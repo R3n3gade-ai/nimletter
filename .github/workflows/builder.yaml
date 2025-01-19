@@ -17,7 +17,7 @@ on:
 env:
   REGISTRY_USER: ${{ github.actor }}
   REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-  IMAGE_REGISTRY: ghcr.io/ThomasTJdev
+  IMAGE_REGISTRY: ghcr.io/thomastjdev
 
 
 jobs:
