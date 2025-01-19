@@ -99,7 +99,7 @@ jobs:
 
       - name: Add registry to podman
         run: |
-          podman login ghcr.io -u ${{ secrets.GITHUB_USERNAME }} -p ${{ secrets.GITHUB_TOKEN }}
+          podman login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
 
 
 
