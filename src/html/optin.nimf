@@ -1,0 +1,131 @@
+#? stdtmpl | standard
+#
+#
+#
+#proc nimfOptinSubscribe(signupForm: bool, errMsg, successMsg: string, listUUID = ""): string =
+<html>
+  <head>
+    <title>Nimletter</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon/favicon.ico">
+
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-300.woff2" crossorigin/>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-regular.woff2" crossorigin/>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-500.woff2" crossorigin/>
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+  </head>
+  <body class="mainbody">
+    <main>
+      <div class="content notLoggedIn">
+        <h1 id="heading" class="center">Nimletter, drip it!</h1>
+        <div id="work" class="subscribe">
+          # if errMsg != "":
+          <div class="error center">
+            <p>${errMsg}</p>
+          </div>
+          # elif successMsg != "":
+          <div class="success center">
+            <p>Perfect! Thank you for subscribing!</p>
+          </div>
+          # else:
+          <div>
+            <p>Click the subscribe button below to get started!</p>
+          </div>
+          # end if
+          # if signupForm:
+          <form action="/subscribe/${listUUID}" method="post" class="center">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="name" placeholder="Name">
+            <input type="text" name="username_second" placeholder="Name" class="hideme">
+            <div class="buttonArea">
+              <button type="submit" class="buttonIcon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                </svg>
+                <div class="ml5">Subscribe</div>
+              </button>
+            </div>
+          </form>
+          # end if
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+#end proc
+#
+#
+#
+#proc nimfOptinSubscribeOptin(userUUID: string): string =
+<html>
+  <head>
+    <title>Nimletter</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon/favicon.ico">
+
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-300.woff2" crossorigin/>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-regular.woff2" crossorigin/>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-500.woff2" crossorigin/>
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+  </head>
+  <body class="mainbody">
+    <main>
+      <div class="content notLoggedIn">
+        <h1 id="heading" class="center">Nimletter, drip it!</h1>
+        <div id="work subscribe">
+          <div class="mb30" style="display: flex;">
+            <img src="/assets/images/nimletter.png" style="width: 300px;margin: auto;">
+          </div>
+          <p>
+            Perfect! Glad to have you onboard! 🚀
+          </p>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+#end proc
+#
+#
+#
+#proc nimfOptinUnubscribe(userUUID, name, email: string): string =
+<html>
+  <head>
+    <title>Nimletter</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon/favicon.ico">
+
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-300.woff2" crossorigin/>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-regular.woff2" crossorigin/>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-500.woff2" crossorigin/>
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+  </head>
+  <body class="mainbody">
+    <main>
+      <div class="content notLoggedIn">
+        <h1 id="heading" class="center">Nimletter, drip it!</h1>
+        <div class="mb30" style="display: flex;">
+          <div>
+            <p>Sorry to see you go, <b>${name}</b>!</p>
+            <p>We have unsubscribed you from our list.</p>
+          </div>
+        </div>
+        # if userUUID != "":
+        <div id="work">
+          <div>
+            <div class="buttonArea">
+              <button onclick="window.location.href='/subscribe/optin?userUUID=${userUUID}'" class="buttonIcon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                </svg>
+                <div class="ml5">Subscribe again</div>
+              </button>
+            </div>
+          </div>
+        </div>
+        # end if
+      </div>
+    </main>
+  </body>
+</html>
+#end proc

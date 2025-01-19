@@ -1,0 +1,36 @@
+name: Build PROD
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        nim: ["binary:1.6.18"]
+    uses: ./.github/workflows/builder.yaml
+    with:
+      container: 'nimletter'
+      release: 'prod'
+      nimversion: ${{ matrix.nim }}
+    secrets: inherit
+
+
+  public-key:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 3
+    needs: [build-matrix]
+
+    steps:
+      - name: Create cosign public from {{ secrets.COSIGN_PUBLIC_KEY }}
+        run: |
+          echo "${{ secrets.COSIGN_PUBLIC_KEY }}" > cosign.pub
+
+      - name: Attach cosign public key to artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cosign-public-key
+          path: cosign.pub

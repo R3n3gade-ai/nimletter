@@ -1,0 +1,30 @@
+#? stdtmpl | standard
+#
+#
+#
+#proc nimfProfile(): string =
+<html>
+  <head>
+    <title>Nimletter</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon/favicon.ico">
+
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-300.woff2" crossorigin/>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-regular.woff2" crossorigin/>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-500.woff2" crossorigin/>
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <script defer src="/assets/js/index.js"></script>
+    <script defer type="module" src="/assets/js/views/profile.js"></script>
+  </head>
+  <body class="mainbody">
+    <main>
+      ${nimfSidebar()}
+      <div class="content">
+        <h1 id="heading">Nimletter, drip it!</h1>
+        <div id="work">
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+#end proc

@@ -1,0 +1,192 @@
+#? stdtmpl | standard
+#
+#
+#
+#proc nimfMain(page = ""): string =
+<html>
+  <head>
+    <title>Nimletter</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon/favicon.ico">
+
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-300.woff2" crossorigin/>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-regular.woff2" crossorigin/>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-500.woff2" crossorigin/>
+
+    # if page != "dashboard":
+    <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
+    # end if
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <script defer src="/assets/js/index.js"></script>
+    # if page == "dashboard":
+    <script defer src="/assets/js/thirdparty/echarts.min.js"></script>
+    <script defer src="/assets/js/dashboard.js"></script>
+    # else:
+    <script defer src="/assets/js/table_load.js"></script>
+    <script defer src="/assets/js/contacts.js"></script>
+    <script defer src="/assets/js/lists.js"></script>
+    <script defer src="/assets/js/mails.js"></script>
+    <script defer src="/assets/js/flows.js"></script>
+    <script defer src="/assets/js/settings.js"></script>
+    # end if
+  </head>
+  <body class="mainbody ${page}">
+    <main>
+      ${nimfSidebar()}
+      <div class="content">
+        <h1 id="heading">Nimletter, drip it!</h1>
+        <div id="work">
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+#end proc
+#
+#
+#
+#proc nimfEvent(page = ""): string =
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/css/tom-select.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/js/tom-select.complete.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <script defer src="/assets/js/index.js"></script>
+    <script defer src="/assets/js/table_load.js"></script>
+    <script defer src="/assets/js/contacts.js"></script>
+    <script defer src="/assets/js/lists.js"></script>
+    <script defer src="/assets/js/mails.js"></script>
+    <script defer src="/assets/js/flows.js"></script>
+    <script defer src="/assets/js/settings.js"></script>
+  </head>
+  <body class="mainbody ${page}">
+    <main>
+      ${nimfSidebar()}
+      <div class="content">
+        <h1 id="heading">Events</h1>
+        <div id="work">
+
+          <div class="examples" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 40px;max-width: 800px;">
+<div>
+<b>Send immediate mail:</b>
+<pre>
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+        "event": "send-email",
+        "email": "nim@nimletter.com",
+        "mail": "welcome-mail",
+        "delay": 0
+      }' \
+  http://localhost:5555/api/event</pre>
+</div>
+<div>
+<b>Send mail after 40 minutes:</b>
+<pre>
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+        "event": "send-email",
+        "email": "nim@nimletter.com",
+        "mail": "first-login",
+        "delay": 40
+  }' \
+  http://localhost:5555/api/event</pre>
+</div>
+<div>
+<b>Cancel mail:</b>
+<pre>
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+        "event": "cancel-email",
+        "email": "nim@nimletter.com",
+        "mail": "welcome-mail",
+      }' \
+  http://localhost:5555/api/event</pre>
+</div>
+
+          </div>
+
+          <div class="examples" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 40px;max-width: 800px; margin-top: 80px;">
+<div>
+<b>Create contact:</b>
+<pre>
+curl -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d 'email=nim@nimletter.com&name=Nimmi Nim&requiresDoubleOptIn=false' \
+  http://localhost:5555/api/contacts/create
+</pre>
+</div>
+<div>
+  <b>Create contact and add to list:</b>
+  <pre>
+  curl -X POST \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -d 'email=nim@nimletter.com&name=Nimmi Nim&requiresDoubleOptIn=false&list=list-identifier' \
+    http://localhost:5555/api/contacts/create
+  </pre>
+</div>
+<div>
+  <b>Create contact and add to list with optin email:</b>
+  <pre>
+  curl -X POST \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -d 'email=nim@nimletter.com&name=Nimmi Nim&requiresDoubleOptIn=true&list=list-identifier' \
+    http://localhost:5555/api/contacts/create
+  </pre>
+</div>
+<div>
+  <b>Update/replace contact (contactID OR email):</b>
+  <pre>
+  curl -X POST \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -d 'email=nim@nimletter.com&name=Nimmi Nim&meta={"key":"value","key2":"value2","key3":"value3"}' \
+    http://localhost:5555/api/contacts/create
+  </pre>
+</div>
+<div>
+  <b>Update meta (contactID OR email):</b>
+  <pre>
+  curl -X POST \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -d 'email=nim@nimletter.com&actions=add&key=key&value=value' \
+    http://localhost:5555/api/contacts/meta/add
+  </pre>
+</div>
+<div>
+  <b>Transfer contact from other system:</b>
+  <pre>
+  curl -X POST \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -d 'email=nim@nimletter.com&name=Nimmi Nim&requiresDoubleOptIn=false&list=list-identifier&flowStep=3' \
+    http://localhost:5555/api/contacts/create</pre>
+</div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+#end proc

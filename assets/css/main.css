@@ -1,0 +1,810 @@
+/* roboto-300 - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 300;
+  src: url('../fonts/roboto-v47-latin-300.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+/* roboto-300italic - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 300;
+  src: url('../fonts/roboto-v47-latin-300italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+/* roboto-regular - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/roboto-v47-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+/* roboto-italic - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 400;
+  src: url('../fonts/roboto-v47-latin-italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+/* roboto-500 - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../fonts/roboto-v47-latin-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+/* roboto-600 - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../fonts/roboto-v47-latin-600.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+/* roboto-700 - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/roboto-v47-latin-700.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+/* roboto-800 - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 800;
+  src: url('../fonts/roboto-v47-latin-800.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+
+:root {
+  --colorG50: #E3FCEF;
+  --colorG75: #ABF5D1;
+  --colorG100: #79F2C0;
+  --colorG200: #57D9A3;
+  --colorG300: #36B37E;
+  --colorG400: #00875A;
+  --colorN10: #FAFBFC;
+  --colorN20: #F4F5F7;
+  --colorN25: #F7F8F8;
+  --colorN30: #EBECF0;
+  --colorN40: #DFE1E6;
+  --colorN50: #C1C7D0;
+  --colorN60: #B3BAC5;
+  --colorN70: #A5ADBA;
+  --colorN80: #97A0AF;
+  --colorN90: #8993A4;
+  --colorN100: #7A869A;
+  --colorN200: #6B778C;
+  --colorN300: #5E6C84;
+  --colorN400: #505F79;
+  --colorN600: #344563;
+  --colorN700: #253858;
+  --colorN800: #172B4D;
+  --colorR100: #FF8F73;
+  --colorR200: #FF7452;
+  --colorR250: #FF6948;
+  --colorR300: #FF5630;
+  --colorR400: #DE350B;
+  --colorY200: #FFC400;
+  --colorY300: #FFAB00;
+  --colorY500: #FF8B00;
+}
+
+/*
+.roboto-<uniquifier> {
+  font-family: "Roboto", serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+*/
+
+.headingH2 {
+  font-size: 26px;
+}
+.headingH3 {
+  font-size: 20px;
+}
+
+.mb10 {
+  margin-bottom: 10px;
+}
+.mb20 {
+  margin-bottom: 20px;
+}
+.mb30 {
+  margin-bottom: 30px;
+}
+.mb40 {
+  margin-bottom: 40px;
+}
+.mb50 {
+  margin-bottom: 50px;
+}
+.ml5 {
+  margin-left: 5px;
+}
+.mr5 {
+  margin-right: 5px;
+}
+.mr10 {
+  margin-right: 10px;
+}
+.mr20 {
+  margin-right: 20px;
+}
+.mt10 {
+  margin-top: 10px;
+}
+.mt20 {
+  margin-top: 20px;
+}
+
+.svg30 svg {
+  width: 30px;
+  height: 30px;
+}
+.svg16 svg {
+  width: 16px;
+  height: 16px;
+}
+
+.w100p {
+  width: 100%;
+}
+
+.center {
+  text-align: center;
+}
+
+
+/* -- -- Buttons */
+.buttonIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 100%;
+}
+.buttonIcon svg {
+  height: 18px;
+  width: 18px;
+  margin-right: 5px;
+}
+.buttonIcon:hover {
+  background-color: var(--colorN20);
+  box-shadow: rgba(0, 0, 0, 0.10) 0px 1px 4px;
+}
+
+
+/* -- Body */
+body.mainbody {
+  font-family: "Roboto", serif;
+  font-weight: 300;
+  padding: 0;
+  margin: 0;
+  line-height: 1.5;
+  background-color: var(--colorN10);
+}
+body.mainbody * {
+  font-family: "Roboto", serif;
+  font-weight: 300;
+}
+
+/* -- Scrollbar */
+body ::-webkit-scrollbar,html ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px
+}
+body ::-webkit-scrollbar-track,html ::-webkit-scrollbar-track {
+  background: #f0f0f0
+}
+body ::-webkit-scrollbar-thumb,html ::-webkit-scrollbar-thumb {
+  background: #a6a6a6; /*cdcdcd;*/
+  border: 2px solid transparent;
+  border-radius: 9px;
+  background-clip: content-box
+}
+body ::-webkit-scrollbar-thumb:hover,html ::-webkit-scrollbar-thumb:hover {
+  background: #838383;
+  background-clip: content-box
+}
+body ::-webkit-scrollbar-thumb:active,html ::-webkit-scrollbar-thumb:active {
+  border: 2px solid transparent;
+  background: #606060;
+  background-clip: content-box
+}
+body ::-webkit-scrollbar-corner,html ::-webkit-scrollbar-corner {
+  background: #f0f0f0
+}
+
+
+body.mainbody b {
+  font-weight: 400;
+}
+
+
+/* HTML elements */
+input, select, textarea, .simulateInput {
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--colorN40);
+  width: 100%;
+  box-shadow: rgba(0, 0, 0, 0.10) 0px 1px 4px;
+  background-color: white;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+input:focus,
+select:focus {
+  border: 1px solid var(--colorN80);
+}
+
+pre {
+  margin: 10px;
+  border: 1px solid var(--colorN30);
+  background-color: var(--colorN20);
+  padding: 10px;
+}
+
+button {
+  background: white;
+  border-radius: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--colorN60);
+  width: auto;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--colorN20);
+}
+
+
+/* -- -- Label for input, requires parent to relative */
+label.forinput,
+label.inborder {
+  font-size: 14px;
+  font-weight: 500;
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  background: transparent;
+  transition: top 0.12s ease-in-out;
+}
+
+label.forinput.floatup,
+label.inborder.floatup {
+  top: -18px;
+}
+label.labelBold {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+
+.hideme {
+  display: none;
+}
+
+
+/* -- Subscribe area */
+#work.subscribe {
+  max-width: 400px;
+  text-align: center;
+  margin: auto;
+}
+#work.subscribe input,
+#work.subscribe button {
+  margin-bottom: 20px;
+  max-width: 300px;
+}
+#work.subscribe .buttonArea {
+  display: flex;
+  justify-content: center;
+}
+
+
+/* Tabulator plugin */
+.tabulator .tabulator-row .tabulator-cell {
+  font-size: 12px;
+}
+.tabulator .tabulator-header-filter input,
+.tabulator .tabulator-header-filter select {
+  font-size: 12px;
+  box-shadow: none;
+}
+
+
+/* Sidebar */
+.sidebar {
+  height: 100vh;
+  width: 240; /* Width - Padding */
+  padding: 60px 30px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: white;
+  border-right: 1px solid var(--colorN20);
+}
+.sidebarArea {
+  height: 100%;
+  width: 100%;
+}
+.sidebar .heading {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 400;
+}
+.sidebar a {
+  padding: 10px 15px;
+  text-decoration: none;
+  font-size: 18px;
+  color: var(--colorN400);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  width: calc(100% - 30px);
+  display: block;
+  display: flex;
+  align-items: center;
+}
+.sidebar a:hover {
+  background-color: var(--colorN30);
+}
+
+.sidebar a svg {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+
+/* Main content */
+.content {
+  margin-left: 300px;
+  padding: 60px;
+  max-width: 1800px;
+}
+.content.notLoggedIn {
+  margin-left: 0;
+  margin: auto;
+}
+
+/*
+  Modal pop
+*/
+.modalpop {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  padding: 50px 0;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, .4);
+  overflow-y: auto;
+  max-height: 85vh;
+}
+.modalpop.emailbuilder {
+  max-height: 100vh;
+  padding: 20px 0;
+}
+.modalpop.show {
+  display: block;
+}
+.modalpop>div {
+  display: none;
+  position: relative;
+  border-radius: 8px;
+  background-color: #fff;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: fit-content;
+  animation: floatUp 0.2s ease-out forwards;
+}
+.modalpop.show>div {
+  display: block;
+}
+@keyframes floatUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/*
+  Modal slide
+*/
+.modal {
+  opacity: 0;
+  visibility: hidden;
+  position: fixed;
+  z-index: 1;
+  right: -100%;
+  top: 0;
+  width: 100%;
+  margin: 40px 0 40px 40px;
+  padding: 40px;
+  height: calc(100% - 160px);
+  overflow: auto;
+  background-color: #fefefe;
+  border: 1px solid var(--colorN40);
+  width: 50%;
+  min-width: 1200px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 15px;
+  overflow: hidden;
+  transition: right 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+.modal.show {
+  opacity: 1;
+  visibility: visible;
+  right: 0;
+}
+.modal:not(.show) {
+  opacity: 0;
+  visibility: hidden;
+  right: -100%;
+}
+.modal>div {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 10px;
+  transition: right 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+
+/* General */
+.alert-danger {
+  text-align: center;
+  padding: 20px;
+  background: var(--colorR200);
+  border: 1px solid var(--colorR400);
+  border-radius: 6px;
+  margin: 40px 20px;
+}
+.alert-warning {
+  text-align: center;
+  padding: 20px;
+  background: var(--colorY300);
+  border: 1px solid var(--colorY500);
+  border-radius: 6px;
+  margin: 40px 20px;
+}
+
+
+/* Toggle switch */
+.toggleItem {
+  margin-bottom: 10px;
+  align-items: center;
+}
+.toggleItem div {
+  letter-spacing: normal;
+}
+.toggleSwitch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 23px;
+}
+.toggleSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggleSwitch.disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.toggleSwitch.disabled .toggleSlider {
+  background-color: var(--colorN40)!important;
+  border-color: var(--colorN60)!important;
+}
+.toggleSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--colorN40);
+  border: 1px solid var(--colorN50);
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+.toggleSlider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .2s;
+  transition: .2s;
+}
+.toggleSwitch.disabled:before {
+  background-color: transparent;
+}
+.toggleSwitch.compact {
+  width: 58px;
+  margin-right: 5px;
+}
+.toggleSlider.round {
+  border-radius: 34px;
+}
+.toggleSlider.round:before {
+  border-radius: 50%;
+}
+input:checked + .toggleSlider {
+  background: var(--colorG200);
+  border: 1px solid var(--colorG300);
+}
+input:focus + .toggleSlider {
+  box-shadow: 0 0 1px var(--colorB400);
+}
+input:checked + .toggleSlider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+input:checked+.toggleSlider:before {
+  -webkit-transform: translateX(56px);
+  -ms-transform: translateX(56px);
+  transform: translateX(56px);
+}
+input:checked+.toggleSlider.compact:before {
+  -webkit-transform: translateX(35px);
+  -ms-transform: translateX(35px);
+  transform: translateX(35px);
+}
+
+
+
+
+/* -- -- General */
+.topBlock {
+  display: flex;
+  align-items: center;
+  font-size: 26px;
+  margin-bottom: 40px;
+}
+
+.itemBlock {
+  position: relative;
+}
+
+.blockBorder {
+  padding: 16px;
+  border: 1px solid var(--colorN40);
+  border-radius: 6px;
+}
+
+
+
+/*  -- -- Contact */
+#contact.modal>div {
+  overflow-y: hidden;
+  padding-right: 0;
+}
+
+#contact.modal #contactGrid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-gap: 40px;
+  height: calc(100% - 80px);
+}
+
+#contact.modal #contactData,
+#contact.modal #contactActivity {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 10px;
+  padding-top: 10px;
+}
+
+.metaKeyVal>div {
+  position: relative;
+}
+
+
+
+/* -- -- Subscription */
+.subscriptionArea {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 16px 16px 10px 16px;
+}
+.subscriptionItem {
+  width: fit-content;
+  background-color: var(--colorN10);
+  border: 1px solid var(--colorN40);
+  padding: 6px 10px;
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-gap: 16px;
+  align-items: center;
+  margin-right: 10px;
+  margin-bottom: 5px;
+}
+.subscriptionItem button {
+  height: 100%;
+}
+.subscriptionName {
+  font-size: 14px;
+}
+.subscriptionDate {
+  font-size: 12px;
+  color: var(--colorN100);
+  margin-top: 4px;
+}
+.pending .subscriptionDate {
+  display: none;
+}
+
+
+
+/* -- -- Activity */
+.activityItem {
+  min-height: 42px;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: var(--colorN10);
+  border: 1px solid var(--colorN30);
+  margin-bottom: 20px;
+  display: grid ;
+  grid-template-columns: 1fr auto;
+}
+.activityItem>div:first-child {
+  max-width: 230px;
+}
+.activityType {
+  font-weight: 400;
+}
+.activityData {
+  font-size: 14px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  display: inline-block;
+}
+.activityDate {
+  font-size: 12px;
+  color: var(--colorN100);
+  margin-bottom: 5px;
+}
+
+
+/* -- -- Lists */
+.listArea {
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.listItem {
+  /* background-color: var(--colorN10);
+  border: 1px solid var(--colorN40); */
+  padding: 6px 10px;
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  grid-gap: 16px;
+  align-items: center;
+
+  margin-bottom: 15px;
+
+  width: calc(100% - 20px);
+  text-align: left;
+}
+.listItem button {
+  height: 40px;
+  width: 40px;
+  background-color: var(--colorN20);
+  border: 1px solid var(--colorN40);
+}
+.listItem button:hover {
+  background-color: var(--colorN40);
+  border: 1px solid var(--colorN60);
+}
+.listName {
+  font-weight: 400;
+}
+.listFlowName {
+  font-size: 14px;
+  color: var(--colorN600);
+}
+
+
+/* -- EmailbuilderJS */
+body.mainbody #rootArea * {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-weight: inherit;
+}
+body.mainbody #mailEditPreview * {
+  font-weight: inherit;
+}
+
+#rootArea {
+  position: relative;
+  width: 90vw;
+  height: 90vh;
+  overflow: hidden;
+  border: 1px solid var(--colorN40);
+}
+
+.MuiStack-root.css-gu09ps,
+.MuiStack-root.css-1j7a2qb .MuiStack-root.css-j7qwjs,
+.MuiButtonBase-root.MuiIconButton-root.MuiIconButton-sizeMedium.css-17kijze {
+  display: none;
+}
+
+
+
+/* -- Mail */
+.mailSave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #adb6c7;
+  color: white;
+  width: 200px;
+  font-size: 16px;
+  height: 42px;
+}
+.mailSave:hover {
+  background-color: #adb6c7;
+}
+.mailSave.active {
+  background-color: #3461b7;
+}
+.mailSave.active:hover {
+  background-color: #4270c5;
+}
+
+
+/* -- Flow steps */
+.stepBlock.itemBlock>div.stepInfo {
+  width: 500px;
+  padding: 10px 20px;
+  margin-bottom: 50px;
+  background-color: var(--colorN20);
+  border: 1px solid var(--colorN50);
+  border-radius: 6px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  font-size: 14px;
+  position: relative;
+}
+/* .stepBlock .itemBlock>div>* { */
+
+.stepBlock.itemBlock .stepInfoItems input,
+.stepBlock.itemBlock .stepInfoItems select {
+  padding: 4px 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
