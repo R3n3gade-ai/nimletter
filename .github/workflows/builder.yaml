@@ -115,7 +115,7 @@ jobs:
             --label "org.opencontainers.image.created=$(date --iso-8601=seconds)" \
             --label "org.opencontainers.image.version=${{github.ref_name}}" \
             --label "org.opencontainers.image.vendor=ThomasTJdev" \
-            --label "org.opencontainers.image.source="https://github.com/ThomasTJdev/nimletter" \
+            --label "org.opencontainers.image.source=https://github.com/ThomasTJdev/nimletter" \
             | tee build.log
 
 
