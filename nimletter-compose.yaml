@@ -1,0 +1,49 @@
+
+services:
+  postgres:
+    image: docker.io/postgres:17.2-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: nimletter
+      POSTGRES_PASSWORD: nimletter
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./nimletter-compose-init.sh:/docker-entrypoint-initdb.d/init-user.sh:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+    network_mode: host
+
+  nimletter:
+    image: ghcr.io/thomastjdev/nimletter:latest
+    container_name: nimletter
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PG_HOST: postgres
+      PG_USER: nimletter
+      PG_PASSWORD: nimletter
+      PG_DATABASE: nimletter_db
+      PG_WORKERS: 3
+      SMTP_HOST: smtp_host
+      SMTP_PORT: 465
+      SMTP_USER: smtp_username
+      SMTP_PASSWORD: smtp_password
+      SMTP_FROMEMAIL: admin@nimletter.com
+      SMTP_FROMNAME: ADMIN
+      # Maximum number of emails to send per second
+      SMTP_MAILSPERSECOND: 1
+      # Use a random long string - it's part of the route to the webhook
+      SNS_WEBHOOK_SECRET: secret
+    volumes:
+      - ./src/database/db_schema.sql:/home/nimmer/src/database/db_schema.sql
+    # ports:
+    #   - "5555:5555"
+    network_mode: host
+
+volumes:
+  postgres_data:

@@ -135,10 +135,22 @@ proc sendMailMimeNow*(
     echo "\n"
     return (true, "dev" & $rand(100000), 1)
 
+  if smtpData.smtpHost == "smtp_host":
+    return (false, "SMTP_not_configured_" & $rand(100000), 1)
+
   # Make SMTP connection
-  var client = newSmtp(useSsl = true)
-  smtpAuth(client, smtpData.smtpHost, smtpData.smtpPort, smtpData.smtpUser, smtpData.smtpPass)
-  let (success, messageID) = sendMail(client, smtpData.smtpFromEmail, recipient, multi)
+  var
+    client = newSmtp(useSsl = true)
+    success: bool
+    messageID: string
+
+  try:
+    smtpAuth(client, smtpData.smtpHost, smtpData.smtpPort, smtpData.smtpUser, smtpData.smtpPass)
+    (success, messageID) = sendMail(client, smtpData.smtpFromEmail, recipient, multi)
+  except:
+    echo getCurrentExceptionMsg()
+    success = false
+    messageID = "email_failed_" & $rand(100000)
 
   return (success, messageID, smtpData.smtpMailspersecond)
 

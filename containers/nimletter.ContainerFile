@@ -17,6 +17,8 @@ RUN groupadd nimgroup \
 
 WORKDIR /home/nimmer
 
+COPY src/database/db_schema.sql /home/nimmer/db_schema.sql
+
 COPY nimletter /home/nimmer/nimletter
 
 CMD ["/home/nimmer/nimletter", "--CREATE_DATABASE_AND_INSERT_TESTDATA"]

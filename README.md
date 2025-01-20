@@ -66,24 +66,24 @@ templates for newsletters...
 ## Start the database
 Create the database for starters:
 ```
-psql -U postgres -c "CREATE USER nimsletter WITH PASSWORD 'nimsletter';"
-psql -U postgres -c "CREATE DATABASE nimsletter_db OWNER nimsletter;"
-psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE nimsletter_db TO nimsletter;"
+psql -U postgres -c "CREATE USER nimletter WITH PASSWORD 'nimletter';"
+psql -U postgres -c "CREATE DATABASE nimletter_db OWNER nimletter;"
+psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE nimletter_db TO nimletter;"
 ```
 
-## Option A) Container
+### Option A) Run the container
 __(Only database setup is needed)__
 ```
 podman run \
-  --name nimletter
-  --network host
+  --name nimletter \
+  --network host \
   --rm \
   -e PG_HOST=localhost \
-  -e PG_USER=nimsletter \
-  -e PG_PASSWORD=nimsletter \
-  -e PG_DATABASE=nimsletter_db \
+  -e PG_USER=nimletter \
+  -e PG_PASSWORD=nimletter \
+  -e PG_DATABASE=nimletter_db \
   -e PG_WORKERS=3 \
-  -e SMTP_HOST=email-smtp.eu-west-1.amazonaws.com \
+  -e SMTP_HOST=smtp_host \
   -e SMTP_PORT=465 \
   -e SMTP_USER=smtp_username \
   -e SMTP_PASSWORD=smtp_password \
@@ -91,30 +91,36 @@ podman run \
   -e SMTP_FROMNAME=ADMIN \
   -e SMTP_MAILSPERSECOND=1 \
   -e SNS_WEBHOOK_SECRET=secret \
-  <repo>/nimletter
+  ghcr.io/thomastjdev/nimletter:latest
 ```
 
-## Option B1) Binary
+### Option B) Compile and run
 __(See environment setup below for configuration)__
 
 ```
-git clone
-cd nimletter
-nim c -d:release nimletter
-./nimletter
+$ git clone
+$ cd nimletter
+$ nim c -d:release nimletter
+# First run creates the database and inserts test data
+$ ./nimletter --DEV_RESET
+$ ./nimletter
 ```
 
-## Option B2) First run
-
-__Only relevant for binary, container uses `CREATE_DATABASE_AND_INSERT_TESTDATA`__
-
-On first run, you need to create the database and insert test data. This is done
-by using the runtime param `--DEV_RESET`:
-
+### Option C) Systemd service file
 ```
-./nimletter --DEV_RESET
+$ cp nimletter.service ~/.config/systemd/user/
+$ podman pull ghcr.io/thomastjdev/nimletter:latest
+$ systemctl --user start nimletter
+$ systemctl --user status nimletter
+$ systemctl --user enable nimletter
 ```
 
+### Option D) Docker / Podman compose
+```
+$ docker compose -f nimletter-compose.yaml up --detach
+# or
+$ podman compose -f nimletter-compose.yaml up --detach
+```
 
 ## Default credentials
 
@@ -155,15 +161,15 @@ The values are customizable within the system and will be saved to the database.
 **Database**
 ```
 export PG_HOST=localhost
-export PG_USER=nimsletter
-export PG_PASSWORD=nimsletter
-export PG_DATABASE=nimsletter_db
+export PG_USER=nimletter
+export PG_PASSWORD=nimletter
+export PG_DATABASE=nimletter_db
 export PG_WORKERS=3
 ```
 
 **SMTP**
 ```
-export SMTP_HOST=email-smtp.eu-west-1.amazonaws.com
+export SMTP_HOST=smtp_host
 export SMTP_PORT=465
 export SMTP_USER=smtp_username
 export SMTP_PASSWORD=smtp_password
@@ -191,21 +197,21 @@ export GEOIP_PATH=/usr/share/GeoIP/GeoIP.dat
 \c postgres;
 
 -- Step 2: Create the user
-CREATE USER nimsletter WITH PASSWORD 'nimsletter';
+CREATE USER nimletter WITH PASSWORD 'nimletter';
 
 -- Step 3: Create the database
-CREATE DATABASE nimsletter_db OWNER nimsletter;
+CREATE DATABASE nimletter_db OWNER nimletter;
 
 -- Step 4: Grant privileges to the user on the database
-GRANT ALL PRIVILEGES ON DATABASE nimsletter_db TO nimsletter;
+GRANT ALL PRIVILEGES ON DATABASE nimletter_db TO nimletter;
 ```
 
 or
 
 ```
-psql -U postgres -c "CREATE USER nimsletter WITH PASSWORD 'nimsletter';"
-psql -U postgres -c "CREATE DATABASE nimsletter_db OWNER nimsletter;"
-psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE nimsletter_db TO nimsletter;"
+psql -U postgres -c "CREATE USER nimletter WITH PASSWORD 'nimletter';"
+psql -U postgres -c "CREATE DATABASE nimletter_db OWNER nimletter;"
+psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE nimletter_db TO nimletter;"
 ```
 
 

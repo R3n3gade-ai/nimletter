@@ -115,6 +115,8 @@ proc scheduleStart() {.thread.} =
 
 
 when isMainModule:
+  echo "\nnimletter - starting ...\n"
+
   for kind, key, val in getOpt():
     echo "[" & ($now())[0..18] & "] - CLI_RUN: running on"
 
@@ -209,7 +211,7 @@ when isMainModule:
         maxBodyLen = 1024 * 1024 * 30, # 30 MB
       )
 
-  echo "\nnimsletter - server started on port 5555\n"
+  echo "\nnimletter - server started on port 5555\n"
 
   server.serve(Port(5555))
 

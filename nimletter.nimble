@@ -1,11 +1,11 @@
 # Package
 
-version       = "0.1.0"
+version       = "0.1.1"
 author        = "ThomasTJdev"
 description   = "Newsletter"
 license       = "AGPL v3"
 srcDir        = "src"
-bin           = @["nimsletter"]
+bin           = @["nimletter"]
 
 # Dependencies
 requires "nim >= 1.6.18"

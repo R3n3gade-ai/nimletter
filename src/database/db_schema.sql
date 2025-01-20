@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS settings (
   optin_email         INT NOT NULL REFERENCES mails(id),
   logo_url            TEXT
 );
-INSERT INTO settings (page_name, hostname, optin_email) VALUES ('Nimsletter', 'https://nimsletter.com', 1) ON CONFLICT DO NOTHING;
+INSERT INTO settings (page_name, hostname, optin_email) VALUES ('nimletter', 'https://nimletter.com', 1) ON CONFLICT DO NOTHING;
 
 -- Table for smtp
 CREATE TABLE IF NOT EXISTS smtp_settings (
@@ -205,7 +205,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO users (email, password, salt) VALUES ('admin@nimsletter.com', 'admin', 'salt') ON CONFLICT DO NOTHING;
+
 
 -- Session table for storing user sessions
 CREATE TABLE IF NOT EXISTS sessions (

@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS settings (
   logo_url            TEXT
 );
 
-INSERT INTO settings (page_name, hostname, optin_email) VALUES ('Nimsletter', 'https://nimsletter.com', 1);
+INSERT INTO settings (page_name, hostname, optin_email) VALUES ('nimletter', 'https://nimletter.com', 1);
 
 -- Table for smtp
 CREATE TABLE IF NOT EXISTS smtp_settings (
@@ -211,7 +211,6 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at          DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO users (email, password, salt) VALUES ('admin@nimsletter.com', 'admin', 'salt');
 
 -- Session table for storing user sessions
 CREATE TABLE IF NOT EXISTS sessions (

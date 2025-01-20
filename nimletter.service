@@ -1,0 +1,72 @@
+#
+# nimletter.service for rootless deployment with podman and systemd
+#
+# Requires:
+# - podman
+# - systemd
+#
+# Can be updated with:
+# - podman auto-update
+# - podman auto-update --dry-run
+#
+# How to use:
+# $ cp nimletter.service ~/.config/systemd/user/
+# $ podman pull ghcr.io/thomastjdev/nimletter:latest
+# $ systemctl --user start nimletter
+# $ systemctl --user status nimletter
+# $ systemctl --user enable nimletter
+#
+
+[Unit]
+Description=Podman nimletter.service
+Documentation=man:podman-generate-systemd(1)
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=%t/containers
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart=always
+RestartSec=3
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/%n.ctr-id
+ExecStart=/usr/bin/podman run \
+        --cidfile=%t/%n.ctr-id \
+        --cgroups=no-conmon \
+        --rm \
+        --sdnotify=conmon \
+        -d \
+        --replace \
+        --name nimletter \
+        --init \
+        --network host \
+        --label io.containers.autoupdate=registry \
+        --log-driver journald \
+        --log-opt tag=nimletter \
+        --env RUN_MODE=prod \
+        --env PG_HOST=localhost \
+        --env PG_USER=nimletter \
+        --env PG_PASSWORD=nimletter \
+        --env PG_DATABASE=nimletter_db \
+        --env PG_WORKERS=3 \
+        --env SMTP_HOST=smtp_host \
+        --env SMTP_PORT=465 \
+        --env SMTP_USER=smtp_username \
+        --env SMTP_PASSWORD=smtp_password \
+        --env SMTP_FROMEMAIL=admin@nimletter.com \
+        --env SMTP_FROMNAME=ADMIN \
+        --env SMTP_MAILSPERSECOND=1 \
+        --env SNS_WEBHOOK_SECRET=secret \
+        ghcr.io/thomastjdev/nimletter:latest
+ExecStop=/usr/bin/podman stop \
+        --ignore \
+        --cidfile=%t/%n.ctr-id
+ExecStopPost=/usr/bin/podman rm \
+        -f \
+        --ignore \
+        --cidfile=%t/%n.ctr-id
+Type=notify
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target default.target
