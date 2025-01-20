@@ -174,7 +174,6 @@ when isMainModule:
         quit(0)
 
       of "CREATE_DATABASE_AND_INSERT_TESTDATA":
-        databaseDelete()
         databaseCreate()
         insertTestData()
 

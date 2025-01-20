@@ -15,6 +15,9 @@ import
 
 proc insertTestData*() =
   pg.withConnection conn:
+    if getAllRows(conn, sql("SELECT * FROM users")).len > 0:
+      return
+
     exec(conn, sql("""
       INSERT INTO contacts (name, email, created_at, updated_at, requires_double_opt_in, double_opt_in, double_opt_in_data, pending_lists)
       VALUES

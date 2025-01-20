@@ -110,6 +110,7 @@ $ ./nimletter
 ```
 $ cp nimletter.service ~/.config/systemd/user/
 $ podman pull ghcr.io/thomastjdev/nimletter:latest
+$ systemctl --user daemon-reload
 $ systemctl --user start nimletter
 $ systemctl --user status nimletter
 $ systemctl --user enable nimletter
