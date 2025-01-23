@@ -30,20 +30,26 @@ proc listIDfromIdentifier*(listIdentifer: string): string =
       ), listIdentifer)
 
 
-proc listIDsFromUUIDs*(uuids: seq[string], includeDefaultList = true): seq[string] =
+proc listIDsFromUUIDs*(uuids: seq[string], includeDefaultList = true): tuple[requireOptIn: bool, ids: seq[string]] =
+  var
+    ids: seq[string]
+    requireOptIn = false
+
   if includeDefaultList:
-    result.add("1")
+    ids.add("1")
 
   pg.withConnection conn:
     let data = getAllRows(conn, sqlSelect(
         table = "lists",
-        select = ["id"],
+        select = ["id", "require_optin"],
         where = ["uuid = ANY(?::uuid[])"]
       ), "{" & uuids.join(",") & "}")
 
     for row in data:
       if row[0] == "1":
         continue
-      result.add(row[0])
+      ids.add(row[0])
+      if row[1] == "t" and not requireOptIn:
+        requireOptIn = true
 
-  return result
+  return (requireOptIn, ids)

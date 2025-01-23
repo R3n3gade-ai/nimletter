@@ -78,7 +78,7 @@ proc(request: Request) =
 
   var
     userID: string
-    listIDs: seq[string] = @["1"] # 1 = default list
+    listsData: tuple[requireOptIn: bool, ids: seq[string]] = (true, @["1"])
   pg.withConnection conn:
 
     #
@@ -90,9 +90,9 @@ proc(request: Request) =
         if listUUID.isValidUUID(): continue
         listsTmp.add(listUUID)
 
-      listIDs = listIDsFromUUIDs(listsTmp, true)
+      listsData = listIDsFromUUIDs(listsTmp, true)
 
-    userID = createContact(email, name, requiresDoubleOptIn, listIDs)
+    userID = createContact(email, name, listsData.requireOptIn, listsData.ids)
 
   if requiresDoubleOptIn:
     emailOptinSend(email, name)
@@ -100,7 +100,8 @@ proc(request: Request) =
   let data = %* {
       "success": true,
       "id": userID,
-      "requiresDoubleOptIn": requiresDoubleOptIn,
+      "requiresDoubleOptIn": listsData.requireOptIn,
+      "listIDs": listsData.ids,
       "email": email,
       "name": name,
       "event": "contact_created"
@@ -189,7 +190,6 @@ proc(request: Request) =
 
   resp Http200, nimfOptinSubscribeOptin(userUUID)
 )
-
 
 
 optinRouter.get("/unsubscribe",
