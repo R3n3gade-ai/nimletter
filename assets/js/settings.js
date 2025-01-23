@@ -228,6 +228,26 @@ async function buildSettingsMain() {
 
 /*
 
+  Main
+
+*/
+function saveSettingsMain() {
+  fetch('/api/settings/main', {
+    method: 'POST',
+    body: new URLSearchParams({
+      pageName: dqs("#pageName").value,
+      hostname: dqs("#hostname").value,
+      logoUrl: dqs("#logoUrl").value,
+      optinEmailID: dqs("#optinEmailID").value
+    })
+  })
+  .then(manageErrors)
+}
+
+
+
+/*
+
 SMTP
 
 */

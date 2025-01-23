@@ -3,6 +3,17 @@
 #
 #
 #proc nimfOptinSubscribe(signupForm: bool, errMsg, successMsg: string, listUUID = ""): string =
+#
+# var pageName = "Nimletter, drip it!"
+# let conn = pg.borrow()
+# try:
+#   let p = getValue(conn, sqlSelect(table = "settings", select = ["page_name"], where = ["id = 1"]))
+#   if p != "":
+#     pageName = p
+#   end if
+# finally:
+#   pg.recycle(conn)
+# end try
 <html>
   <head>
     <title>Nimletter</title>
@@ -17,7 +28,7 @@
   <body class="mainbody">
     <main>
       <div class="content notLoggedIn">
-        <h1 id="heading" class="center">Nimletter, drip it!</h1>
+        <h1 id="heading" class="center">${pageName}</h1>
         <div id="work" class="subscribe">
           # if errMsg != "":
           <div class="error center">

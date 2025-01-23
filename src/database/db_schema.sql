@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS settings (
   optin_email         INT NOT NULL REFERENCES mails(id),
   logo_url            TEXT
 );
-INSERT INTO settings (page_name, hostname, optin_email) VALUES ('nimletter', 'https://nimletter.com', 1) ON CONFLICT DO NOTHING;
+INSERT INTO settings (page_name, hostname, optin_email) VALUES ('Nimletter, drip it!', 'https://nimletter.com', 1) ON CONFLICT DO NOTHING;
 
 -- Table for smtp
 CREATE TABLE IF NOT EXISTS smtp_settings (

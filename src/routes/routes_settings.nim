@@ -67,6 +67,50 @@ proc(request: Request) =
   )
 )
 
+settingsRouter.post("/api/settings/main",
+proc(request: Request) =
+  createTFD()
+  if not c.loggedIn: resp Http401
+
+  let
+    pageName = @"pageName"
+    hostname = @"hostname"
+    logoUrl = @"logoUrl"
+    optinEmailID = @"optinEmailID"
+
+  if pageName.strip() == "":
+    resp Http400, "Page Name is required"
+
+  if hostname.strip() == "":
+    resp Http400, "Domain with HTTPS is required"
+
+  if not optinEmailID.isValidInt():
+    resp Http400, "Optin Email ID is required"
+
+  #
+  # Update database
+  #
+  pg.withConnection conn:
+    exec(conn, sqlUpdate(
+        table = "settings",
+        data  = [
+          "page_name",
+          "hostname",
+          "logo_url",
+          "optin_email"
+        ],
+        where = [
+          "id = 1"
+        ]),
+        pageName,
+        hostname,
+        logoUrl,
+        optinEmailID
+      )
+
+  resp Http200, "Main settings saved"
+)
+
 #
 # SMTP settings
 #
