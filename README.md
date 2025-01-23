@@ -240,3 +240,5 @@ https://heroicons.com/
 * Valkey (Redis) as caching
 * Backup schedule checking
 * SQLite support
+* Moving JS to TypeScript
+* Captcha for subscribe
