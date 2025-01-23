@@ -190,6 +190,14 @@ __(Only relevant for binary)__
 export GEOIP_PATH=/usr/share/GeoIP/GeoIP.dat
 ```
 
+**Subscription**
+The `ALLOW_GLOBAL_SUBSCRIPTION` is a global setting that allows users to
+subscribe at `/subscribe` without a specific list. The user will be added
+to the default list in this case. Default is `false`.
+```
+export ALLOW_GLOBAL_SUBSCRIPTION=true
+```
+
 
 
 # How to setup the postgres database

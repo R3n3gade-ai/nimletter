@@ -45,6 +45,9 @@ var optinRouter*: Router
 
 optinRouter.get("/subscribe",
 proc(request: Request) =
+  if getEnv("ALLOW_GLOBAL_SUBSCRIPTION").toLowerAscii() != "true":
+    resp Http200, nimfOptinSubscribe(false, "Please find a subscription list first", "", listUUID = "")
+
   var defaultListUUID: string
   pg.withConnection conn:
     defaultListUUID = getValue(conn, sqlSelect(
