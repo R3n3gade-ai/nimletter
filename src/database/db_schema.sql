@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS lists (
   identifier          TEXT NOT NULL UNIQUE,  -- Unique identifier, e.g. welcome-list
   flow_ids            INT[],            -- Flows associated with the list
   description         TEXT,             -- Description of the list
+  require_optin       BOOLEAN DEFAULT TRUE,  -- Flag for double opt-in status
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   uuid                UUID NOT NULL DEFAULT uuid_generate_v4()  -- Unique identifier

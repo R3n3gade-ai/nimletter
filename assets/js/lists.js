@@ -55,6 +55,39 @@ async function addList() {
           })
         ]
       }),
+      // requireOptIn
+      jsCreateElement('div', {
+        attrs: {
+          class: 'itemBlock mb20'
+        },
+        children: [
+          jsCreateElement('label', {
+            attrs: {
+              class: 'forinput'
+            },
+            children: ['Require opt-in']
+          }),
+          jsCreateElement('select', {
+            attrs: {
+              id: 'requireOptIn'
+            },
+            children: [
+              jsCreateElement('option', {
+                attrs: {
+                  value: 'true'
+                },
+                children: ['Yes']
+              }),
+              jsCreateElement('option', {
+                attrs: {
+                  value: 'false'
+                },
+                children: ['No']
+              })
+            ]
+          })
+        ]
+      }),
       jsCreateElement('div', {
         attrs: {
           style: "font-size: 12px;margin:20px;"
@@ -88,13 +121,15 @@ async function addList() {
 function addListDo() {
   let
     name = dqs("#listNewName").value,
-    description = dqs("#listNewDescription").value;
+    description = dqs("#listNewDescription").value,
+    requireOptIn = dqs("#requireOptIn").value;
 
   fetch("/api/lists/create", {
     method: "POST",
     body: new URLSearchParams({
       name: name,
       description: description,
+      requireOptIn: requireOptIn
     })
   })
   .then(manageErrors)
@@ -223,6 +258,41 @@ function openList(listID) {
               })
             ]
           }),
+          // requireOptIn
+          jsCreateElement('div', {
+            attrs: {
+              class: 'itemBlock mb20'
+            },
+            children: [
+              jsCreateElement('label', {
+                attrs: {
+                  class: 'forinput'
+                },
+                children: ['Require opt-in']
+              }),
+              jsCreateElement('select', {
+                attrs: {
+                  id: 'requireOptIn'
+                },
+                children: [
+                  jsCreateElement('option', {
+                    attrs: {
+                      value: 'true',
+                      selected: data.require_optin == true ? 'selected' : false
+                    },
+                    children: ['Yes']
+                  }),
+                  jsCreateElement('option', {
+                    attrs: {
+                      value: 'false',
+                      selected: data.require_optin == false ? 'selected' : false
+                    },
+                    children: ['No']
+                  })
+                ]
+              })
+            ]
+          }),
           jsCreateElement('div', {
             attrs: {
               class: 'itemBlock mb20'
@@ -328,7 +398,8 @@ function updateList(listID) {
   let
     name = dqs("#listEditName").value,
     description = dqs("#listEditDescription").value,
-    identifier = dqs("#listEditIdentifier").value;
+    identifier = dqs("#listEditIdentifier").value,
+    requireOptIn = dqs("#requireOptIn").value;
 
   fetch("/api/lists/update", {
     method: "POST",
@@ -336,7 +407,8 @@ function updateList(listID) {
       listID: listID,
       name: name,
       description: description,
-      identifier: identifier
+      identifier: identifier,
+      requireOptIn: requireOptIn
     })
   })
   .then(manageErrors)

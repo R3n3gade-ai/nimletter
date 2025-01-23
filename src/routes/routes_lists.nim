@@ -36,6 +36,7 @@ proc(request: Request) =
     identifier = (if @"identifier" == "": name.toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) else: @"identifier".replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}))
     description = @"description"
     flowIDRaw   = @"flowID"
+    requireOptIn = @"requireOptIn" == "true"
 
   if name.strip() == "":
     resp Http400, "Name is required"
@@ -59,33 +60,40 @@ proc(request: Request) =
   #
   # Insert into database
   #
-  let
-    args = @[
-      name,
-      identifier,
-      description,
-      flowID,
-    ]
-  var argsParams: seq[string]
-  argsParams.add(name)
-  argsParams.add(identifier)
+  if flowID == "":
+    pg.withConnection conn:
+      exec(conn, sqlInsert(
+          table = "lists",
+          data  = [
+            "name",
+            "identifier",
+            "require_optin",
+            "description",
+          ]),
+          name,
+          identifier,
+          $requireOptIn,
+          description
+        )
 
-  if description != "":
-    argsParams.add(description)
-  if flowID != "":
-    argsParams.add(flowID)
+  else:
+    pg.withConnection conn:
+      exec(conn, sqlInsert(
+          table = "lists",
+          data  = [
+            "name",
+            "identifier",
+            "require_optin",
+            "description",
+            "flow_id",
+          ]),
+          name,
+          identifier,
+          $requireOptIn,
+          description,
+          flowID
+        )
 
-  pg.withConnection conn:
-    exec(conn, sqlInsert(
-        table = "lists",
-        data  = [
-          "name",
-          "identifier",
-          "description",
-          "flow_id",
-        ],
-        args = args),
-      argsParams)
 
   resp Http200
 )
@@ -113,7 +121,7 @@ proc(request: Request) =
   pg.withConnection conn:
     data = getRow(conn, sqlSelect(
         table   = "lists",
-        select  = ["lists.name", "lists.identifier", "lists.description", "array_to_string(lists.flow_ids, ',') as flows", "lists.uuid"],
+        select  = ["lists.name", "lists.identifier", "lists.description", "array_to_string(lists.flow_ids, ',') as flows", "lists.uuid", "lists.require_optin"],
         where   = ["lists.id = ?"]
       ), listID)
 
@@ -136,7 +144,8 @@ proc(request: Request) =
       "identifier": data[1],
       "description": data[2],
       "uuid": data[4],
-      "flow_id": flowdata
+      "flow_id": flowdata,
+      "require_optin": data[5] == "t"
     }
   )
 )
@@ -293,7 +302,8 @@ proc(request: Request) =
           "array_to_string(lists.flow_ids, ',') as flows",
           "to_char(lists.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at",
           "to_char(lists.updated_at, 'YYYY-MM-DD HH24:MI:SS') as updated_at",
-          "(SELECT COUNT(*) FROM subscriptions WHERE subscriptions.list_id = lists.id) as user_count"
+          "(SELECT COUNT(*) FROM subscriptions WHERE subscriptions.list_id = lists.id) as user_count",
+          "lists.require_optin"
         ],
         customSQL = "ORDER BY lists.name DESC"
       ))
@@ -314,7 +324,8 @@ proc(request: Request) =
       "flows": row[5],
       "created_at": row[6],
       "updated_at": row[7],
-      "user_count": row[8]
+      "user_count": row[8],
+      "require_optin": row[9] == "t"
     })
 
   resp Http200, (
