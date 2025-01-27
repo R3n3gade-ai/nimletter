@@ -6,9 +6,10 @@ services:
     environment:
       POSTGRES_USER: nimletter
       POSTGRES_PASSWORD: nimletter
+      POSTGRES_DB: nimletter_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./nimletter-compose-init.sh:/docker-entrypoint-initdb.d/init-user.sh:ro
+      #- ./nimletter-compose-init.sh:/docker-entrypoint-initdb.d/init-user.sh:ro
     ports:
       - "5432:5432"
     healthcheck:
