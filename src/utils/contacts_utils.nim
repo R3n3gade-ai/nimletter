@@ -48,7 +48,7 @@ proc moveFromPendingToSubscription*(userID: string) =
             #
             # User subscribed to list, create pending email
             #
-            let flowIDs = getValue(conn, sqlSelect(table = "lists", select = ["STRING_AGG(flow_ids, ',')"], where = ["id = ?"]), listID)
+            let flowIDs = getValue(conn, sqlSelect(table = "lists", select = ["array_to_string(flow_ids, ',')"], where = ["id = ?"]), listID)
             for flowID in flowIDs.split(","):
               createPendingEmailFromFlowstep(userID, listID, flowID, 1)
           else:
@@ -93,7 +93,7 @@ proc addContactToList*(userID, listID: string, flowStep = 1): bool =
         ]),
         userID, listID
     ) > 0:
-      let flowIDs = getValue(conn, sqlSelect(table = "lists", select = ["STRING_AGG(flow_ids, ',')"], where = ["id = ?"]), listID)
+      let flowIDs = getValue(conn, sqlSelect(table = "lists", select = ["array_to_string(flow_ids, ',')"], where = ["id = ?"]), listID)
       for flowID in flowIDs.split(","):
         createPendingEmailFromFlowstep(userID, listID, flowID, flowStep)
       result = true
