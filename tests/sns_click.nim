@@ -34,5 +34,5 @@ snsContainer["Message"] = ($snsClick).newJString()
 let client = newHttpClient()
 client.headers = newHttpHeaders({ "Content-Type": "application/json" })
 let body = snsContainer
-let response = client.request("http://127.0.0.1:5555/webhook/incoming/sns", httpMethod = HttpPost, body = $body)
+let response = client.request("http://127.0.0.1:5555/webhook/incoming/sns/secret", httpMethod = HttpPost, body = $body)
 echo response.status

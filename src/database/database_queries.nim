@@ -88,7 +88,6 @@ proc getDataFromPendingEmails*(conn: DbConn, messageID: string): PendingMail =
 
 
 proc getDataFromPendingEmailsTrigger*(conn: DbConn, flowID, stepNumber, userID: string): PendingMail =
-
   let data = getRow(conn, sqlSelect(
       table   = "pending_emails",
       select  = [
@@ -102,9 +101,12 @@ proc getDataFromPendingEmailsTrigger*(conn: DbConn, flowID, stepNumber, userID: 
         "flow_steps.trigger_type",
         "flow_steps.delay_minutes",
         "flow_steps.step_number",
+        "contacts.email",
+        "contacts.name",
       ],
       joinargs = [
         (table: "flow_steps", tableAs: "", on: @["flow_steps.id = pending_emails.flow_step_id"]),
+        (table: "contacts", tableAs: "", on: @["contacts.id = pending_emails.user_id"]),
       ],
       where   = [
         "pending_emails.flow_id = ?",

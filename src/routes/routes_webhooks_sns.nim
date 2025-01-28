@@ -276,7 +276,7 @@ proc(request: Request) =
 
 
   else:
-    echo "Unknown event type"
+    echo "Unknown event type: " & request.body
 
   resp Http200
 
