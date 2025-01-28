@@ -30,7 +30,7 @@ function manageErrors(response) {
       manageErrorsMsg("error", ("Http401"))
     } else if (response.status == 400) {
       response.text().then((text) => {
-        manageErrorsMsg("error", text)
+        manageErrorsMsg("error", text || "Error400");
       });
     } else if (response.status == 403) {
       response.text().then((text) => {
