@@ -36,22 +36,25 @@ proc moveFromPendingToSubscription*(userID: string) =
         return
 
       for listID in lists:
-        if execAffectedRows(conn, sqlInsert(
-            table = "subscriptions",
-            data  = [
-              "user_id",
-              "list_id",
-            ]),
-            userID, listID
-        ) > 0:
-          #
-          # User subscribed to list, create pending email
-          #
-          let flowIDs = getValue(conn, sqlSelect(table = "lists", select = ["STRING_AGG(flow_ids, ',')"], where = ["id = ?"]), listID)
-          for flowID in flowIDs.split(","):
-            createPendingEmailFromFlowstep(userID, listID, flowID, 1)
-        else:
-          echo "Error subscribing user to list: " & listID
+        try:
+          if execAffectedRows(conn, sqlInsert(
+              table = "subscriptions",
+              data  = [
+                "user_id",
+                "list_id",
+              ]),
+              userID, listID
+          ) > 0:
+            #
+            # User subscribed to list, create pending email
+            #
+            let flowIDs = getValue(conn, sqlSelect(table = "lists", select = ["STRING_AGG(flow_ids, ',')"], where = ["id = ?"]), listID)
+            for flowID in flowIDs.split(","):
+              createPendingEmailFromFlowstep(userID, listID, flowID, 1)
+          else:
+            echo "Error subscribing user to list: " & listID
+        except:
+          continue
 
     # Set pendling_list to NULL
     exec(conn, sqlUpdate(

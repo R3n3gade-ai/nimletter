@@ -58,63 +58,6 @@ proc(request: Request) =
   redirect("/subscribe/" & defaultListUUID)
 )
 
-optinRouter.get("/subscribe/@listUUID",
-proc(request: Request) =
-  resp Http200, nimfOptinSubscribe(true, "", "", listUUID = @"listUUID")
-)
-
-
-optinRouter.post("/subscribe",
-proc(request: Request) =
-
-  let
-    email = @"email"
-    name  = @"name"
-    lists = @"lists".split(",")
-
-  if @"username_second" != "":
-    resp Http200, nimfOptinSubscribe(true, "", "")
-
-  if not email.isValidEmail():
-    resp Http400, nimfOptinSubscribe(true, "Invalid email", "")
-
-
-  var
-    userID: string
-    listsData: tuple[requireOptIn: bool, ids: seq[string]] = (true, @["1"])
-  pg.withConnection conn:
-
-    #
-    # If we have any pending lists, then get those
-    #
-    if lists.len() > 0:
-      var listsTmp: seq[string]
-      for listUUID in lists:
-        if listUUID.isValidUUID(): continue
-        listsTmp.add(listUUID)
-
-      listsData = listIDsFromUUIDs(listsTmp, true)
-
-    userID = createContact(email, name, listsData.requireOptIn, listsData.ids)
-
-  if requiresDoubleOptIn:
-    emailOptinSend(email, name, userID)
-
-  let data = %* {
-      "success": true,
-      "id": userID,
-      "requiresDoubleOptIn": listsData.requireOptIn,
-      "listIDs": listsData.ids,
-      "email": email,
-      "name": name,
-      "event": "contact_created"
-    }
-
-  parseWebhookEvent(contact_created, data)
-
-  resp Http200, nimfOptinSubscribe(false, "", "Succes")
-)
-
 
 optinRouter.get("/subscribe/optin",
 proc(request: Request) =
@@ -194,6 +137,63 @@ proc(request: Request) =
   resp Http200, nimfOptinSubscribeOptin(userUUID)
 )
 
+
+optinRouter.get("/subscribe/@listUUID",
+proc(request: Request) =
+  resp Http200, nimfOptinSubscribe(true, "", "", listUUID = @"listUUID")
+)
+
+
+optinRouter.post("/subscribe",
+proc(request: Request) =
+
+  let
+    email = @"email"
+    name  = @"name"
+    lists = @"lists".split(",")
+
+  if @"username_second" != "":
+    resp Http200, nimfOptinSubscribe(true, "", "")
+
+  if not email.isValidEmail():
+    resp Http400, nimfOptinSubscribe(true, "Invalid email", "")
+
+
+  var
+    userID: string
+    listsData: tuple[requireOptIn: bool, ids: seq[string]] = (true, @["1"])
+  pg.withConnection conn:
+
+    #
+    # If we have any pending lists, then get those
+    #
+    if lists.len() > 0:
+      var listsTmp: seq[string]
+      for listUUID in lists:
+        if listUUID.isValidUUID(): continue
+        listsTmp.add(listUUID)
+
+      listsData = listIDsFromUUIDs(listsTmp, true)
+
+    userID = createContact(email, name, listsData.requireOptIn, listsData.ids)
+
+  if requiresDoubleOptIn:
+    emailOptinSend(email, name, userID)
+
+  let data = %* {
+      "success": true,
+      "id": userID,
+      "requiresDoubleOptIn": listsData.requireOptIn,
+      "listIDs": listsData.ids,
+      "email": email,
+      "name": name,
+      "event": "contact_created"
+    }
+
+  parseWebhookEvent(contact_created, data)
+
+  resp Http200, nimfOptinSubscribe(false, "", "Succes")
+)
 
 optinRouter.get("/unsubscribe",
 proc(request: Request) =

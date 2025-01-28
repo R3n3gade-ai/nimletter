@@ -87,7 +87,7 @@
           <div class="mb30" style="display: flex;">
             <img src="/assets/images/nimletter.png" style="width: 300px;margin: auto;">
           </div>
-          <p>
+          <p class="center">
             Perfect! Glad to have you onboard! 🚀
           </p>
         </div>
