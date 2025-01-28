@@ -13,7 +13,7 @@ RUN groupadd nimgroup \
       ca-certificates \
       libpq-dev \
       libpcre3-dev \
-      libgeoip1
+      libgeoip1 geoip-bin geoip-database
 
 WORKDIR /home/nimmer
 
