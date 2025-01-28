@@ -2,6 +2,10 @@ window.addEventListener("DOMContentLoaded", (event) => {
   function checkUrlPath() {
     const path = window.location.pathname;
 
+    if (window.location.href.includes("#")) {
+      return;
+    }
+
     switch (path) {
       case '/contacts':
         tableContacts();

@@ -156,9 +156,10 @@ function addMailDo() {
     })
   })
   .then(manageErrors)
-  .then(() => {
+  .then(response => response.json())
+  .then(data => {
     dqs(".modalpop").remove();
-    objTableMails.setData();
+    loadMail(data.id);
   });
 
 }
@@ -615,7 +616,7 @@ function emailbuilderShow(purpose) {
       try {
         let parsedData = JSON.parse(globalMailEditorContent);
         emailbuilderAddonSetJson(globalMailEditorContent);
-        emailbuilderLoadedJSON = globalMailEditorContent;
+        emailbuilderLoadedJSON = parsedData;
       } catch (error) {
         console.error("Invalid JSON data, reverting to default JSON. Error:", error);
         let defaultJson = JSON.stringify(emailbuilderAddonClearJSON);
@@ -732,6 +733,7 @@ function saveMail(mailID) {
   } else {
     contentHTML = typeof emailbuilderAddonGetHTML === 'function' ? emailbuilderAddonGetHTML() : '';
     contentEditor = typeof emailbuilderAddonGetJson === 'function' ? emailbuilderAddonGetJson() : '';
+    emailbuilderLoadedJSON = contentEditor;
     // contentHTML = emailbuilderAddonGetHTML();
     // contentEditor = emailbuilderAddonGetJson();
     dqs("#mailEditPreviewHTML").innerHTML = contentHTML;

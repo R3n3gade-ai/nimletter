@@ -54,8 +54,9 @@ proc(request: Request) =
   #
   # Insert into database
   #
+  var mailID: string
   pg.withConnection conn:
-    exec(conn, sqlInsert(
+    mailID = $insertID(conn, sqlInsert(
         table = "mails",
         data  = [
           "name",
@@ -73,7 +74,11 @@ proc(request: Request) =
         contentEditor
       )
 
-  resp Http200
+  resp Http200, (
+    %* {
+      "id": mailID
+    }
+  )
 )
 
 
