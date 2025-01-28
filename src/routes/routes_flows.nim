@@ -207,12 +207,15 @@ proc(request: Request) =
 
 
   pg.withConnection conn:
-    let stepNumber = getValue(conn, sqlSelect(
+
+    let stepNumberRaw = getValue(conn, sqlSelect(
         table  = "flow_steps",
         select = ["max(step_number)"],
         where  = ["flow_id = ?"]
-      ), flowID).parseInt() + 1
-
+      ), flowID)
+    var stepNumber = 1
+    if stepNumberRaw.len > 0:
+      stepNumber = stepNumberRaw.parseInt() + 1
 
     let newStepID = insertID(conn, sqlInsert(
         table = "flow_steps",
@@ -228,31 +231,33 @@ proc(request: Request) =
         flowID, name, mailID, stepNumber, delayMinutes, subject, triggerType
     )
 
+
     #
     # When a new step is created, all contacts who has completed (sent) the
     # previous step should be scheduled to mail the new step using
     # the proc `createPendingEmail()`
     #
 
-    let prevStepNumber = stepNumber - 1
-    let prevStepID = getValue(conn, sqlSelect(
-        table  = "flow_steps",
-        select = ["id"],
-        where  = ["flow_id = ?", "step_number = ?"]
-      ), flowID, prevStepNumber)
+    if stepNumber > 1:
+      let prevStepNumber = stepNumber - 1
+      let prevStepID = getValue(conn, sqlSelect(
+          table  = "flow_steps",
+          select = ["id"],
+          where  = ["flow_id = ?", "step_number = ?"]
+        ), flowID, prevStepNumber)
 
-    exec(conn, sql("""
-      WITH subscription_info AS (
-      SELECT s.user_id, s.list_id, NOW() + (fs.delay_minutes || ' minutes')::INTERVAL AS scheduled_time
-      FROM subscriptions s
-      JOIN lists l ON s.list_id = l.id
-      JOIN flow_steps fs ON ARRAY[fs.flow_id] <@ l.flow_ids
-      WHERE fs.flow_id = ? AND fs.id = ?
-      )
-      INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for)
-      SELECT user_id, list_id, ?, ?, scheduled_time
-      FROM subscription_info
-    """), flowID, prevStepID, flowID, newStepID)
+      exec(conn, sql("""
+        WITH subscription_info AS (
+        SELECT s.user_id, s.list_id, NOW() + (fs.delay_minutes || ' minutes')::INTERVAL AS scheduled_time
+        FROM subscriptions s
+        JOIN lists l ON s.list_id = l.id
+        JOIN flow_steps fs ON ARRAY[fs.flow_id] <@ l.flow_ids
+        WHERE fs.flow_id = ? AND fs.id = ?
+        )
+        INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for)
+        SELECT user_id, list_id, ?, ?, scheduled_time
+        FROM subscription_info
+      """), flowID, prevStepID, flowID, newStepID)
 
 
   resp Http200
