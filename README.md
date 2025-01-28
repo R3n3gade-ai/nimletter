@@ -150,6 +150,8 @@ __(The SNS_WEBHOOK_SECRET can also be set inside the settings page)__
 /webhook/incoming/sns/" & getEnv("SNS_WEBHOOK_SECRET", "secret")
 ```
 
+If the `SMTP_HOST` is specified as an environment variable, then it won't use the saved values in the database.
+
 # 🌐 Environment variables
 The values are customizable within the system and will be saved to the database.
 
