@@ -311,7 +311,6 @@ proc(request: Request) =
       )
 
     resp Http200
-
   #
   # Get potential flow, so we can stop pending emails
   #
@@ -339,8 +338,6 @@ proc(request: Request) =
           ),
           $now().utc, userID, flowID)
 
-
-  pg.withConnection conn:
     exec(conn, sqlDelete(
         table = "subscriptions",
         where = ["user_id = ?", "list_id = ?"]),
