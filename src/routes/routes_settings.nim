@@ -195,6 +195,17 @@ proc(request: Request) =
     resp Http400, "Max Mails Per Second is required"
 
   #
+  # Delete existing row if it exists
+  #
+  pg.withConnection conn:
+    exec(conn, sqlDelete(
+        table = "smtp_settings",
+        where = [
+          "id = 1"
+        ]
+      ))
+
+  #
   # Insert into database
   #
   pg.withConnection conn:
