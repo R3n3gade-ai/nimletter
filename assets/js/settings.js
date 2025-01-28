@@ -273,7 +273,8 @@ async function buildSettingsSMTP() {
             attrs: {
               id: item.key,
               value: item.value,
-              disabled: (item.key == 'smtpStorage') ? true : false
+              disabled: (item.key == 'smtpStorage') ? true : false,
+              type: (item.key == 'smtpPassword') ? 'password' : 'text'
             }
           })
         ]
