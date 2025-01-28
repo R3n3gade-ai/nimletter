@@ -190,7 +190,7 @@ function buildContactHTML(data) {
   let subscriptions = [];
   for (var i = 0; i < data.subscriptions.length; i++) {
     subscriptions.push(
-      createSubcriptionHTML(data.subscriptions[i].id, "subscribed", data.subscriptions[i].list_name, data.subscriptions[i].subscribed_at.split(".")[0])
+      createSubcriptionHTML(data.subscriptions[i].list_id, "subscribed", data.subscriptions[i].list_name, data.subscriptions[i].subscribed_at.split(".")[0])
     );
   }
 
@@ -599,6 +599,7 @@ function buildContactHTML(data) {
 
 
   const closeModal = (event) => {
+    if (event.type === 'keydown' && event.key !== 'Escape') return;
     if (event.key === 'Escape' || !dqs('#contact').contains(event.target)) {
       dqs('#contact').classList.remove('show');
       document.removeEventListener('keydown', closeModal);
@@ -854,6 +855,7 @@ function addContactToListDo(listID) {
   .then(() => {
     dqs(".modalpop").remove();
     loadContact(globalContactID);
+    objTableContacts.setData();
   });
 }
 
@@ -869,6 +871,7 @@ function removeContactFromList(self, listID, listType) {
   .then(manageErrors)
   .then(() => {
     loadContact(globalContactID);
+    objTableContacts.setData();
   });
 }
 
