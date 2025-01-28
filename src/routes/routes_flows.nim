@@ -233,6 +233,7 @@ proc(request: Request) =
     # previous step should be scheduled to mail the new step using
     # the proc `createPendingEmail()`
     #
+
     let prevStepNumber = stepNumber - 1
     let prevStepID = getValue(conn, sqlSelect(
         table  = "flow_steps",
@@ -245,7 +246,7 @@ proc(request: Request) =
       SELECT s.user_id, s.list_id, NOW() + (fs.delay_minutes || ' minutes')::INTERVAL AS scheduled_time
       FROM subscriptions s
       JOIN lists l ON s.list_id = l.id
-      JOIN flow_steps fs ON l.flow_id = fs.flow_id
+      JOIN flow_steps fs ON ARRAY[fs.flow_id] <@ l.flow_ids
       WHERE fs.flow_id = ? AND fs.id = ?
       )
       INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for)
