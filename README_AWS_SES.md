@@ -1,0 +1,13 @@
+
+# Configuration sets
+
+Create a configuration set which will be used on your verified domain/sender in AWS SES.
+
+![alt text](assets/screenshots/configuration_set_events.png)
+
+![alt text](assets/screenshots/configuration_set_destination.png)
+
+
+# SNS Topic
+
+Input the domain `/webhook/incoming/sns/secret` to confirm the subscription (http or https).
