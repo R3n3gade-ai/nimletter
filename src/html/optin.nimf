@@ -16,7 +16,7 @@
 # end try
 <html>
   <head>
-    <title>Nimletter</title>
+    <title>${pageName}</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon/favicon.ico">
 
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-300.woff2" crossorigin/>
