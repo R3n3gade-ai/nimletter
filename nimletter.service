@@ -44,9 +44,9 @@ ExecStart=/usr/bin/podman run \
         --log-driver journald \
         --log-opt tag=nimletter \
         --env RUN_MODE=prod \
-        --env PG_HOST=localhost \
-        --env PG_USER=nimletter \
-        --env PG_PASSWORD=nimletter \
+        --env PG_HOST=localhost:5432 \
+        --env PG_USER=postgres \
+        --env PG_PASSWORD=postgres \
         --env PG_DATABASE=nimletter_db \
         --env PG_WORKERS=3 \
         --env SMTP_HOST=smtp_host \

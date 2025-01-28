@@ -110,7 +110,7 @@ proc scheduleStart() {.thread.} =
       # cron(minute="*", hour="*/1", day_of_month="*", month="*", day_of_week="*", id="tick", throttle=10):
       #   echo $now() & " - cron job running (backup)"
       #   {.gcsafe.}:
-      #     checkAndSendScheduledEmails(minutesBack = 1)
+      #     checkAndSendScheduledEmails(backupCheck = true)
 
 
 
