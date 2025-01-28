@@ -225,14 +225,18 @@ proc updateUserClick(mail: MailClick) =
 
 var webhooksSnsRouter*: Router
 
-webhooksSnsRouter.post("/webhook/incoming/sns/" & getEnv("SNS_WEBHOOK_SECRET", "secret"),
+webhooksSnsRouter.post("/webhook/incoming/sns/@key",
 proc(request: Request) =
   when defined(dev):
     echo "Received SNS webhook"
 
+  if @"key" != getEnv("SNS_WEBHOOK_SECRET", "secret"):
+    resp Http400
+
   let (snsSuccess, snsMsg) = snsParseJson(request.body)
   if not snsSuccess:
     echo "Error parsing SNS JSON"
+    echo request.body
     resp Http400
 
 
