@@ -542,10 +542,13 @@ proc(request: Request) =
         "pending_emails.updated_at",    # 6
         "pending_emails.status",        # 7
         "flow_steps.mail_id",       # 8
+        "mails.subject",             # 9
+        "mails.identifier",          # 10
       ],
       joinargs = [
         (table: "flows", tableAs: "flows", on: @["pending_emails.flow_id = flows.id"]),
         (table: "flow_steps", tableAs: "flow_steps", on: @["pending_emails.flow_step_id = flow_steps.id"]),
+        (table: "mails", tableAs: "mails", on: @["pending_emails.mail_id = mails.id"]),
       ],
       where = ["user_id = ?"],
       ), contactID)
@@ -607,11 +610,12 @@ proc(request: Request) =
       ),
       "scheduled_for": pendingEmail[0],
       "sent_at": pendingEmail[1],
-      "subject": pendingEmail[3],
+      "subject": (if pendingEmail[3] != "": pendingEmail[3] else: pendingEmail[9]),
       "flow_name": pendingEmail[2],
-      "trigger_type": pendingEmail[4],
+      "trigger_type": (if pendingEmail[10] == "double-opt-in": "double-opt-in" else: pendingEmail[4]),
       "delay_minutes": pendingEmail[5],
       "mail_id": pendingEmail[8],
+      "mail_identifier": pendingEmail[10],
     }
 
     if jItem["date"].getStr() == "":
