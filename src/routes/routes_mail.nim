@@ -253,7 +253,7 @@ proc(request: Request) =
     mails = getAllRows(conn, sqlSelect(
       table   = "mails",
       select  = [
-        "mails.id",
+        "DISTINCT mails.id",
         "mails.name",
         "mails.subject",
         "mails.tags",
