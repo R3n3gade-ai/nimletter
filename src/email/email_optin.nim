@@ -28,7 +28,7 @@ proc emailOptinSend*(email, name, contactID: string) =
       data  = [
         "user_id",
         "trigger_type",
-        /"status",
+        "status",
       ],
     ), contactID, "optin", "sent")
 
