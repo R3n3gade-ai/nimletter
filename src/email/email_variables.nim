@@ -15,13 +15,13 @@ const htmlHeader = """<!DOCTYPE html><html lang="EN" style="background:#FAFAFA;m
 const htmlFooter = "</body></html>"
 
 
-proc insertSubscribeLink*(message, subjectChecked, userUUID, hostname: string): string =
-  let unsubscribelink = hostname & "/unsubscribe?" & userUUID
+proc insertUnsubscribeLink*(message, subjectChecked, userUUID, hostname: string): string =
+  let unsubscribelink = hostname & "/unsubscribe?contactUUID=" & userUUID
   let htmlLink = "<div style=\"width: 100%; text-align: center;\"><a href='" & unsubscribelink & "'>Unsubscribe</a></div>"
   return htmlHeader.format(subjectChecked) & message & htmlLink & htmlFooter
 
 
-proc emailVariableReplace*(contactID, message, subjectChecked: string): string =
+proc emailVariableReplace*(contactID, message, subjectChecked: string, ignoreUnsubscribe = false): string =
   ## Replace variables in a message.
   ##
   ## Variables are defined by {{ and }}. It holds a variable name,
@@ -41,7 +41,7 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string): string =
   let matches = findAll(message, re)
 
 
-  const internalFields = @["firstname", "lastname", "name", "email", "pagename", "hostname"]
+  const internalFields = @["firstname", "lastname", "name", "email", "pagename", "hostname", "uuid"]
   var
     fieldVariable: seq[string]
     fieldDefaults: seq[string]
@@ -69,6 +69,8 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string): string =
         fieldVariable.add("name")
       of "email":
         fieldVariable.add("email")
+      of "contactUUID":
+        fieldVariable.add("uuid")
       else:
         continue
     else:
@@ -104,11 +106,14 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string): string =
     pageName = mainSettings[1]
 
   if matchesChecked.len == 0:
-    return insertSubscribeLink(message, subjectChecked, userData[userData.high], hostname)
+    if ignoreUnsubscribe:
+      return message
+    return insertUnsubscribeLink(message, subjectChecked, userData[userData.high], hostname)
 
   var multi: seq[(string, string)]
   multi.add(("{{ pagename }}", pageName))
   multi.add(("{{ hostname }}", hostname))
+  multi.add(("{{ contactUUID }}", userData[userData.high]))
 
   for i in 0..matchesChecked.high:
     let
@@ -124,6 +129,7 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string): string =
 
   result = message.multiReplace(multi)
 
-
-  return insertSubscribeLink(result, subjectChecked, userData[userData.high], hostname)
+  if ignoreUnsubscribe:
+    return result
+  return insertUnsubscribeLink(result, subjectChecked, userData[userData.high], hostname)
 

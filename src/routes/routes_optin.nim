@@ -98,7 +98,7 @@ proc(request: Request) =
     userID = createContact(email, name, listsData.requireOptIn, listsData.ids)
 
   if requiresDoubleOptIn:
-    emailOptinSend(email, name)
+    emailOptinSend(email, name, userID)
 
   let data = %* {
       "success": true,
@@ -118,7 +118,7 @@ proc(request: Request) =
 
 optinRouter.get("/subscribe/optin",
 proc(request: Request) =
-  let userUUID = @"userUUID"
+  let userUUID = @"contactUUID"
 
   if not userUUID.isValidUUID():
     resp Http200, nimfOptinSubscribeOptin("")
@@ -197,7 +197,7 @@ proc(request: Request) =
 
 optinRouter.get("/unsubscribe",
 proc(request: Request) =
-  let userUUID = @"userUUID"
+  let userUUID = @"contactUUID"
 
   if not userUUID.isValidUUID():
     resp Http200, nimfOptinUnubscribe("", "", "")

@@ -66,7 +66,7 @@ proc(request: Request) =
   let userID = createContact(email, name, requiresDoubleOptIn, listIDs = @[])
 
   if requiresDoubleOptIn:
-    emailOptinSend(email, name)
+    emailOptinSend(email, name, userID)
 
     if listID != "":
       discard addContactToPendinglist(userID, listID)
