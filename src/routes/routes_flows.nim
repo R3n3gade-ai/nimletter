@@ -441,7 +441,7 @@ proc(request: Request) =
     # Cancel pending emails
     exec(conn, sqlUpdate(
         table = "pending_emails",
-        data  = ["status = 'cancelled'"],
+        data  = ["status = 'cancelled'", "flow_step_id = NULL"],
         where = [
           "flow_step_id = ?",
           "status = 'pending'"
@@ -496,15 +496,16 @@ proc(request: Request) =
 
     exec(conn, sql("""
       WITH subscription_info AS (
-        SELECT s.user_id, s.flow_id, NOW() + (fs.delay_minutes || ' minutes')::INTERVAL AS scheduled_time
-        FROM subscriptions s
-        JOIN flow_steps fs ON s.flow_id = fs.flow_id
-        WHERE s.flow_id = ? AND fs.id = ?
+      SELECT s.user_id, s.list_id, NOW() + (fs.delay_minutes || ' minutes')::INTERVAL AS scheduled_time
+      FROM subscriptions s
+      JOIN lists l ON s.list_id = l.id
+      JOIN flow_steps fs ON ARRAY[fs.flow_id] <@ l.flow_ids
+      WHERE fs.flow_id = ? AND fs.id = ?
       )
-      INSERT INTO pending_emails (user_id, flow_id, flow_step_id, scheduled_for)
-      SELECT user_id, flow_id, ?, scheduled_time
+      INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for)
+      SELECT user_id, list_id, ?, ?, scheduled_time
       FROM subscription_info
-    """), flowID, newFlowStepID, newFlowStepID)
+    """), flowID, newFlowStepID, flowID, newFlowStepID)
 
   resp Http200
 )
