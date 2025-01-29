@@ -253,7 +253,7 @@ proc(request: Request) =
     mails = getAllRows(conn, sqlSelect(
       table   = "mails",
       select  = [
-        "DISTINCT mails.id",
+        "DISTINCT ON (mails.id) mails.id",
         "mails.name",
         "mails.subject",
         "mails.tags",
@@ -267,7 +267,7 @@ proc(request: Request) =
       joinargs = [
         (table: "flow_steps", tableAs: "", on: @["flow_steps.mail_id = mails.id"])
       ],
-      customSQL = "ORDER BY name ASC LIMIT $1 OFFSET $2".format(
+      customSQL = "ORDER BY mails.id, mails.name ASC LIMIT $1 OFFSET $2".format(
         $limit,
         $offset
       )
