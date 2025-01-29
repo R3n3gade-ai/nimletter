@@ -465,6 +465,7 @@ function removeFlowFromListDo(flowID) {
       flowID: flowID,
     })
   });
+  dqs(".modalpop").remove();
 }
 
 function addFlowToList() {

@@ -1025,10 +1025,10 @@ function createActivityHTML(type, date, data) {
     case 'mail_sent':
       break;
     case 'email_open':
-      text = '<b>Opened at:</b> ' + data.date.split(".")[0];
+      text = '<b>Subject:</b> ' + data.subject + '<br><b>Opened at:</b> ' + data.date.split(".")[0];
       break;
     case 'email_click':
-      text = '<b>Clicked at:</b> ' + data.date.split(".")[0] + '<br><b>URL:</b> ' + data.link_url;
+      text = '<b>Subject:</b> ' + data.subject + '<br><b>Clicked at:</b> ' + data.date.split(".")[0] + '<br><b>URL:</b> ' + data.link_url;
       break;
     case 'email_bounce':
       text = '<b>Bounced at:</b> ' + data.date.split(".")[0] + '<br><b>Reason:</b> ' + data.bounced_feedback + " - " + data.bounce_subtype + " (" + data.diagnostic_code + ")";
