@@ -99,7 +99,8 @@ CREATE TABLE IF NOT EXISTS pending_emails (
   message_id          TEXT,  -- Store the message ID here
   sent_at             TIMESTAMP,
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  uuid                UUID NOT NULL DEFAULT uuid_generate_v4()
 );
 
 -- Table for email opens (tracking opens for analytics)

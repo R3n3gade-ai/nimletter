@@ -161,6 +161,7 @@ proc(request: Request) =
 
   var
     userID: string
+    createSuccess: bool
     listsData: tuple[requireOptIn: bool, ids: seq[string]] = (true, @["1"])
   pg.withConnection conn:
 
@@ -175,7 +176,10 @@ proc(request: Request) =
 
       listsData = listIDsFromUUIDs(listsTmp, true)
 
-    userID = createContact(email, name, listsData.requireOptIn, listsData.ids)
+    (createSuccess, userID) = createContact(email, name, listsData.requireOptIn, listsData.ids)
+
+  if not createSuccess:
+    resp Http200, nimfOptinSubscribe(true, "Contact already exists", "")
 
   if requiresDoubleOptIn:
     emailOptinSend(email, name, userID)

@@ -1,8 +1,12 @@
 
 import
   std/[
+    base64,
     json,
-    strutils
+    locks,
+    strutils,
+    tables,
+    times
   ]
 
 from std/os import getEnv
@@ -22,7 +26,9 @@ import
   ../database/database_connection,
   ../database/database_queries,
   ../scheduling/schedule_mail,
+  ../utils/assets,
   ../utils/auth,
+  ../utils/validate_data,
   ../webhook/webhook_events
 
 
@@ -279,5 +285,76 @@ proc(request: Request) =
     echo "Unknown event type: " & request.body
 
   resp Http200
+
+)
+
+
+webhooksSnsRouter.get("/webhook/tracking/@mailuuid/@action/@do",
+proc(request: Request) =
+  when defined(dev):
+    echo "Received SNS webhook"
+
+  let mailuuid = @"mailuuid"
+
+  if not mailuuid.isValidUUID():
+    resp Http400
+
+  var mailID: string
+  pg.withConnection conn:
+    mailID = getValue(conn, sqlSelect(
+      table   = "pending_emails",
+      select  = ["message_id"],
+      where   = ["uuid = ?"]
+    ), mailuuid)
+
+  if mailID == "":
+    resp Http404
+
+  let action = @"action"
+  if action notin ["open", "click"]:
+    resp Http400
+
+  if action == "open":
+    var mailOpen = MailOpen(
+      messageID: mailID,
+      timestamp: $now(),
+      ipAddress: request.ip,
+      userAgent: (if request.headers.hasKey("User-Agent"): request.headers["User-Agent"] else: "")
+    )
+
+    updateUserOpen(mailOpen)
+
+    const path = "/assets/images/nimletter_icon.png"
+    acquire(gFilecacheLock)
+    # if not assets.hasKey(path):
+    #   release(gFilecacheLock)
+    #   resp Http404
+
+    try:
+      var headers: HttpHeaders
+      {.gcsafe.}:
+        headers["Content-Type"] = "image/png"
+        request.respond(200, headers, assets[path].filedata)
+    except:
+      request.respond(400)
+
+    release(gFilecacheLock)
+    return
+
+
+  elif action == "click":
+    let link = decode(@"do")
+
+    var mailClick = MailClick(
+      messageID: mailID,
+      timestamp: $now(),
+      ipAddress: request.ip,
+      userAgent: (if request.headers.hasKey("User-Agent"): request.headers["User-Agent"] else: ""),
+      link: decode(@"do")
+    )
+
+    updateUserClick(mailClick)
+
+    redirect(link)
 
 )

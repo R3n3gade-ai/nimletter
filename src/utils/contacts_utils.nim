@@ -103,9 +103,21 @@ proc addContactToList*(userID, listID: string, flowStep = 1): bool =
   return result
 
 
-proc createContact*(email, name: string, requiresDoubleOptIn: bool, listIDs: seq[string]): string =
+proc createContact*(email, name: string, requiresDoubleOptIn: bool, listIDs: seq[string]): (bool, string) =
+
+  var
+    userID: string
+    success: bool
   pg.withConnection conn:
-    result = $insertID(conn, sqlInsert(
+    if getValue(conn, sqlSelect(
+        table = "contacts",
+        select = ["id"],
+        where = ["email = ?"]
+    ), email) != "":
+      return (false, "Contact already exists")
+
+    success = true
+    userID = $insertID(conn, sqlInsert(
         table = "contacts",
         data  = [
           "email",

@@ -443,6 +443,8 @@ proc(request: Request) =
     listID = @"listID"
     email  = @"email"
 
+  echo email.isValidEmail()
+
   var
     mailData: seq[string]
     contactData: seq[string]
@@ -488,11 +490,12 @@ proc(request: Request) =
     resp Http404, "Mail not found for ID " & mailID
 
   if email.isValidEmail():
+    let isContact = contactData[0] != ""
     discard sendMailMimeNow(
-      contactID = contactData[0],
+      contactID = (if isContact: contactData[0] else: "0"),
       subject = mailData[2],
       message = mailData[1],
-      recipient = contactData[1]
+      recipient = (if isContact: contactData[1] else: email),
     )
 
     resp Http200, "Mail sent to " & email

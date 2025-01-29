@@ -63,7 +63,9 @@ proc(request: Request) =
     else:
       "1" # => Default list
 
-  let userID = createContact(email, name, requiresDoubleOptIn, listIDs = @[])
+  let (createSuccess, userID) = createContact(email, name, requiresDoubleOptIn, listIDs = @[])
+  if not createSuccess:
+    resp Http400, "Error creating user, already exist"
 
   if requiresDoubleOptIn:
     emailOptinSend(email, name, userID)
@@ -553,18 +555,32 @@ proc(request: Request) =
     emailClicks = getAllRows(conn, sqlSelect(
       table = "email_clicks",
       select = [
-        "clicked_at",
-        "link_url"
+        "email_clicks.clicked_at",
+        "email_clicks.link_url",
+        "mails.subject",
+        "flow_steps.subject",
       ],
-      where = ["user_id = ?"],
+      joinargs = [
+        (table: "pending_emails", tableAs: "", on: @["email_clicks.pending_email_id = pending_emails.id"]),
+        (table: "flow_steps", tableAs: "flow_steps", on: @["pending_emails.flow_step_id = flow_steps.id"]),
+        (table: "mails", tableAs: "mails", on: @["pending_emails.mail_id = mails.id"]),
+      ],
+      where = ["email_clicks.user_id = ?"],
       ), contactID)
 
     emailOpens = getAllRows(conn, sqlSelect(
       table = "email_opens",
       select = [
-        "opened_at"
+        "email_opens.opened_at",
+        "mails.subject",
+        "flow_steps.subject",
       ],
-      where = ["user_id = ?"],
+      joinargs = [
+        (table: "pending_emails", tableAs: "", on: @["email_opens.pending_email_id = pending_emails.id"]),
+        (table: "flow_steps", tableAs: "flow_steps", on: @["pending_emails.flow_step_id = flow_steps.id"]),
+        (table: "mails", tableAs: "mails", on: @["pending_emails.mail_id = mails.id"]),
+      ],
+      where = ["email_opens.user_id = ?"],
       ), contactID)
 
     emailBounces = getAllRows(conn, sqlSelect(
@@ -627,6 +643,7 @@ proc(request: Request) =
       "type": "email_click",
       "date": emailClick[0],
       "link_url": emailClick[1],
+      "subject": (if emailClick[3] != "": emailClick[3] else: emailClick[2]),
     }
 
     bodyJson.add( jItem )
@@ -636,6 +653,7 @@ proc(request: Request) =
     let jItem = %* {
       "type": "email_open",
       "date": emailOpen[0],
+      "subject": (if emailOpen[2] != "": emailOpen[2] else: emailOpen[1]),
     }
 
     bodyJson.add( jItem )

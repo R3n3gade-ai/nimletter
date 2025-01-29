@@ -1,5 +1,6 @@
 import
   std/[
+    base64,
     re,
     strutils,
     times
@@ -12,16 +13,37 @@ import
   ../database/database_connection
 
 const htmlHeader = """<!DOCTYPE html><html lang="EN" style="background:#FAFAFA;min-height:100%;"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>$1</title></head><body>"""
+
 const htmlFooter = "</body></html>"
 
+const htmlTracker = """<div style="width: 100%; text-align: center;"><img src="$1/webhook/tracking/$2/open/do"></div>"""
 
-proc insertUnsubscribeLink*(message, subjectChecked, userUUID, hostname: string): string =
-  let unsubscribelink = hostname & "/unsubscribe?contactUUID=" & userUUID
-  let htmlLink = "<div style=\"width: 100%; text-align: center;\"><a href='" & unsubscribelink & "'>Unsubscribe</a></div>"
-  return htmlHeader.format(subjectChecked) & message & htmlLink & htmlFooter
+const unsubscribeLink = """<div style="width: 100%; text-align: center;"><a href="$1">Unsubscribe</a></div>"""
 
 
-proc emailVariableReplace*(contactID, message, subjectChecked: string, ignoreUnsubscribe = false): string =
+
+
+proc finalizeEmail(
+    message, subjectChecked, userUUID, hostname, mailUUID: string,
+    includeUnsubscribe = true
+  ): string =
+  if includeUnsubscribe:
+    return (
+      htmlHeader.format(subjectChecked) &
+      message &
+      unsubscribeLink.format(hostname & "/unsubscribe?contactUUID=" & userUUID) &
+      htmlTracker.format(hostname, mailUUID) &
+      htmlFooter
+    )
+  else:
+    return (
+      htmlHeader.format(subjectChecked) &
+      message &
+      htmlTracker.format(hostname, mailUUID) &
+      htmlFooter
+    )
+
+proc emailVariableReplace*(contactID, message, subjectChecked: string, mailUUID = "", ignoreUnsubscribe = false): string =
   ## Replace variables in a message.
   ##
   ## Variables are defined by {{ and }}. It holds a variable name,
@@ -48,6 +70,9 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string, ignoreUns
     fieldArgs: seq[string]
     matchesChecked: seq[string]
 
+  #
+  # Index matches and fields
+  #
   for match in matches:
     if match in matchesChecked:
       continue
@@ -74,17 +99,19 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string, ignoreUns
       else:
         continue
     else:
+      # All non-internal fields are stored in the metadata column
       fieldVariable.add("contacts.meta->>?")
       fieldArgs.add(base)
 
     fieldDefaults.add(default)
-
     matchesChecked.add(match)
 
   fieldArgs.add(contactID)
-
   fieldVariable.add("uuid")
 
+  #
+  # Query the database
+  #
   var
     userData: seq[string]
     mainSettings: seq[string]
@@ -105,11 +132,44 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string, ignoreUns
     hostname = mainSettings[0]
     pageName = mainSettings[1]
 
-  if matchesChecked.len == 0:
-    if ignoreUnsubscribe:
-      return message
-    return insertUnsubscribeLink(message, subjectChecked, userData[userData.high], hostname)
 
+
+  #
+  # Link replacing
+  #
+  # 1. Get all href="..." links and convert it to base64
+  # 2. Replace the link with a `customurl/base64` string
+  #
+  if mailUUID != "":
+    let reLink = re("""href="([^"]+)"""")
+    let links = findAll(message, reLink)
+    for link in links:
+      let
+        base64 = encode(link.split("\"")[1])
+
+      const
+        baseUrl = "/webhook/tracking/$1/click/$2"
+
+      result = result.replace(link, "href=\"" & hostname & baseUrl.format(mailUUID, base64) & "\"")
+
+
+
+  #
+  # If there's no special attributes, we can just return the message.
+  #
+  if matchesChecked.len == 0:
+    return finalizeEmail(
+      result,
+      subjectChecked,
+      userData[userData.high],
+      hostname,
+      mailUUID,
+      ignoreUnsubscribe
+    )
+
+  #
+  # Go attribute crazy
+  #
   var multi: seq[(string, string)]
   multi.add(("{{ pagename }}", pageName))
   multi.add(("{{ hostname }}", hostname))
@@ -127,9 +187,14 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string, ignoreUns
     else:
       multi.add((match, dbvalue))
 
-  result = message.multiReplace(multi)
+  result = result.multiReplace(multi)
 
-  if ignoreUnsubscribe:
-    return result
-  return insertUnsubscribeLink(result, subjectChecked, userData[userData.high], hostname)
+  return finalizeEmail(
+      result,
+      subjectChecked,
+      userData[userData.high],
+      hostname,
+      mailUUID,
+      ignoreUnsubscribe
+    )
 

@@ -23,6 +23,7 @@ import
 type
   PendingMailObj = object
     id: string
+    uuid: string
     userID: string
     listID: string
     flowID: string
@@ -92,7 +93,8 @@ proc sendPendingEmail(pendingEmail: PendingMailObj) =
     contactID = pendingEmail.userID,
     subject = mailData[0],
     message = mailData[2],
-    recipient = userData[1]
+    recipient = userData[1],
+    mailUUID = pendingEmail.uuid
   )
 
   if not sendData.success:
@@ -146,7 +148,8 @@ proc checkAndSendScheduledEmails*(minutesBack = 5) =
           "pending_emails.status",
           "pending_emails.message_id",
           "pending_emails.created_at",
-          "pending_emails.updated_at"
+          "pending_emails.updated_at",
+          "pending_emails.uuid"
         ],
         where = [
           "pending_emails.scheduled_for <= NOW()",
@@ -170,5 +173,6 @@ proc checkAndSendScheduledEmails*(minutesBack = 5) =
       status: pendingEmail[7],
       messageID: pendingEmail[8],
       createdAt: pendingEmail[9],
-      updatedAt: pendingEmail[10]
+      updatedAt: pendingEmail[10],
+      uuid: pendingEmail[11]
     ))

@@ -21,9 +21,10 @@ proc emailOptinSend*(email, name, contactID: string) =
     hostname:string
     body: string
     subject: string
+    mailUUID: string
 
   pg.withConnection conn:
-    exec(conn, sqlInsert(
+    let mailID = $insertID(conn, sqlInsert(
       table = "pending_emails",
       data  = [
         "user_id",
@@ -47,12 +48,17 @@ proc emailOptinSend*(email, name, contactID: string) =
       where = ["id = 1"]
     ))
 
-  let message = emailVariableReplace(contactID, body, subject, ignoreUnsubscribe = true)
+    mailUUID = getValue(conn, sqlSelect(
+      table = "pending_emails",
+      select = ["uuid"],
+      where = ["id"]
+    ), mailID)
 
   let data = sendMailMimeNow(
     contactID,
-    subject, message, email,
+    subject, body, email,
     replyTo = "",
+    mailUUID = mailUUID,
     ignoreUnsubscribe = true
   )
 

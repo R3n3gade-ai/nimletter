@@ -98,6 +98,7 @@ proc sendMailMimeNow*(
       contactID: string,
       subject, message, recipient: string,
       replyTo: string = "",
+      mailUUID: string = "",
       ignoreUnsubscribe = false
   ): tuple[success: bool, messageID: string, mailsPerSecond: int] =
 
@@ -117,7 +118,7 @@ proc sendMailMimeNow*(
   if replyTo != "":
     multi.header["Reply-To"] = replyTo
 
-  let message = emailVariableReplace(contactID, message, subjectChecked, ignoreUnsubscribe).wrapWords(maxLineWidth=250, splitLongWords=false)
+  let message = emailVariableReplace(contactID, message, subjectChecked, mailUUID, ignoreUnsubscribe).wrapWords(maxLineWidth=250, splitLongWords=false)
 
   var first = newMimeMessage()
   first.header["Content-Type"]  = "text/html; charset=\"UTF-8\""
