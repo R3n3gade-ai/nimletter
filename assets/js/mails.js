@@ -725,7 +725,8 @@ function saveMail(mailID) {
 
   let
     contentHTML,
-    contentEditor;
+    contentEditor,
+    skipContent = false;
 
   if (globalMailEditorType == "html" || globalMailEditorType == "") {
     contentHTML = dqs("#mailEditContent").value;
@@ -734,9 +735,13 @@ function saveMail(mailID) {
     contentHTML = typeof emailbuilderAddonGetHTML === 'function' ? emailbuilderAddonGetHTML() : '';
     contentEditor = typeof emailbuilderAddonGetJson === 'function' ? emailbuilderAddonGetJson() : '';
     emailbuilderLoadedJSON = contentEditor;
+    if (contentEditor == "") {
+      skipContent = true;
+    } else {
+      dqs("#mailEditPreviewHTML").innerHTML = contentHTML;
+    }
     // contentHTML = emailbuilderAddonGetHTML();
     // contentEditor = emailbuilderAddonGetJson();
-    dqs("#mailEditPreviewHTML").innerHTML = contentHTML;
   }
 
   fetch("/api/mails/update", {
@@ -751,7 +756,8 @@ function saveMail(mailID) {
       sendOnce: sendOnce,
       contentHTML: contentHTML,
       contentEditor: contentEditor,
-      editorType: globalMailEditorType
+      editorType: globalMailEditorType,
+      skipContent: skipContent
     })
   })
   .then(manageErrors)

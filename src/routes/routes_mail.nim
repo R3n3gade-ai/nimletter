@@ -167,6 +167,7 @@ proc(request: Request) =
     contentHTML = @"contentHTML"
     contentEditor = @"contentEditor"
     editorType = (if @"editorType" in ["html", "emailbuilder"]: @"editorType" else: "html")
+    skipContent = (@"skipContent" == "true")
 
   if not mailID.isValidInt():
     resp Http400, "Invalid UUID"
@@ -176,31 +177,56 @@ proc(request: Request) =
 
   var hit = false
   pg.withConnection conn:
-    hit = execAffectedRows(conn, sqlUpdate(
-        table = "mails",
-        data  = [
-          "name",
-          "identifier",
-          "tags",
-          "category",
-          "contentHTML",
-          "contentEditor",
-          "editorType",
-          "send_once"
-        ],
-        where = [
-          "id = ?"
-        ]),
-      name,
-      identifier,
-      "{" & formatTags(tags).join(",") & "}",
-      category,
-      contentHTML,
-      contentEditor,
-      editorType,
-      sendOnce,
-      mailID
-    ) > 0
+
+    if not skipContent:
+      hit = execAffectedRows(conn, sqlUpdate(
+          table = "mails",
+          data  = [
+            "name",
+            "identifier",
+            "tags",
+            "category",
+            "contentHTML",
+            "contentEditor",
+            "editorType",
+            "send_once"
+          ],
+          where = [
+            "id = ?"
+          ]),
+        name,
+        identifier,
+        "{" & formatTags(tags).join(",") & "}",
+        category,
+        contentHTML,
+        contentEditor,
+        editorType,
+        sendOnce,
+        mailID
+      ) > 0
+
+    else:
+      hit = execAffectedRows(conn, sqlUpdate(
+          table = "mails",
+          data  = [
+            "name",
+            "identifier",
+            "tags",
+            "category",
+            "editorType",
+            "send_once"
+          ],
+          where = [
+            "id = ?"
+          ]),
+        name,
+        identifier,
+        "{" & formatTags(tags).join(",") & "}",
+        category,
+        editorType,
+        sendOnce,
+        mailID
+      ) > 0
 
   if not hit:
     resp Http404, "Mail not found for UUID " & mailID
