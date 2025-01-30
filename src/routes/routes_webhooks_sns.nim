@@ -223,6 +223,10 @@ proc updateUserClick(mail: MailClick) =
         mail.messageID
       )
 
+      # On opt-in messages
+      if mailData.flowID == "":
+        return
+
       #
       # Do we have a trigger for this click?
       #
