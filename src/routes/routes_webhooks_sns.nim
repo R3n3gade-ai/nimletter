@@ -237,6 +237,19 @@ proc updateUserClick(mail: MailClick) =
     triggerScheduleEmail(triggerData)
 
 
+  let data = %* {
+      "success": true,
+      "userAgent": mail.userAgent,
+      "link": mail.link,
+      "email": mailData.userEmail,
+      "username": mailData.userName,
+      "messageID": mail.messageID,
+      "event": "email_clicked"
+    }
+
+  parseWebhookEvent(email_clicked, data)
+
+
 var webhooksSnsRouter*: Router
 
 webhooksSnsRouter.post("/webhook/incoming/sns/@key",

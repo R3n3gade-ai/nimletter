@@ -28,7 +28,7 @@ type
     contact_optedout,# DONE
     email_sent,
     email_opened,    # DONE
-    email_clicked,
+    email_clicked,   # DONE
     email_bounced,   # DONE
     email_complained # DONE
 
@@ -57,24 +57,34 @@ proc parseWebhookEvent*(event: WebhookEvent, data: JsonNode) =
   # Create client
   #
   let client = newHttpClient()
-
   #
   # Loop through webhooks
   #
   for webhook in webhooks:
-    #
-    # Set headers
-    #
-    var tmpHeaders: seq[tuple[key: string, val: string]]
-    for head in webhooks[1]:
-      try:
-        let headJson = parseJson(head)
-        for key in headJson:
-          tmpHeaders.add((headJson["type"].getStr(), headJson["value"].getStr()))
-      except:
-        continue
 
-    client.headers = newHttpHeaders(tmpHeaders)
+    var
+      headerJson: JsonNode
+      specialHeaders: bool
+    try:
+      headerJson = parseJson(webhook[1])
+      specialHeaders = true
+    except:
+      specialHeaders = false
+
+    if specialHeaders:
+      #
+      # Set headers
+      #
+      var tmpHeaders: seq[tuple[key: string, val: string]]
+      for head in headerJson:
+        try:
+          let headJson = head
+          for key in head:
+            tmpHeaders.add((headJson["type"].getStr(), headJson["value"].getStr()))
+        except:
+          continue
+
+      client.headers = newHttpHeaders(tmpHeaders)
 
     #
     # Post data
