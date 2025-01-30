@@ -165,6 +165,10 @@ proc updateUserOpen(mail: MailOpen) =
         mail.messageID
       )
 
+      # On opt-in messages
+      if mailData.flowID == "":
+        return
+
       #
       # Do we have a trigger for this click?
       #
@@ -289,6 +293,8 @@ proc(request: Request) =
 )
 
 
+const pathTracker = "/assets/images/nimletter_icon.png"
+
 webhooksSnsRouter.get("/webhook/tracking/@mailuuid/@action/@do",
 proc(request: Request) =
   when defined(dev):
@@ -309,13 +315,12 @@ proc(request: Request) =
     ), mailuuid)
 
   if mailID == "" and @"action" == "open":
-    const path = "/assets/images/nimletter_icon.png"
     acquire(gFilecacheLock)
     try:
       var headers: HttpHeaders
       {.gcsafe.}:
         headers["Content-Type"] = "image/png"
-        request.respond(200, headers, assets[path].filedata)
+        request.respond(200, headers, assets[pathTracker].filedata)
     except:
       request.respond(400)
 
@@ -339,13 +344,12 @@ proc(request: Request) =
 
     updateUserOpen(mailOpen)
 
-    const path = "/assets/images/nimletter_icon.png"
     acquire(gFilecacheLock)
     try:
       var headers: HttpHeaders
       {.gcsafe.}:
         headers["Content-Type"] = "image/png"
-        request.respond(200, headers, assets[path].filedata)
+        request.respond(200, headers, assets[pathTracker].filedata)
     except:
       request.respond(400)
 
