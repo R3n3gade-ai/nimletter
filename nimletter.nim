@@ -48,9 +48,10 @@ var
 var routerMain*: Router
 
 # Error handlers
-routerMain.notFoundHandler = routeCustom404
-routerMain.methodNotAllowedHandler = routeCustom404
-routerMain.errorHandler = routeErrorHandler
+when defined(release):
+  routerMain.notFoundHandler = routeCustom404
+  routerMain.methodNotAllowedHandler = routeCustom404
+  routerMain.errorHandler = routeErrorHandler
 
 for r in mainRouter.routes:
   routerMain.routes.add(r)
