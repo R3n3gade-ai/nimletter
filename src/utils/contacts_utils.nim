@@ -11,14 +11,43 @@ import
     times
   ]
 
+from std/os import getEnv
 
 import
+  mmgeoip,
   sqlbuilder
 
 
 import
   ../database/database_connection,
   ../scheduling/schedule_mail
+
+
+proc getCountryFromIP(ip: string): string =
+  if ip == "":
+    return ""
+
+  try:
+    let
+      geoPath = (
+        if getEnv("GEOIP_PATH") != "":
+          getEnv("GEOIP_PATH")
+        else:
+          "/usr/share/GeoIP/GeoIP.dat"
+        )
+
+      geo     = GeoIP(geoPath)
+    return $geo.country_name_by_addr(ip)
+
+  except:
+    return ""
+
+
+proc createMetaWithCountry*(ip: string): string =
+  let country = getCountryFromIP(ip)
+  if country == "":
+    return "{}"
+  return $( %* { "country": country } )
 
 
 proc moveFromPendingToSubscription*(userID: string) =
@@ -50,6 +79,8 @@ proc moveFromPendingToSubscription*(userID: string) =
             #
             let flowIDs = getValue(conn, sqlSelect(table = "lists", select = ["array_to_string(flow_ids, ',')"], where = ["id = ?"]), listID)
             for flowID in flowIDs.split(","):
+              if flowID == "":
+                continue
               createPendingEmailFromFlowstep(userID, listID, flowID, 1)
           else:
             echo "Error subscribing user to list: " & listID
@@ -95,6 +126,8 @@ proc addContactToList*(userID, listID: string, flowStep = 1): bool =
     ) > 0:
       let flowIDs = getValue(conn, sqlSelect(table = "lists", select = ["array_to_string(flow_ids, ',')"], where = ["id = ?"]), listID)
       for flowID in flowIDs.split(","):
+        if flowID == "":
+          continue
         createPendingEmailFromFlowstep(userID, listID, flowID, flowStep)
       result = true
     else:
@@ -103,7 +136,7 @@ proc addContactToList*(userID, listID: string, flowStep = 1): bool =
   return result
 
 
-proc createContact*(email, name: string, requiresDoubleOptIn: bool, listIDs: seq[string]): (bool, string) =
+proc createContact*(email, name: string, requiresDoubleOptIn: bool, listIDs: seq[string], ip: string = ""): (bool, string) =
 
   var
     userID: string
@@ -123,15 +156,19 @@ proc createContact*(email, name: string, requiresDoubleOptIn: bool, listIDs: seq
           "email",
           "name",
           "requires_double_opt_in",
-          "pending_lists" & (if listIDs.len() > 0: "" else: " = NULL")
+          "meta",
+          "pending_lists" & (if requiresDoubleOptIn and listIDs.len() > 0: "" else: " = NULL"),
         ]),
         email,
         name,
         $requiresDoubleOptIn,
+        createMetaWithCountry(ip),
         (
-          if listIDs.len() > 0:
+          if requiresDoubleOptIn and listIDs.len() > 0:
             "{" & listIDs.join(",") & "}"
           else:
             ""
         )
       )
+
+  return (success, userID)

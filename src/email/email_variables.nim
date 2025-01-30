@@ -176,6 +176,9 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string, mailUUID 
   multi.add(("{{ pagename }}", pageName))
   multi.add(("{{ hostname }}", hostname))
   multi.add(("{{ contactUUID }}", userData[userData.high]))
+  multi.add(("{{ unsubscribe_href }}", hostname & "/unsubscribe?contactUUID=" & userData[userData.high]))
+  multi.add(("{{ unsubscribe_link }}", "<a href=\"" & hostname & "/unsubscribe?contactUUID=" & userData[userData.high] & "\">Unsubscribe</a>"))
+
 
   for i in 0..matchesChecked.high:
     let

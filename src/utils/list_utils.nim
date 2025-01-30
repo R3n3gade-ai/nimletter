@@ -38,6 +38,9 @@ proc listIDsFromUUIDs*(uuids: seq[string], includeDefaultList = true): tuple[req
   if includeDefaultList:
     ids.add("1")
 
+  if uuids.len == 0:
+    return (requireOptIn, ids)
+
   pg.withConnection conn:
     let data = getAllRows(conn, sqlSelect(
         table = "lists",

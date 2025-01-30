@@ -19,7 +19,6 @@ import
 
 
 import
-  mmgeoip,
   sqlbuilder
 
 
@@ -30,6 +29,8 @@ import
   ../utils/list_utils,
   ../utils/validate_data,
   ../webhook/webhook_events
+
+from ../utils/contacts_utils import createMetaWithCountry
 
 
 include
@@ -75,21 +76,7 @@ proc(request: Request) =
     name: string
     email: string
 
-    country: string
-    meta: string
-
-  try:
-    let
-      geoPath = (if getEnv("GEOIP_PATH") != "":
-        getEnv("GEOIP_PATH")
-      else:
-        "/usr/share/GeoIP/GeoIP.dat")
-      geo     = GeoIP(geoPath)
-    country = $geo.country_name_by_addr(request.ip)
-    meta = $( %* { "country": country } )
-  except:
-    country = ""
-
+  let meta = createMetaWithCountry(request.ip)
 
 
   pg.withConnection conn:
@@ -144,7 +131,7 @@ proc(request: Request) =
 )
 
 
-optinRouter.post("/subscribe",
+optinRouter.post("/subscribe/@lists",
 proc(request: Request) =
 
   let
@@ -171,9 +158,9 @@ proc(request: Request) =
     if lists.len() > 0:
       var listsTmp: seq[string]
       for listUUID in lists:
-        if listUUID.isValidUUID(): continue
+        if not listUUID.isValidUUID():
+          continue
         listsTmp.add(listUUID)
-
       listsData = listIDsFromUUIDs(listsTmp, true)
 
     (createSuccess, userID) = createContact(email, name, listsData.requireOptIn, listsData.ids)
@@ -181,8 +168,13 @@ proc(request: Request) =
   if not createSuccess:
     resp Http200, nimfOptinSubscribe(true, "Contact already exists", "")
 
-  if requiresDoubleOptIn:
+  if listsData.requireOptIn:
     emailOptinSend(email, name, userID)
+  else:
+    echo "Adding contact to lists"
+    for listID in listsData.ids:
+      echo "Adding contact to list " & listID
+      discard addContactToList(userID, listID)
 
   let data = %* {
       "success": true,
