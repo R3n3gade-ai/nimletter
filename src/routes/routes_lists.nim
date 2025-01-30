@@ -161,6 +161,7 @@ proc(request: Request) =
     name     = @"name"
     identifier  = (if @"identifier" == "": name.toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) else: @"identifier".replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}))
     description = @"description"
+    requireOptIn = @"requireOptIn" == "true"
 
   #
   # Validate input
@@ -179,9 +180,10 @@ proc(request: Request) =
             "name",
             "identifier",
             "description",
+            "require_optin"
           ],
           where = ["id = ?", "identifier != 'default'"]),
-        name, identifier, description, listID)
+        name, identifier, description, $requireOptIn, listID)
 
   resp Http200
 )

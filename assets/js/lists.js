@@ -203,6 +203,7 @@ function openList(listID) {
     .then(response => response.json())
     .then(data => {
       let locked = data.identifier == 'default';
+      globalListFlowIDs = [];
       data.flow_id.forEach(flow => {
         globalListFlowIDs.push(flow.id);
       });

@@ -1,6 +1,7 @@
 import
   std/[
     base64,
+    random,
     re,
     strutils,
     times
@@ -12,11 +13,14 @@ import
 import
   ../database/database_connection
 
+
+randomize()
+
 const htmlHeader = """<!DOCTYPE html><html lang="EN" style="background:#FAFAFA;min-height:100%;"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>$1</title></head><body>"""
 
 const htmlFooter = "</body></html>"
 
-const htmlTracker = """<div style="width: 100%; text-align: center;"><img src="$1/webhook/tracking/$2/open/do"></div>"""
+const htmlTracker = """<div style="width: 100%; text-align: center;"><img src="$1/webhook/tracking/$2/open/$3"></div>"""
 
 const unsubscribeLink = """<div style="width: 100%; text-align: center;"><a href="$1">Unsubscribe</a></div>"""
 
@@ -31,7 +35,7 @@ proc finalizeEmail(
     return (
       htmlHeader.format(subjectChecked) &
       message &
-      htmlTracker.format(hostname, mailUUID) &
+      htmlTracker.format(hostname, (if mailUUID != "": mailUUID else: "pure"), $rand(1000)) &
       htmlFooter
     )
 
@@ -40,7 +44,7 @@ proc finalizeEmail(
       htmlHeader.format(subjectChecked) &
       message &
       unsubscribeLink.format(hostname & "/unsubscribe?contactUUID=" & userUUID) &
-      htmlTracker.format(hostname, mailUUID) &
+      htmlTracker.format(hostname, (if mailUUID != "": mailUUID else: "pure"), $rand(1000)) &
       htmlFooter
     )
 

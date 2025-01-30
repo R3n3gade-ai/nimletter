@@ -24,23 +24,29 @@ proc emailOptinSend*(email, name, contactID: string) =
     mailUUID: string
 
   pg.withConnection conn:
+
+    let optMail = getRow(conn, sqlSelect(
+      table = "mails",
+      select = ["subject", "contentHTML", "id"],
+      where = ["identifier = 'double-opt-in'"]
+    ))
+
+    if optMail[2] == "":
+      echo "No double opt-in mail found"
+      return
+
+    subject = optMail[0]
+    body = optMail[1]
+
     let mailID = $insertID(conn, sqlInsert(
       table = "pending_emails",
       data  = [
         "user_id",
         "trigger_type",
         "status",
+        "mail_id"
       ],
-    ), contactID, "optin", "sent")
-
-    let optMail = getRow(conn, sqlSelect(
-      table = "mails",
-      select = ["subject", "contentHTML"],
-      where = ["identifier = 'double-opt-in'"]
-    ))
-
-    subject = optMail[0]
-    body = optMail[1]
+    ), contactID, "optin", "sent", optMail[2])
 
     hostname = getValue(conn, sqlSelect(
       table = "settings",
@@ -51,7 +57,7 @@ proc emailOptinSend*(email, name, contactID: string) =
     mailUUID = getValue(conn, sqlSelect(
       table = "pending_emails",
       select = ["uuid"],
-      where = ["id"]
+      where = ["id = ?"]
     ), mailID)
 
   let data = sendMailMimeNow(

@@ -296,6 +296,21 @@ proc(request: Request) =
 
   let mailuuid = @"mailuuid"
 
+  if mailuuid == "pure":
+    const path = "/assets/images/nimletter_icon.png"
+    acquire(gFilecacheLock)
+    try:
+      var headers: HttpHeaders
+      {.gcsafe.}:
+        headers["Content-Type"] = "image/png"
+        request.respond(200, headers, assets[path].filedata)
+    except:
+      request.respond(400)
+
+    release(gFilecacheLock)
+    return
+
+
   if not mailuuid.isValidUUID():
     resp Http400
 
@@ -326,10 +341,6 @@ proc(request: Request) =
 
     const path = "/assets/images/nimletter_icon.png"
     acquire(gFilecacheLock)
-    # if not assets.hasKey(path):
-    #   release(gFilecacheLock)
-    #   resp Http404
-
     try:
       var headers: HttpHeaders
       {.gcsafe.}:

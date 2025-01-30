@@ -169,11 +169,11 @@ proc(request: Request) =
     resp Http200, nimfOptinSubscribe(true, "Contact already exists", "")
 
   if listsData.requireOptIn:
+    echo "oko"
     emailOptinSend(email, name, userID)
+    echo "ll"
   else:
-    echo "Adding contact to lists"
     for listID in listsData.ids:
-      echo "Adding contact to list " & listID
       discard addContactToList(userID, listID)
 
   let data = %* {
