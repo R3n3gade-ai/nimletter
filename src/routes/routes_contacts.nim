@@ -730,7 +730,8 @@ proc(request: Request) =
         "(SELECT COUNT(*) FROM email_opens WHERE email_opens.user_id = contacts.id) AS email_opens_count",
         "(SELECT COUNT(*) FROM email_clicks WHERE email_clicks.user_id = contacts.id) AS email_clicks_count",
         "(SELECT STRING_AGG(lists.name, ', ') FROM subscriptions JOIN lists ON subscriptions.list_id = lists.id WHERE subscriptions.user_id = contacts.id) AS subscribed_lists",
-        "contacts.meta->>'country' AS country"
+        "contacts.meta->>'country' AS country",
+        "CASE WHEN COUNT(pending_emails.id) FILTER (WHERE pending_emails.status = 'sent') = 0 THEN 0 ELSE (SELECT COUNT(*) FROM email_opens WHERE email_opens.user_id = contacts.id) * 100 / COUNT(pending_emails.id) FILTER (WHERE pending_emails.status = 'sent') END AS opening_rate"
       ],
       joinargs = [
         (table: "pending_emails", tableAs: "", on: @["contacts.id = pending_emails.user_id"])
@@ -739,6 +740,7 @@ proc(request: Request) =
         $limit,
         $offset
       )))
+
 
     contactsCount = getValue(conn, sqlSelect(
       table = "contacts",
@@ -766,7 +768,8 @@ proc(request: Request) =
       "emails_count_open": contact[14].parseInt(),
       "emails_count_clicks": contact[15].parseInt(),
       "subscribed_lists": contact[16],
-      "country": contact[17]
+      "country": contact[17],
+      "opening_rate": contact[18].parseInt(),
     })
 
   resp Http200, (

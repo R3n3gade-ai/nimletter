@@ -330,7 +330,9 @@ function openList(listID) {
                 attrs: {
                   type: 'text',
                   value: window.location.origin + '/subscribe/' + data.uuid,
-                  readonly: true
+                  readonly: true,
+                  style: 'cursor: pointer;',
+                  onclick: "let t=this;t.select();document.execCommand('copy');t.blur();" // Copy to clipboard
                 }
               })
             ]

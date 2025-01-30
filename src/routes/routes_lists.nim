@@ -307,7 +307,7 @@ proc(request: Request) =
           "(SELECT COUNT(*) FROM subscriptions WHERE subscriptions.list_id = lists.id) as user_count",
           "lists.require_optin"
         ],
-        customSQL = "ORDER BY lists.name DESC"
+        customSQL = "ORDER BY lists.name ASC"
       ))
 
     listsCount = getValue(conn, sqlSelect(

@@ -158,6 +158,9 @@ function tableMails() {
     layout:"fitColumns",
     ajaxURL:"/api/mails/all",
     progressiveLoad:"load",
+    initialSort:[
+      {column:"name", dir:"asc"}
+    ],
     // rowHeight:50,
     columns:[
       {title:"ID", field:"id", vertAlign: "middle", width:60, headerFilter:true},
@@ -165,7 +168,17 @@ function tableMails() {
       {title:"Subject", field:"subject", vertAlign: "middle", minWidth:250, headerFilter:true},
       {title:"Identifier", field:"identifier", vertAlign: "middle", width:140, headerFilter:true},
       {title:"Category", field:"category", vertAlign: "middle", width:200, headerFilter:true},
-      {title:"Tags", field:"tags", vertAlign: "middle", width:200, headerFilter:true},
+      {title:"Tags", field:"tags", vertAlign: "middle", width:200, headerFilter:true, formatter:function(cell, formatterParams, onRendered){
+        if (cell.getValue() == "") {
+          return "";
+        }
+        let tags = cell.getValue();
+        let html = "";
+        tags.forEach(list => {
+          html += `<div style="font-size: 12px; border: 1px solid var(--colorN100); border-radius: 10px; padding: 0px 6px; background-color: var(--colorN20); margin-right: 5px;">${list}</div>`;
+        });
+        return '<div style="display: flex">' + html + '</div>';
+      }},
       {title:"Sent count", field:"sent_count", vertAlign: "middle", width:120, headerFilter:true},
       {title:"Pending count", field:"pending_count", vertAlign: "middle", width:120, headerFilter:true},
       {title:"Created At", field:"created_at", vertAlign: "middle", hozAlign:"center", sorter:"date", width: 160, headerFilter:true},
@@ -202,10 +215,10 @@ function tableLists() {
       {title:"Description", field:"description", vertAlign: "middle", width:250, headerFilter:true},
       // {title:"Flow ID", field:"flow_id", vertAlign: "middle", width:200},
       {title:"Identifier", field:"identifier", vertAlign: "middle", width:200, headerFilter:true},
-      {title:"Flow Count", field:"flows", vertAlign: "middle", width:200, headerFilter:true},
       {title:"Contacts", field:"user_count", vertAlign: "middle", width:200, headerFilter:true, formatter:function(cell, formatterParams, onRendered){
       return cell.getValue() + ' subscribers';
       }},
+      {title:"Flow Count", field:"flows", vertAlign: "middle", width:200, headerFilter:true},
       {title:"Created At", field:"created_at", vertAlign: "middle", hozAlign:"center", sorter:"date", width: 200, headerFilter:true},
       {title:"Updated At", field:"updated_at", vertAlign: "middle", hozAlign:"center", sorter:"date", width: 200, headerFilter:true},
       {title:"Delete", formatter:function(cell, formatterParams, onRendered){

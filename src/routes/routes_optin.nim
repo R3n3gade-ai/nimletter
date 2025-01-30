@@ -163,7 +163,7 @@ proc(request: Request) =
         listsTmp.add(listUUID)
       listsData = listIDsFromUUIDs(listsTmp, true)
 
-    (createSuccess, userID) = createContact(email, name, listsData.requireOptIn, listsData.ids)
+    (createSuccess, userID) = createContact(email, name, listsData.requireOptIn, listsData.ids, request.ip)
 
   if not createSuccess:
     resp Http200, nimfOptinSubscribe(true, "Contact already exists", "")

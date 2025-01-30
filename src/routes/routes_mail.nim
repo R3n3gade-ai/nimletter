@@ -282,7 +282,7 @@ proc(request: Request) =
         "DISTINCT ON (mails.id) mails.id",
         "mails.name",
         "mails.subject",
-        "mails.tags",
+        "array_to_string(mails.tags, ',')",
         "mails.category",
         "to_char(mails.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at",
         "to_char(mails.updated_at, 'YYYY-MM-DD HH24:MI:SS') as updated_at",

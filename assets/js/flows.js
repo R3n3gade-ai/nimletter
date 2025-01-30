@@ -667,6 +667,7 @@ function openStepStats(stepID) {
       {title:"Status", field:"status", width:200},
       {title:"Contact", field:"user_email", width:200},
       {title:"Sent At", field:"sent_at", width:200},
+      {title:"Opened times", field:"open_count", width:200},
       {title:"Scheduled for", field:"scheduled_for", width:200},
     ],
   });

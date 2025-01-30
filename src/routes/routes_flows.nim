@@ -153,7 +153,7 @@ proc(request: Request) =
           "(SELECT COUNT(*) FROM pending_emails WHERE pending_emails.flow_id = flows.id AND pending_emails.status = 'pending') as pending_count",
           "(SELECT COUNT(DISTINCT email_opens.pending_email_id) FROM email_opens JOIN pending_emails ON email_opens.pending_email_id = pending_emails.id WHERE pending_emails.flow_id = flows.id) as open_count"
         ],
-        customSQL = "ORDER BY flows.name DESC"
+        customSQL = "ORDER BY flows.name ASC"
       ))
 
   var respData = parseJson("[]")
@@ -597,24 +597,26 @@ proc(request: Request) =
           "pending_emails.status",
           "to_char(pending_emails.scheduled_for, 'YYYY-MM-DD HH24:MI:SS') as scheduled_for",
           "to_char(pending_emails.sent_at, 'YYYY-MM-DD HH24:MI:SS') as sent_at",
-          "contacts.email"
-        ],
-        joinargs = [
-          (table: "contacts", tableAs: "", on: @["contacts.id = pending_emails.user_id"])
-        ],
-        where   = ["pending_emails.flow_step_id = ?"],
-        customSQL = "ORDER BY pending_emails.status ASC, pending_emails.scheduled_for ASC, pending_emails.sent_at ASC"
-      ), flowStepID)
+          "contacts.email",
+          "(SELECT COUNT(*) FROM email_opens WHERE email_opens.pending_email_id = pending_emails.id) as open_count"
+          ],
+          joinargs = [
+            (table: "contacts", tableAs: "", on: @["contacts.id = pending_emails.user_id"])
+          ],
+          where   = ["pending_emails.flow_step_id = ?"],
+          customSQL = "GROUP BY pending_emails.user_id, pending_emails.status, pending_emails.scheduled_for, pending_emails.sent_at, contacts.email, pending_emails.id ORDER BY pending_emails.status ASC, pending_emails.scheduled_for ASC, pending_emails.sent_at ASC"
+          ), flowStepID)
 
   var respData = parseJson("[]")
   for row in data:
     respData.add(
       %* {
-        "user_id": row[0],
-        "user_email": row[4],
-        "status": row[1],
-        "scheduled_for": row[2],
-        "sent_at": row[3]
+      "user_id": row[0],
+      "user_email": row[4],
+      "status": row[1],
+      "scheduled_for": row[2],
+      "sent_at": row[3],
+      "open_count": row[5],
       }
     )
 

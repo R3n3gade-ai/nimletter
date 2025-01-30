@@ -454,7 +454,7 @@ async function buildSettingsWebhooks() {
     'contact_optedin', 'contact_optedout',
     // 'email_sent',
     'email_opened',
-    // 'email_clicked',
+    'email_clicked',
     'email_bounced', 'email_complained',
   ];
   let hookOptions = [];
