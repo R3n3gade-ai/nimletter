@@ -63,6 +63,47 @@ I needed a simple system to design and send out my newsletter, but also sending 
 
 That was doable with the big players, but I wanted to have full control over the system and the user data (GDPR and syncing to my SaaS). So I ended up with something like Mailerlite for campaigns and Google templates for newsletters.
 
+
+## ✨ Building Emails
+
+Unleash your creativity with the drag-and-drop email builder, powered by EmailbuilderJS! Create templates and personalize your emails effortlessly. Nimletter supports a variety of variables to make each email unique and engaging.
+
+### Available Variables
+You can use the following variables in your emails:
+- `{{ firstname }}`
+- `{{ lastname }}`
+- `{{ name }}`
+- `{{ email }}`
+- `{{ pagename }}`
+- `{{ hostname }}`
+- `{{ uuid }}`
+- `{{ unsubscribe_href }}`
+- `{{ unsubscribe_link }}`
+
+Each variable supports default values, so you can write `{{ firstname | "there" }}` to ensure a friendly fallback.
+
+### User-Specific Attributes
+Enhance personalization by using user-specific attributes. For example, if you collect the user's country during opt-in, you can use `{{ country }}` in your emails. Add any additional attributes to the user, and they become available for use in your email content.
+
+## 🗂️ Structure of Lists, Flows, and Emails
+
+Visualize the structure of your lists, flows, and emails with our intuitive diagram:
+
+![Structure](assets/screenshots/nimletter_base.drawio.svg)
+
+## 🔄 Flows
+
+Create dynamic email flows with customizable delays, clicks, and opens. Mix and match to design the perfect engagement strategy!
+
+![Flows](assets/screenshots/nimletter_flows.drawio.svg)
+
+## 📬 Subscribe
+
+Easily manage subscriptions with unique links for each list. Embed these links on your website or in your emails to grow your audience. Users will be added to the list and start the flow if one is set. Combine multiple lists by separating their UUIDs with commas.
+
+![Subscribe](assets/screenshots/nimletter_subscribe.drawio.svg)
+
+
 # 🚀 Startup
 
 ## Start the database
