@@ -196,9 +196,10 @@ proc updateUserClick(mail: MailClick) =
   var
     match: bool
     triggerData: PendingMail
+    mailData: PendingMail
 
   pg.withConnection conn:
-    let mailData = getDataFromPendingEmails(conn, mail.messageID)
+    mailData = getDataFromPendingEmails(conn, mail.messageID)
     if mailData.id == "":
       echo "No pending email found"
     else:
