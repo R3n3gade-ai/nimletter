@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.2.9"
+version       = "0.3.0"
 author        = "ThomasTJdev"
 description   = "Newsletter"
 license       = "AGPL v3"

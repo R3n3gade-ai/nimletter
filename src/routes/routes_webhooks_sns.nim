@@ -296,7 +296,19 @@ proc(request: Request) =
 
   let mailuuid = @"mailuuid"
 
-  if mailuuid == "pure":
+
+  if not mailuuid.isValidUUID() and mailuuid != "pure":
+    resp Http400
+
+  var mailID: string
+  pg.withConnection conn:
+    mailID = getValue(conn, sqlSelect(
+      table   = "pending_emails",
+      select  = ["message_id"],
+      where   = ["uuid = ?"]
+    ), mailuuid)
+
+  if mailID == "" and @"action" == "open":
     const path = "/assets/images/nimletter_icon.png"
     acquire(gFilecacheLock)
     try:
@@ -310,19 +322,7 @@ proc(request: Request) =
     release(gFilecacheLock)
     return
 
-
-  if not mailuuid.isValidUUID():
-    resp Http400
-
-  var mailID: string
-  pg.withConnection conn:
-    mailID = getValue(conn, sqlSelect(
-      table   = "pending_emails",
-      select  = ["message_id"],
-      where   = ["uuid = ?"]
-    ), mailuuid)
-
-  if mailID == "":
+  elif mailID == "":
     resp Http404
 
   let action = @"action"

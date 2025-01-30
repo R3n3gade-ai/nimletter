@@ -2,7 +2,8 @@
 
 import
   std/[
-    strutils
+    strutils,
+    times
   ]
 
 import
@@ -22,6 +23,7 @@ proc emailOptinSend*(email, name, contactID: string) =
     body: string
     subject: string
     mailUUID: string
+    mailID: string
 
   pg.withConnection conn:
 
@@ -38,7 +40,7 @@ proc emailOptinSend*(email, name, contactID: string) =
     subject = optMail[0]
     body = optMail[1]
 
-    let mailID = $insertID(conn, sqlInsert(
+    mailID = $insertID(conn, sqlInsert(
       table = "pending_emails",
       data  = [
         "user_id",
@@ -60,7 +62,7 @@ proc emailOptinSend*(email, name, contactID: string) =
       where = ["id = ?"]
     ), mailID)
 
-  let data = sendMailMimeNow(
+  let sendData = sendMailMimeNow(
     contactID,
     subject, body, email,
     replyTo = "",
@@ -68,5 +70,25 @@ proc emailOptinSend*(email, name, contactID: string) =
     ignoreUnsubscribe = true
   )
 
-  if not data.success:
+  if not sendData.success:
     echo "Error sending email"
+
+  # Update the status of the pending email
+  pg.withConnection conn:
+    exec(conn, sqlUpdate(
+      table = "pending_emails",
+      data  = [
+        "status",
+        "message_id",
+        "sent_at",
+        "updated_at"
+      ],
+      where = [
+        "id = ?"
+      ]),
+      "sent",
+      sendData.messageID,
+      $(now().utc).format("yyyy-MM-dd HH:mm:ss"),
+      $(now().utc).format("yyyy-MM-dd HH:mm:ss"),
+      mailID
+    )
