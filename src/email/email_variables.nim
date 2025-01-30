@@ -25,9 +25,17 @@ const unsubscribeLink = """<div style="width: 100%; text-align: center;"><a href
 
 proc finalizeEmail(
     message, subjectChecked, userUUID, hostname, mailUUID: string,
-    includeUnsubscribe = true
+    ignoreUnsubscribe = false
   ): string =
-  if includeUnsubscribe:
+  if ignoreUnsubscribe:
+    return (
+      htmlHeader.format(subjectChecked) &
+      message &
+      htmlTracker.format(hostname, mailUUID) &
+      htmlFooter
+    )
+
+  else:
     return (
       htmlHeader.format(subjectChecked) &
       message &
@@ -35,13 +43,7 @@ proc finalizeEmail(
       htmlTracker.format(hostname, mailUUID) &
       htmlFooter
     )
-  else:
-    return (
-      htmlHeader.format(subjectChecked) &
-      message &
-      htmlTracker.format(hostname, mailUUID) &
-      htmlFooter
-    )
+
 
 proc emailVariableReplace*(contactID, message, subjectChecked: string, mailUUID = "", ignoreUnsubscribe = false): string =
   ## Replace variables in a message.
