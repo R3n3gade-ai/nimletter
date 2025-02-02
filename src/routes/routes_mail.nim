@@ -345,6 +345,21 @@ proc(request: Request) =
     limit = (if @"limit" == "": 2000 else: @"limit".parseInt())
     offset = (if @"offset" == "": 0 else: @"offset".parseInt())
 
+
+  var
+    orderby = "ORDER BY pending_emails.scheduled_for DESC, pending_emails.created_at DESC"
+    filterStatus = @["pending_emails.status = 'sent'"]
+
+  if @"status" == "all":
+    filterStatus = @[]
+    orderby = "ORDER BY pending_emails.created_at DESC"
+  elif @"status" == "pending":
+    filterStatus = @["pending_emails.status = 'pending'"]
+    orderby = "ORDER BY pending_emails.scheduled_for DESC, pending_emails.created_at DESC"
+  elif @"status" == "sent":
+    filterStatus = @["pending_emails.status = 'sent'"]
+    orderby = "ORDER BY pending_emails.sent_at DESC"
+
   var
     mails: seq[seq[string]]
     mailsCount: int
@@ -379,14 +394,12 @@ proc(request: Request) =
         (table: "flows", tableAs: "", on: @["flows.id = pending_emails.flow_id"]),
         (table: "flow_steps", tableAs: "", on: @["flow_steps.id = pending_emails.flow_step_id"])
         ],
-        where = [
-        "pending_emails.status = 'sent'"
-        ],
-        customSQL = "ORDER BY created_at DESC LIMIT $1 OFFSET $2".format(
+        where = filterStatus,
+        customSQL = orderby & " LIMIT $1 OFFSET $2".format(
         $limit,
         $offset
         )
-        ))
+      ))
 
     mailsCount = getRow(conn, sqlSelect(
       table   = "pending_emails",

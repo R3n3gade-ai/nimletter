@@ -32,8 +32,9 @@ proc(request: Request) =
   if name.strip() == "":
     resp Http400, "Name is required"
 
+  var flowID: string
   pg.withConnection conn:
-    exec(conn, sqlInsert(
+    flowID = $insertID(conn, sqlInsert(
         table = "flows",
         data  = [
           "name",
@@ -42,7 +43,11 @@ proc(request: Request) =
       ), name, description
     )
 
-  resp Http200
+  resp Http200, (
+    %* {
+      "id": flowID
+    }
+  )
 )
 
 

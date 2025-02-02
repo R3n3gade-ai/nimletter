@@ -32,10 +32,7 @@ import
   ../webhook/webhook_events
 
 
-type
-  UserStatus = enum
-    enabled
-    disabled
+
 
 
 var usersRouter*: Router
@@ -43,125 +40,114 @@ var usersRouter*: Router
 usersRouter.post("/api/contacts/create",
 proc(request: Request) =
   createTFD()
-  if not c.loggedIn: resp Http401
+  if not c.loggedIn:
+    resp Http401
 
-  let
-    email = @"email".toLowerAscii().strip()
-    name  = @"name".strip()
-    requiresDoubleOptIn = (@"requiresDoubleOptIn" == "true")
-    flowStep = (if @"flowStep" == "": 1 else: @"flowStep".parseInt())
+  let data = createContactManual(request.body)
 
-  if email.strip() == "" or email.len() > 255 or not email.isValidEmail():
-    resp Http400, "Email is required"
+  if not data.success:
+    resp Http400, data.msg
 
-  if name.len() > 255:
-    resp Http400, "Name is too long"
-
-  let listID =
-    if @"list" != "":
-      listIDfromIdentifier(@"list")
-    else:
-      "1" # => Default list
-
-  let (createSuccess, userID) = createContact(email, name, requiresDoubleOptIn, listIDs = @[])
-  if not createSuccess:
-    resp Http400, "Error creating user, already exist"
-
-  if requiresDoubleOptIn:
-    emailOptinSend(email, name, userID)
-
-    if listID != "":
-      discard addContactToPendinglist(userID, listID)
-
-  elif listID != "":
-    discard addContactToList($userID, listID, flowStep = flowStep)
-
-  let data = %* {
-      "success": true,
-      "id": userID,
-      "requiresDoubleOptIn": requiresDoubleOptIn,
-      "email": email,
-      "name": name,
-      "list": (if @"list" != "": @"list" else: "default"),
-      "event": "contact_created"
-    }
-
-  parseWebhookEvent(contact_created, data)
-
-  resp Http200, data
+  resp Http200, data.data
 )
 
 
 usersRouter.post("/api/contacts/update",
 proc(request: Request) =
   createTFD()
-  if not c.loggedIn: resp Http401
+  if not c.loggedIn:
+    resp Http401
 
-  let
-    contactID = @"contactID"
-    email  = @"email"
-    name   = @"name"
-    status = $parseEnum[UserStatus](@"status", disabled)
-    requiresDoubleOptIn = (@"requiresDoubleOptIn" == "true")
-    doubleOptIn = (@"doubleOptIn" == "true")
-    meta   = @"meta"
+  let data = contactUpdate(request.body)
+  if not data.success:
+    resp Http400, data.msg
 
-  if not contactID.isValidInt() and not email.isValidEmail():
-    resp Http400, "Invalid user ID or EMAIL"
+  resp Http200, data.data
 
-  if email.len() > 255 or not email.isValidEmail():
-    resp Http400, "Invalid email"
+  # let
+  #   contactID = @"contactID"
+  #   email  = @"email"
+  #   name   = @"name"
+  #   status = parseEnum[UserStatus](@"status", disabled)
+  #   requiresDoubleOptIn = (@"requiresDoubleOptIn" == "true")
+  #   doubleOptIn = (@"doubleOptIn" == "true")
+  #   meta   = @"meta"
 
-  if meta.len() > 0:
-    try:
-      discard parseJson(meta)
-    except:
-      resp Http400, "Invalid meta JSON"
+  # if not contactID.isValidInt() and not email.isValidEmail():
+  #   resp Http400, "Invalid user ID or EMAIL"
 
-  pg.withConnection conn:
-    exec(conn, sqlUpdate(
-        table = "contacts",
-        data  = [
-          "updated_at",
-          "email",
-          "name",
-          "status",
-          "requires_double_opt_in",
-          "double_opt_in",
-          "meta",
-        ],
-        where = [
-          (if contactID != "":
-            "id = ?"
-          else:
-            "email = ?")
-        ]
-      ),
-        $now().utc,
-        email, name, status, $requiresDoubleOptIn, $doubleOptIn, meta,
-        (if contactID != "":
-          contactID
-        else:
-          email)
-      )
+  # if email.len() > 255 or not email.isValidEmail():
+  #   resp Http400, "Invalid email"
 
-  if not requiresDoubleOptIn or doubleOptIn:
-    moveFromPendingToSubscription(contactID)
+  # if meta.len() > 0:
+  #   try:
+  #     discard parseJson(meta)
+  #   except:
+  #     resp Http400, "Invalid meta JSON"
 
-  let data = %* {
-      "success": true,
-      "id": contactID,
-      "requiresDoubleOptIn": requiresDoubleOptIn,
-      "email": email,
-      "name": name,
-      "status": status,
-      "meta": (if meta != "": parseJson(meta) else: parseJson("{}")),
-      "event": "contact_updated"
-    }
+  # pg.withConnection conn:
+  #   exec(conn, sqlUpdate(
+  #       table = "contacts",
+  #       data  = [
+  #         "updated_at",
+  #         "email",
+  #         "name",
+  #         "status",
+  #         "requires_double_opt_in",
+  #         "double_opt_in",
+  #         "meta",
+  #       ],
+  #       where = [
+  #         (if contactID != "":
+  #           "id = ?"
+  #         else:
+  #           "email = ?")
+  #       ]
+  #     ),
+  #       $now().utc,
+  #       email, name, $status, $requiresDoubleOptIn, $doubleOptIn, meta,
+  #       (if contactID != "":
+  #         contactID
+  #       else:
+  #         email)
+  #     )
 
-  parseWebhookEvent(contact_updated, data)
+  # if status != disabled:
+  #   if not requiresDoubleOptIn or doubleOptIn:
+  #     moveFromPendingToSubscription(contactID)
+  # else:
+  #   # Cancel all pending emails
+  #   pg.withConnection conn:
+  #     exec(conn, sqlUpdate(
+  #         table = "pending_emails",
+  #         data  = [
+  #           "status = 'cancelled'",
+  #           "scheduled_for = NULL",
+  #           "updated_at = ?"
+  #         ],
+  #         where = ["user_id = ?", "status = 'pending'"]),
+  #       $now().utc, contactID)
 
-  resp Http200
+  #   # # Remove from all lists
+  #   # exec(conn, sqlDelete(
+  #   #     table = "subscriptions",
+  #   #     where = ["user_id = ?"]),
+  #   #   contactID)
+
+  # let data = %* {
+  #     "success": true,
+  #     "id": contactID,
+  #     "requiresDoubleOptIn": requiresDoubleOptIn,
+  #     "email": email,
+  #     "name": name,
+  #     "status": status,
+  #     "meta": (if meta != "": parseJson(meta) else: parseJson("{}")),
+  #     "event": "contact_updated"
+  #   }
+
+  # parseWebhookEvent(contact_updated, data)
+
+  # resp Http200
 )
 
 
@@ -374,7 +360,7 @@ usersRouter.get("/api/contacts/get",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn:
-    redirect("/login")
+    resp Http401
 
   if not @"contactID".isValidInt():
     resp Http400, "Invalid user ID"
@@ -504,6 +490,21 @@ proc(request: Request) =
       "last_page": 1
     }
   )
+)
+
+
+usersRouter.get("/api/contacts/exist",
+proc(request: Request) =
+  createTFD()
+  if not c.loggedIn:
+    resp Http401
+
+  let data = contactExists(request.body)
+  if not data.success:
+    resp Http400, data.msg
+
+  resp Http200, data.data
+
 )
 
 

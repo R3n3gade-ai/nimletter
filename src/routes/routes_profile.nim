@@ -74,7 +74,7 @@ proc(request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401
 
-  let email = "email"
+  let email = @"email"
   if email == "":
     resp Http400, "Email is required"
 

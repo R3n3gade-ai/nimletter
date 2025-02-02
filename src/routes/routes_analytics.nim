@@ -83,8 +83,8 @@ proc(request: Request) =
     clicked: seq[int] = @[]
     days: seq[string] = @[]
 
-  var startDate = (now() - 7.days()).format("YYYY-MM-dd")
-  var endDate = (now() + 20.days()).format("YYYY-MM-dd")
+  var startDate = (now() - 20.days()).format("YYYY-MM-dd")
+  var endDate = (now() + 7.days()).format("YYYY-MM-dd")
   var currentDate = startDate.parse("YYYY-MM-dd")
 
   while currentDate <= endDate.parse("YYYY-MM-dd"):

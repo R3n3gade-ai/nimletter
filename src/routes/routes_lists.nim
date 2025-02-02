@@ -244,8 +244,11 @@ proc(request: Request) =
 
       users = getAllRows(conn, sqlSelect(
           table   = "subscriptions",
-          select  = ["user_id"],
-          where   = ["list_id = ?"]
+          select  = ["subscriptions.user_id"],
+          joinargs = [
+            (table: "contacts", tableAs: "", on: @["contacts.id = subscriptions.user_id"])
+          ],
+          where   = ["subscriptions.list_id = ?", "contacts.status = 'enabled'"]
         ), listID)
 
     for user in users:

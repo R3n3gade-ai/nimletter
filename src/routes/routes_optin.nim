@@ -179,7 +179,7 @@ proc(request: Request) =
   let data = %* {
       "success": true,
       "id": userID,
-      "requiresDoubleOptIn": listsData.requireOptIn,
+      "double_opt_in": listsData.requireOptIn,
       "listIDs": listsData.ids,
       "email": email,
       "name": name,
@@ -188,7 +188,7 @@ proc(request: Request) =
 
   parseWebhookEvent(contact_created, data)
 
-  resp Http200, nimfOptinSubscribe(false, "", "Succes")
+  resp Http200, nimfOptinSubscribe(false, "", "Success")
 )
 
 optinRouter.get("/unsubscribe",

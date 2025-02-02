@@ -13,6 +13,7 @@
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-500.woff2" crossorigin/>
 
     # if page != "dashboard":
+    <script defer type="text/javascript" src="/assets/js/thirdparty/luxon-3.5.0.min.js"></script>
     <link href="/assets/js/thirdparty/tabulator-6.3.0.min.css" rel="stylesheet">
     <link href="/assets/js/thirdparty/tabulator_semanticui-6.3.0.min.css" rel="stylesheet">
     <script defer type="text/javascript" src="/assets/js/thirdparty/tabulator-6.3.0.min.js"></script>
@@ -57,6 +58,7 @@
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-regular.woff2" crossorigin/>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-500.woff2" crossorigin/>
 
+    <script defer type="text/javascript" src="/assets/js/thirdparty/luxon-3.5.0.min.js"></script>
     <link href="/assets/js/thirdparty/tabulator-6.3.0.min.css" rel="stylesheet">
     <link href="/assets/js/thirdparty/tabulator_semanticui-6.3.0.min.css" rel="stylesheet">
     <script defer type="text/javascript" src="/assets/js/thirdparty/tabulator-6.3.0.min.js"></script>
@@ -77,7 +79,7 @@
         <h1 id="heading">Events</h1>
         <div id="work">
 
-          <div class="examples" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 40px;max-width: 800px;">
+          <div class="examples" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 40px;max-width: 1024px;">
 <div>
 <b>Send immediate mail:</b>
 <pre>
@@ -85,7 +87,7 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-        "event": "send-email",
+        "event": "email-send",
         "email": "nim@nimletter.com",
         "mail": "welcome-mail",
         "delay": 0
@@ -99,9 +101,24 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-        "event": "send-email",
+        "event": "email-send",
         "email": "nim@nimletter.com",
         "mail": "first-login",
+        "delay": 40
+  }' \
+  http://localhost:5555/api/event</pre>
+</div>
+<div>
+<b>Send mail with custom content and subject:</b>
+<pre>
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+        "event": "email-send",
+        "email": "nim@nimletter.com",
+        "content": "&lt;div&gt;Custom content&lt;/div&gt;",
+        "subject": "Custom subject",
         "delay": 40
   }' \
   http://localhost:5555/api/event</pre>
@@ -113,7 +130,7 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-        "event": "cancel-email",
+        "event": "email-cancel",
         "email": "nim@nimletter.com",
         "mail": "welcome-mail",
       }' \
@@ -122,65 +139,118 @@ curl -X POST \
 
           </div>
 
-          <div class="examples" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 40px;max-width: 800px; margin-top: 80px;">
+          <div class="examples" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 40px;max-width: 1024px; margin-top: 80px;">
 <div>
 <b>Create contact:</b>
 <pre>
 curl -X POST \
-  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  -d 'email=nim@nimletter.com&name=Nimmi Nim&requiresDoubleOptIn=false' \
-  http://localhost:5555/api/contacts/create
+  -d '{
+    "event": "contact-create",
+    "email": "mail@nimletter.com",
+    "name": "Nim Letter",
+    "double_opt_in": false,
+    "flow_step": 1
+  }' \
+  http://localhost:5555/api/event
 </pre>
 </div>
 <div>
   <b>Create contact and add to list:</b>
   <pre>
   curl -X POST \
-    -H "Content-Type: application/x-www-form-urlencoded" \
+    -H "Content-Type: application/json" \
     -H "Authorization: Bearer YOUR_API_KEY" \
-    -d 'email=nim@nimletter.com&name=Nimmi Nim&requiresDoubleOptIn=false&list=list-identifier' \
-    http://localhost:5555/api/contacts/create
+    -d '{
+      "event": "contact-create",
+      "email": "mail@nimletter.com",
+      "name": "Nim Letter",
+      "double_opt_in": false,
+      "flow_step": 1,
+      "list": "list-identifier"
+    }' \
+    http://localhost:5555/api/event
   </pre>
 </div>
 <div>
   <b>Create contact and add to list with optin email:</b>
   <pre>
   curl -X POST \
-    -H "Content-Type: application/x-www-form-urlencoded" \
+    -H "Content-Type: application/json" \
     -H "Authorization: Bearer YOUR_API_KEY" \
-    -d 'email=nim@nimletter.com&name=Nimmi Nim&requiresDoubleOptIn=true&list=list-identifier' \
-    http://localhost:5555/api/contacts/create
-  </pre>
-</div>
-<div>
-  <b>Update/replace contact (contactID OR email):</b>
-  <pre>
-  curl -X POST \
-    -H "Content-Type: application/x-www-form-urlencoded" \
-    -H "Authorization: Bearer YOUR_API_KEY" \
-    -d 'email=nim@nimletter.com&name=Nimmi Nim&meta={"key":"value","key2":"value2","key3":"value3"}' \
-    http://localhost:5555/api/contacts/create
-  </pre>
-</div>
-<div>
-  <b>Update meta (contactID OR email):</b>
-  <pre>
-  curl -X POST \
-    -H "Content-Type: application/x-www-form-urlencoded" \
-    -H "Authorization: Bearer YOUR_API_KEY" \
-    -d 'email=nim@nimletter.com&actions=add&key=key&value=value' \
-    http://localhost:5555/api/contacts/meta/add
+    -d '{
+      "event": "contact-create",
+      "email": "mail@nimletter.com",
+      "name": "Nim Letter",
+      "double_opt_in": true,
+      "flow_step": 1,
+      "list": "list-identifier"
+    }' \
+    http://localhost:5555/api/event
   </pre>
 </div>
 <div>
   <b>Transfer contact from other system:</b>
   <pre>
   curl -X POST \
-    -H "Content-Type: application/x-www-form-urlencoded" \
+    -H "Content-Type: application/json" \
     -H "Authorization: Bearer YOUR_API_KEY" \
-    -d 'email=nim@nimletter.com&name=Nimmi Nim&requiresDoubleOptIn=false&list=list-identifier&flowStep=3' \
-    http://localhost:5555/api/contacts/create</pre>
+    -d '{
+      "event": "contact-create",
+      "email": "mail@nimletter.com",
+      "name": "Nim Letter",
+      "double_opt_in": false,
+      "flow_step": 3,
+      "list": "list-identifier,list-identifier2"
+    }' \
+    http://localhost:5555/api/event
+  </pre>
+</div>
+<div>
+  <b>Update (replace) contact (contactID OR email required):</b>
+  <pre>
+  curl -X POST \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -d '{
+      "event": "contact-update",
+      "email": "nim@nimletter.com",
+      "name": "Nim Letter",
+      "status": "enabled",
+      "double_opt_in": false,
+      "opted_in": false,
+      "meta": "{\"country\":\"Denmark\",\"language\":\"DK\"}"
+    }' \
+    http://localhost:5555/api/event
+  </pre>
+</div>
+<div>
+  <b>Update meta-tags:</b>
+  <pre>
+  curl -X POST \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -d '{
+      "event": "contact-meta",
+      "email": "nim@nimletter.com",
+      "meta": "{\"country\":\"Denmark\",\"nim\":\"lang\"}"
+    }' \
+    http://localhost:5555/api/event
+  </pre>
+</div>
+<div>
+  <b>Contact exists:</b>
+  <pre>
+  curl -X POST \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -d '{
+      "event": "contact-exists",
+      "email": "mail@nimletter.com"
+    }' \
+    http://localhost:5555/api/event
+  </pre>
 </div>
           </div>
 

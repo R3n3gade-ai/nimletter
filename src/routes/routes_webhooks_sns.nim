@@ -50,6 +50,15 @@ proc updateUserBounce(mail: MailBounce) =
     exec(conn, sqlUpdate(
       table = "pending_emails",
       data  = [
+        "status = 'cancelled'",
+        "updated_at = CURRENT_TIMESTAMP",
+      ],
+      where = "user_id = ?"
+    ), mailData.userID)
+
+    exec(conn, sqlUpdate(
+      table = "pending_emails",
+      data  = [
         "status = 'bounced'",
         "updated_at = CURRENT_TIMESTAMP",
       ],
@@ -98,6 +107,15 @@ proc updateUserComplaint(mail: MailComplaint) =
         "complained_at = CURRENT_TIMESTAMP",
       ],
       where = "id = ?"
+    ), mailData.userID)
+
+    exec(conn, sqlUpdate(
+      table = "pending_emails",
+      data  = [
+        "status = 'cancelled'",
+        "updated_at = CURRENT_TIMESTAMP",
+      ],
+      where = "user_id = ?"
     ), mailData.userID)
 
     exec(conn, sqlUpdate(
@@ -355,7 +373,7 @@ proc(request: Request) =
   if action == "open":
     var mailOpen = MailOpen(
       messageID: mailID,
-      timestamp: $now(),
+      timestamp: $now().utc,
       ipAddress: request.ip,
       userAgent: (if request.headers.hasKey("User-Agent"): request.headers["User-Agent"] else: "")
     )
@@ -380,7 +398,7 @@ proc(request: Request) =
 
     var mailClick = MailClick(
       messageID: mailID,
-      timestamp: $now(),
+      timestamp: $now().utc,
       ipAddress: request.ip,
       userAgent: (if request.headers.hasKey("User-Agent"): request.headers["User-Agent"] else: ""),
       link: decode(@"do")

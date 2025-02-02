@@ -199,10 +199,7 @@ proc(request: Request) =
   #
   pg.withConnection conn:
     exec(conn, sqlDelete(
-        table = "smtp_settings",
-        where = [
-          "id = 1"
-        ]
+        table = "smtp_settings"
       ))
 
   #
@@ -290,8 +287,9 @@ proc(request: Request) =
   #
   # Insert into database
   #
+  var key: string
   pg.withConnection conn:
-    exec(conn, sqlInsert(
+    let id = insertID(conn, sqlInsert(
         table = "api_keys",
         data  = [
           "name",
@@ -299,7 +297,23 @@ proc(request: Request) =
         apiName
       )
 
-  resp Http200, "API settings saved"
+    key = getValue(conn, sqlSelect(
+      table = "api_keys",
+      select = [
+        "key"
+      ],
+      where = [
+        "id = ?"
+      ]),
+      $id
+    )
+
+  resp Http200, (
+    %* {
+      "key": key,
+      "name": apiName
+    }
+  )
 )
 
 
@@ -332,6 +346,32 @@ proc(request: Request) =
   resp Http200, "API settings updated"
 )
 
+
+settingsRouter.delete("/api/settings/api/delete",
+proc(request: Request) =
+  createTFD()
+  if not c.loggedIn: resp Http401
+
+  let
+    ident = @"ident"
+
+  if not ident.isValidUUID():
+    resp Http400, "API ident is required"
+
+  #
+  # Delete from database
+  #
+  pg.withConnection conn:
+    exec(conn, sqlDelete(
+        table = "api_keys",
+        where = [
+          "ident = ?"
+        ]),
+        ident
+      )
+
+  resp Http200, "API settings deleted"
+)
 
 
 #

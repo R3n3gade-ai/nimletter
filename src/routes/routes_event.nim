@@ -15,7 +15,27 @@ import
 import
   ../database/database_connection,
   ../utils/auth,
+  ../utils/contacts_utils,
   ../utils/validate_data
+
+
+
+proc getUserIDfromEmail(email: string): string =
+  pg.withConnection conn:
+    return getValue(conn, sqlSelect(
+      table = "contacts",
+      select = ["id"],
+      where = ["email = ?"]
+    ), email)
+
+
+proc getMailIDfromIdent(identifier: string): string =
+  pg.withConnection conn:
+    return getValue(conn, sqlSelect(
+      table = "mails",
+      select = ["id"],
+      where = ["identifier = ?"]
+    ), identifier)
 
 
 var eventRouter*: Router
@@ -38,92 +58,107 @@ proc(request: Request) =
     event: string
     email: string
     mail: string
+    content: string
+    subject: string
     delay: int
 
   try:
     event = data["event"].getStr()
     email = data["email"].getStr()
-    mail  = data["mail"].getStr()
+    mail    = if data.hasKey("mail"): data["mail"].getStr() else: "" # mail-identifier
+    content = if data.hasKey("content"): data["content"].getStr() else: ""
+    subject = if data.hasKey("subject"): data["subject"].getStr() else: ""
   except:
     resp Http400, "Invalid data, event = " & event & ", email = " & email & ", mail = " & mail
 
   try:
     delay = data["delay"].getInt()
   except:
-    resp Http400, "Invalid delay"
+    delay = 0
 
 
-  #
-  # Get user ID
-  #
-  var userID: string
-  pg.withConnection conn:
-    userID = getValue(conn, sqlSelect(
-        table  = "users",
-        select = ["id"],
-        where  = ["email = ?"],
-      ), email)
-
-  if userID == "":
-    resp Http400, "User not found"
-
-
-  #
-  # Mail ID
-  #
-  var mailID: string
-  pg.withConnection conn:
-    mailID = getValue(conn, sqlSelect(
-        table  = "mails",
-        select = ["id"],
-        where  = ["identifier = ?"],
-      ), mail)
-
-  if mailID == "":
-    resp Http400, "Mail not found"
 
 
   #
   # Event
   #
   case event
-  of "send-email":
-    pg.withConnection conn:
-      if getValue(conn, sqlSelect(
-          table = "mails",
-          select = [
-            "mails.id"
-          ],
-          joinargs = [
-            (table: "pending_emails", tableAs: "", on: @["pending_emails.mail_id = mails.id"])
-          ],
-          where = [
-            "mails.id =",
-            "mails.send_once = true",
-            "pending_emails.user_id ="
-          ],
-          customSQL = "AND pending_emails.status = 'sent' LIMIT 1"
-      ), mailID, userID) != "":
-        resp Http200, ( %* { "success": false, "message": "Mail enforces send_once. Mail already sent." } )
+  of "email-send":
+    let userID = getUserIDfromEmail(email)
+    if userID == "":
+      resp Http400, "User not found"
 
-      exec(conn, sqlInsert(
-        table = "pending_emails",
-        data  = [
-          "user_id",
-          "mail_id",
-          "status",
-          "scheduled_for",
-          "trigger_type"
-        ]),
-          userID, mailID,
-          "pending",
-          $(now().utc + delay.minutes).format("yyyy-MM-dd HH:mm:ss"),
-          "event-send"
-        )
+    let mailID = getMailIDfromIdent(mail)
+    if mailID == "":
+      resp Http400, "Mail not found"
+
+    pg.withConnection conn:
+      # For a specific mailID
+      if mail != "":
+        if getValue(conn, sqlSelect(
+              table = "mails",
+              select = [
+                "mails.id"
+              ],
+              joinargs = [
+                (table: "pending_emails", tableAs: "", on: @["pending_emails.mail_id = mails.id"])
+              ],
+              where = [
+                "mails.id =",
+                "mails.send_once = true",
+                "pending_emails.user_id ="
+              ],
+              customSQL = "AND pending_emails.status = 'sent' LIMIT 1"
+          ), mailID, userID) != "":
+            resp Http200, ( %* { "success": false, "message": "Mail enforces send_once. Mail already sent." } )
+
+        exec(conn, sqlInsert(
+          table = "pending_emails",
+          data  = [
+            "user_id",
+            "mail_id",
+            "status",
+            "scheduled_for",
+            "trigger_type"
+          ]),
+            userID, mailID,
+            "pending",
+            $(now().utc + delay.minutes).format("yyyy-MM-dd HH:mm:ss"),
+            "event-send"
+          )
+
+      # Free send
+      else:
+        exec(conn, sqlInsert(
+          table = "pending_emails",
+          data  = [
+            "user_id",
+            "status",
+            "scheduled_for",
+            "trigger_type",
+            "manual_html",
+            "manual_subject"
+          ]),
+            userID,
+            "pending",
+            $(now().utc + delay.minutes).format("yyyy-MM-dd HH:mm:ss"),
+            "event-send",
+            content,
+            subject
+          )
 
       resp Http200, ( %* { "success": true, "message": "Email scheduled" } )
 
-  of "cancel-email":
+
+  of "email-cancel":
+    let userID = getUserIDfromEmail(email)
+    if userID == "":
+      resp Http400, "User not found"
+
+    let mailID = getMailIDfromIdent(mail)
+    if mail == "":
+      resp Http400, "Mail identifier required"
+
     pg.withConnection conn:
       if execAffectedRows(conn, sqlUpdate(
         table = "pending_emails",
@@ -138,8 +173,50 @@ proc(request: Request) =
       else:
         resp Http200, ( %* { "success": false, "message": "No pending email found" } )
 
-  of "create-contact":
-    resp Http200, "Not implemented"
+
+  of "contact-create":
+    let data = createContactManual(request.body)
+    if not data.success:
+      resp Http400, %* {
+        "success": false,
+        "message": data.msg
+      }
+
+    resp Http200, data.data
+
+
+  of "contact-exists":
+    let data = contactExists(request.body)
+    if not data.success:
+      resp Http400, %* {
+        "success": false,
+        "message": data.msg
+      }
+
+    resp Http200, data.data
+
+
+  of "contact-update":
+    let data = contactUpdate(request.body)
+    if not data.success:
+      resp Http400, %* {
+        "success": false,
+        "message": data.msg
+      }
+
+    resp Http200, data.data
+
+
+  of "contact-meta":
+    let data = contactUpdateMeta(request.body)
+    if not data.success:
+      resp Http400, %* {
+        "success": false,
+        "message": data.msg
+      }
+
+    resp Http200, data.data
+
 
   else:
     resp Http400, "Invalid event"

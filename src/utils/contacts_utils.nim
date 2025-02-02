@@ -20,8 +20,16 @@ import
 
 import
   ../database/database_connection,
-  ../scheduling/schedule_mail
+  ../email/email_optin,
+  ../scheduling/schedule_mail,
+  ../utils/list_utils,
+  ../utils/validate_data,
+  ../webhook/webhook_events
 
+type
+  UserStatus = enum
+    enabled
+    disabled
 
 proc getCountryFromIP(ip: string): string =
   if ip == "":
@@ -172,3 +180,228 @@ proc createContact*(email, name: string, requiresDoubleOptIn: bool, listIDs: seq
       )
 
   return (success, userID)
+
+
+proc createContactManual*(body: string): tuple[success: bool, msg: string, data: JsonNode] =
+  var
+    email, name, list: string
+    requiresDoubleOptIn: bool
+    flowStep: int
+
+  var jsonBody: JsonNode
+  try:
+    jsonBody = parseJson(body)
+  except:
+    return (false, "Invalid JSON", nil)
+
+  email     = jsonBody.getOrDefault("email").getStr().toLowerAscii().strip()
+  name      = jsonBody.getOrDefault("name").getStr().strip()
+  flowStep  = jsonBody.getOrDefault("flow_step").getInt()
+  requiresDoubleOptIn = jsonBody.getOrDefault("double_opt_in").getBool() == true
+  list      = jsonBody.getOrDefault("list").getStr()
+
+  if flowStep == 0:
+    flowStep = 1
+
+  if email.strip() == "" or email.len() > 255 or not email.isValidEmail():
+    return (false, "Invalid email", nil)
+
+  if name.len() > 255:
+    return (false, "Name too long", nil)
+
+  let listID =
+    if list != "":
+      listIDfromIdentifier(list)
+    else:
+      "1" # => Default list
+
+  let (createSuccess, userID) = createContact(email, name, requiresDoubleOptIn, listIDs = @[])
+  if not createSuccess:
+    return (false, "Contact already exists", nil)
+
+  if requiresDoubleOptIn:
+    emailOptinSend(email, name, userID)
+
+    if listID != "":
+      discard addContactToPendinglist(userID, listID)
+
+  elif listID != "":
+    discard addContactToList($userID, listID, flowStep = flowStep)
+
+  let data = %* {
+      "success": true,
+      "id": userID,
+      "double_opt_in": requiresDoubleOptIn,
+      "email": email,
+      "name": name,
+      "list": (if list != "": list else: "default"),
+      "event": "contact_created"
+    }
+
+  parseWebhookEvent(contact_created, data)
+
+  return (true, "", data)
+
+
+proc contactExists*(body: string): tuple[success: bool, exists: bool, msg: string, data: JsonNode] =
+
+  var email: string
+  try:
+    email = parseJson(body)["email"].getStr().toLowerAscii().strip()
+  except:
+    return (false, false, "Invalid JSON", nil)
+
+  if email == "":
+    return (false, false, "Email is required", nil)
+
+  var userID: string
+  pg.withConnection conn:
+    userID = getValue(conn, sqlSelect(
+      table = "contacts",
+      select = ["id"],
+      where = ["email = ?"]
+      ), email)
+
+  return (true, userID != "", "", %* {
+    "success": true,
+    "exists": userID != "",
+    "email": email,
+    "event": "contact_exists"
+  })
+
+
+
+proc contactUpdate*(body: string): tuple[success: bool, msg: string, data: JsonNode] =
+  var
+    contactID, email, name, meta: string
+    status: UserStatus
+    requiresDoubleOptIn, doubleOptIn: bool
+
+  try:
+    let jsonBody = parseJson(body)
+
+    contactID = jsonBody.getOrDefault("contactID").getStr().strip()
+    email     = jsonBody.getOrDefault("email").getStr().toLowerAscii().strip()
+    name      = jsonBody.getOrDefault("name").getStr().strip()
+    status    = parseEnum[UserStatus](jsonBody.getOrDefault("status").getStr(), disabled)
+    meta      = jsonBody.getOrDefault("meta").getStr().strip()
+    requiresDoubleOptIn = jsonBody.getOrDefault("double_opt_in").getBool()
+    doubleOptIn = jsonBody.getOrDefault("opted_in").getBool()
+  except:
+    return (false, "Invalid JSON", nil)
+
+  if not contactID.isValidInt() and not email.isValidEmail():
+    return (false, "Invalid contact ID / email", nil)
+
+  if email.len() > 255 or not email.isValidEmail():
+    return (false, "Invalid email", nil)
+
+  if meta.len() > 0:
+    try:
+      discard parseJson(meta)
+    except:
+      return (false, "Invalid meta JSON", nil)
+
+  pg.withConnection conn:
+    exec(conn, sqlUpdate(
+        table = "contacts",
+        data  = [
+          "updated_at",
+          "email",
+          "name",
+          "status",
+          "requires_double_opt_in",
+          "double_opt_in",
+          "meta",
+        ],
+        where = [
+          (if contactID != "":
+            "id = ?"
+          else:
+            "email = ?")
+        ]
+      ),
+        $now().utc,
+        email, name, $status, $requiresDoubleOptIn, $doubleOptIn, meta,
+        (if contactID != "":
+          contactID
+        else:
+          email)
+      )
+
+  if status != disabled:
+    if not requiresDoubleOptIn or doubleOptIn:
+      moveFromPendingToSubscription(contactID)
+  else:
+    pg.withConnection conn:
+      exec(conn, sqlUpdate(
+          table = "pending_emails",
+          data  = [
+            "status = 'cancelled'",
+            "scheduled_for = NULL",
+            "updated_at = ?"
+          ],
+          where = ["user_id = ?", "status = 'pending'"]),
+        $now().utc, contactID)
+
+  let data = %* {
+      "success": true,
+      "id": contactID,
+      "double_opt_in": requiresDoubleOptIn,
+      "opted_in": doubleOptIn,
+      "email": email,
+      "name": name,
+      "status": status,
+      "meta": (if meta != "": parseJson(meta) else: parseJson("{}")),
+      "event": "contact_updated"
+    }
+
+  parseWebhookEvent(contact_updated, data)
+
+  return (true, "", data)
+
+
+proc contactUpdateMeta*(body: string): tuple[success: bool, msg: string, data: JsonNode] =
+  var
+    email, meta: string
+
+  try:
+    let jsonBody = parseJson(body)
+
+    email = jsonBody.getOrDefault("email").getStr().strip().toLowerAscii()
+    meta  = jsonBody.getOrDefault("meta").getStr().strip()
+  except:
+    return (false, "Invalid JSON", nil)
+
+  if email.len() > 255 or not email.isValidEmail():
+    return (false, "Invalid email", nil)
+
+  var metaJson: JsonNode
+  if meta.len() > 0:
+    try:
+      metaJson = parseJson(meta)
+    except:
+      return (false, "Invalid meta JSON", nil)
+
+  # We are using JSONB field. The users meta should either add or update values.
+  # If the key already exists, it will be updated, otherwise it will be added.
+  pg.withConnection conn:
+    exec(conn, sqlUpdate(
+        table = "contacts",
+        data  = [
+          "meta = meta || ?::jsonb",
+          "updated_at",
+        ],
+        where = ["email = ?"]
+      ),
+      metaJson, $now().utc, email
+    )
+
+  let data = %* {
+      "success": true,
+      "email": email,
+      "meta": metaJson,
+      "event": "contact_meta_updated"
+    }
+
+  return (true, "", data)
