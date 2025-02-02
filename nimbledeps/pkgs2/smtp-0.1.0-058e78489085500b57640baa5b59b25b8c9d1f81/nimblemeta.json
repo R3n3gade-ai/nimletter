@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "metaData": {
+    "url": "https://github.com/nim-lang/smtp",
+    "downloadMethod": "git",
+    "vcsRevision": "829a2a11c4899740cf82c0c58fb7704f96fc293c",
+    "files": [
+      "/smtp.nimble",
+      "/smtp.nim.cfg",
+      "/smtp.nim"
+    ],
+    "binaries": [],
+    "specialVersions": [
+      "0.1.0"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "metaData": {
+    "url": "https://github.com/ThomasTJdev/nimMime",
+    "downloadMethod": "git",
+    "vcsRevision": "c078527fbea7390f19d79f995237cdfc93575a7c",
+    "files": [
+      "/src/quotedPrintables.nim",
+      "/mime.nimble",
+      "/mime.nim"
+    ],
+    "binaries": [],
+    "specialVersions": [
+      "0.0.3"
+    ]
+  }
+}

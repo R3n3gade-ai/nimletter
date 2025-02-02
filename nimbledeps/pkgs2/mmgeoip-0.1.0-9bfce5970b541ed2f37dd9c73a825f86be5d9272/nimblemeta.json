@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "metaData": {
+    "url": "https://github.com/ThomasTJdev/nim-mmgeoip",
+    "downloadMethod": "git",
+    "vcsRevision": "c7b84ce31a2f5d240f97294459d63ed9849e8447",
+    "files": [
+      "/mmgeoip.nim",
+      "/mmgeoip.nimble"
+    ],
+    "binaries": [],
+    "specialVersions": [
+      "0.1.0"
+    ]
+  }
+}

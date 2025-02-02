@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "metaData": {
+    "url": "https://github.com/ThomasTJdev/bcryptnim",
+    "downloadMethod": "git",
+    "vcsRevision": "440c5676ff63ae1ba1bd7dae4c0682ba4b9c54b2",
+    "files": [
+      "/bcrypt.nimble",
+      "/bcrypt.nim",
+      "/bcrypt/blowfish.h",
+      "/bcrypt/build",
+      "/bcrypt/blowfish.c",
+      "/bcrypt/crypt-blowfish.c",
+      "/bcrypt/arc4random.c"
+    ],
+    "binaries": [],
+    "specialVersions": [
+      "0.2.1"
+    ]
+  }
+}

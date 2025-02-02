@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "metaData": {
+    "url": "https://github.com/ThomasTJdev/waterpark",
+    "downloadMethod": "git",
+    "vcsRevision": "9d551f2afc7c0530fbb640e00aab655723c3873e",
+    "files": [
+      "/waterpark.nim",
+      "/waterpark/mysql.nim",
+      "/waterpark.nimble",
+      "/waterpark/postgres.nim",
+      "/waterpark/sqlite.nim"
+    ],
+    "binaries": [],
+    "specialVersions": [
+      "0.1.6"
+    ]
+  }
+}

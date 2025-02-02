@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "metaData": {
+    "url": "https://github.com/ThomasTJdev/nim-schedules",
+    "downloadMethod": "git",
+    "vcsRevision": "4b359d9d82eca5bec4454182dc5ebda9ca8267c5",
+    "files": [
+      "/schedules.nim",
+      "/schedules/cron/parser.nim",
+      "/schedules.nimble",
+      "/schedules/cron/field.nim",
+      "/schedules/cron/expr.nim",
+      "/schedules/cron/cron.nim",
+      "/schedules/scheduler.nim"
+    ],
+    "binaries": [],
+    "specialVersions": [
+      "0.2.0"
+    ]
+  }
+}

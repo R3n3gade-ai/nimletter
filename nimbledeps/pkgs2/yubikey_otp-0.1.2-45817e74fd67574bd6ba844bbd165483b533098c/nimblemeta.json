@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "metaData": {
+    "url": "https://github.com/ThomasTJdev/nim_yubikey_otp.git",
+    "downloadMethod": "git",
+    "vcsRevision": "380cbfb607d2d52d0df5dd4315b93358bfc28a77",
+    "files": [
+      "/yubikey_otp/modhex.nim",
+      "/yubikey_otp.nim",
+      "/yubikey_otp.nimble"
+    ],
+    "binaries": [],
+    "specialVersions": [
+      "0.1.2"
+    ]
+  }
+}
