@@ -19,7 +19,7 @@ else:
   export
     postgres
 
-  echo "Connecting to PostgreSQL"
+  echo "PostgreSQL: connecting ..."
   let
     pgHost      = getEnv("PG_HOST", "localhost")
     pgUser*     = getEnv("PG_USER", "nimletter")
@@ -27,4 +27,4 @@ else:
     pgDatabase* = getEnv("PG_DATABASE", "nimletter_db")
     pgWorkers   = getEnv("PG_WORKERS", "3").parseInt()
     pg* = newPostgresPool(pgWorkers, pgHost, pgUser, pgPassword, pgDatabase)
-  echo "Connected to PostgreSQL"
+  echo "PostgreSQL: connected"

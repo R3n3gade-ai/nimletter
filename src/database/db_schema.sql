@@ -98,6 +98,8 @@ CREATE TABLE IF NOT EXISTS pending_emails (
   status              TEXT DEFAULT 'pending', -- E.g., 'pending', 'scheduled', 'sent', 'failed'
   message_id          TEXT,  -- Store the message ID here
   sent_at             TIMESTAMP,
+  manual_html         TEXT,  -- Manually created HTML content
+  manual_subject      TEXT,  -- Manually created subject
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   uuid                UUID NOT NULL DEFAULT uuid_generate_v4()
