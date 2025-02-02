@@ -99,9 +99,10 @@ function addFlowDo() {
     })
   })
   .then(manageErrors)
-  .then(() => {
+  .then(response => response.json())
+  .then(data => {
     dqs(".modalpop").remove();
-    objTableFlows.setData();
+    openFlow(data.id);
   });
 
 }

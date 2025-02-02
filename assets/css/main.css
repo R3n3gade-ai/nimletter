@@ -259,6 +259,9 @@ pre {
   border: 1px solid var(--colorN30);
   background-color: var(--colorN20);
   padding: 10px;
+  height: 300px;
+  overflow-y: auto;
+  font-family: monospace !important;
 }
 
 button {
@@ -418,7 +421,7 @@ label.labelBold {
   padding: 20px;
   border: 1px solid #888;
   width: fit-content;
-  animation: floatUp 0.2s ease-out forwards;
+  /* animation: floatUp 0.2s ease-out forwards; */
 }
 .modalpop.show>div {
   display: block;

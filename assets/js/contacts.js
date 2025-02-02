@@ -26,12 +26,11 @@ function addContact() {
             attrs: {
               class: 'forinput'
             },
-            children: ['Email']
+            children: ['Name']
           }),
           jsCreateElement('input', {
             attrs: {
-              type: 'email',
-              id: 'contactNewEmail'
+              id: 'contactNewName'
             }
           })
         ]
@@ -45,11 +44,12 @@ function addContact() {
             attrs: {
               class: 'forinput'
             },
-            children: ['Name']
+            children: ['Email']
           }),
           jsCreateElement('input', {
             attrs: {
-              id: 'contactNewName'
+              type: 'email',
+              id: 'contactNewEmail'
             }
           })
         ]
@@ -123,7 +123,10 @@ function addContactDo() {
 
   fetch("/api/contacts/create", {
     method: "POST",
-    body: new URLSearchParams({
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
       email: email,
       name: name,
       requiresDoubleOptIn: requiresDoubleOptIn
@@ -260,7 +263,8 @@ function buildContactHTML(data) {
               // Email
               jsCreateElement('div', {
                 attrs: {
-                  class: 'topBlock itemBlock'
+                  class: 'topBlock itemBlock mt20',
+                  style: 'margin-bottom: 20px;'
                 },
                 children: [
                   jsCreateElement('label', {
@@ -894,13 +898,13 @@ function contactUpdate() {
 
   fetch("/api/contacts/update", {
     method: "POST",
-    body: new URLSearchParams({
+    body: JSON.stringify({
       contactID: globalContactID,
       email: email,
       name: name,
       status: status,
-      requiresDoubleOptIn: requiresDoubleOptIn,
-      doubleOptIn: doubleOptIn,
+      double_opt_in: requiresDoubleOptIn,
+      opted_in: doubleOptIn,
       meta: JSON.stringify(meta)
     })
   })
@@ -913,6 +917,8 @@ function contactUpdate() {
     ) {
       loadContact(globalContactID);
     }
+
+    objTableContacts.setData();
   })
 }
 
