@@ -63,23 +63,33 @@ function tableContacts() {
     layout:"fitColumns",
     ajaxURL:"/api/contacts/all",
     progressiveLoad:"load",
+    initialSort:[
+      {column:"status", dir:"desc"},
+      {column:"created_at", dir:"desc"},
+    ],
     rowFormatter:function(row){
       var data = row.getData();
 
       // If bounced_at then extreme red, if complained_at then extreme orange
       if(data.bounced_at){
-      row.getElement().style.backgroundColor = "#FF0000";
+        row.getElement().style.backgroundColor = "#ff5959";
       } else if(data.complained_at){
-      row.getElement().style.backgroundColor = "#FFA500";
+        row.getElement().style.backgroundColor = "#FFA500";
+      } else if(data.status == 'disabled'){
+        row.getElement().style.backgroundColor = "#c2c2c2";
       } else if(data.emails_count_sent >= 2 && data.emails_count_open <= 0){
-      row.getElement().style.backgroundColor = "#fff9bf8f";
-    }
+        row.getElement().style.backgroundColor = "#fff9bf8f";
+      }
 
     },
     columns:[
+      {formatter:"rowSelection", titleFormatter:"rowSelection", titleFormatterParams:{
+        rowRange:"active"
+      }, hozAlign:"center", headerSort:false},
       {title:"ID", field:"id", width:50, headerFilter:true},
       {title:"Email", field:"email", width:250, headerFilter:true},
       {title:"Name", field:"name", width:200, headerFilter:true},
+      {title:"Status", field:"status", width:100, headerFilter:true},
       {title:"Requires Double Opt-In", field:"requires_double_opt_in", hozAlign:"center", width: 80, headerFilter:true, formatter:"toggle", formatterParams:{
         size:16,
         onValue:"on",
@@ -129,10 +139,10 @@ function tableContacts() {
       {title:"Emails Sent", field:"emails_count_sent", hozAlign:"center", width: 140, headerFilter:true},
       {title:"Emails Pending", field:"emails_count_pending", hozAlign:"center", width: 140, headerFilter:true},
 
-      {title:"Bounced At", field:"bounced_at", hozAlign:"center", sorter:"date", width: 140, headerFilter:true},
-      {title:"Complained At", field:"complained_at", hozAlign:"center", sorter:"date", width: 140, headerFilter:true},
-      {title:"Created At", field:"created_at", hozAlign:"center", sorter:"date", width: 160, headerFilter:true},
-      {title:"Updated At", field:"updated_at", hozAlign:"center", sorter:"date", width: 160, headerFilter:true},
+      {title:"Bounced At", field:"bounced_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 140, headerFilter:true},
+      {title:"Complained At", field:"complained_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 140, headerFilter:true},
+      {title:"Created At", field:"created_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 160, headerFilter:true},
+      {title:"Updated At", field:"updated_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 160, headerFilter:true},
     ],
     });
 
@@ -181,8 +191,8 @@ function tableMails() {
       }},
       {title:"Sent count", field:"sent_count", vertAlign: "middle", width:120, headerFilter:true},
       {title:"Pending count", field:"pending_count", vertAlign: "middle", width:120, headerFilter:true},
-      {title:"Created At", field:"created_at", vertAlign: "middle", hozAlign:"center", sorter:"date", width: 160, headerFilter:true},
-      {title:"Updated At", field:"updated_at", vertAlign: "middle", hozAlign:"center", sorter:"date", width: 160, headerFilter:true},
+      {title:"Created At", field:"created_at", vertAlign: "middle", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 160, headerFilter:true},
+      {title:"Updated At", field:"updated_at", vertAlign: "middle", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 160, headerFilter:true},
     ],
   });
 
@@ -219,8 +229,8 @@ function tableLists() {
       return cell.getValue() + ' subscribers';
       }},
       {title:"Flow Count", field:"flows", vertAlign: "middle", width:200, headerFilter:true},
-      {title:"Created At", field:"created_at", vertAlign: "middle", hozAlign:"center", sorter:"date", width: 200, headerFilter:true},
-      {title:"Updated At", field:"updated_at", vertAlign: "middle", hozAlign:"center", sorter:"date", width: 200, headerFilter:true},
+      {title:"Created At", field:"created_at", vertAlign: "middle", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 200, headerFilter:true},
+      {title:"Updated At", field:"updated_at", vertAlign: "middle", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 200, headerFilter:true},
       {title:"Delete", formatter:function(cell, formatterParams, onRendered){
       return '<button onclick="removeList(' + cell.getRow().getData().id + ')">Delete</button>';
       }},
@@ -256,8 +266,8 @@ function tableFlows() {
       {title:"Opening Rate", field:"opening_rate", width:150, headerFilter:true},
       {title:"Pending Count", field:"pending_count", width:150, headerFilter:true},
       {title:"Sent Count", field:"sent_count", width:150, headerFilter:true},
-      {title:"Created At", field:"created_at", hozAlign:"center", sorter:"date", width: 200, headerFilter:true},
-      {title:"Updated At", field:"updated_at", hozAlign:"center", sorter:"date", width: 200, headerFilter:true},
+      {title:"Created At", field:"created_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 200, headerFilter:true},
+      {title:"Updated At", field:"updated_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 200, headerFilter:true},
       {title:"Delete", formatter:function(cell, formatterParams, onRendered){
       return '<button onclick="removeFlow(' + cell.getRow().getData().id + ')">Delete</button>';
       }},
@@ -292,8 +302,8 @@ function tableFlowsteps(flowID) {
       {title:"Step Number", field:"step_number", width:150},
       {title:"Delay Minutes", field:"delay_minutes", width:150},
       {title:"Subject", field:"subject", width:250},
-      {title:"Created At", field:"created_at", hozAlign:"center", sorter:"date", width: 200},
-      {title:"Updated At", field:"updated_at", hozAlign:"center", sorter:"date", width: 200},
+      {title:"Created At", field:"created_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 200},
+      {title:"Updated At", field:"updated_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 200},
     ],
   });
 }
@@ -305,19 +315,38 @@ function tableFlowsteps(flowID) {
   Maillog
 
 */
+function addNewButtonLog(eleID, onclick, text) {
+  return `
+    <button onclick="${onclick}" style="display: flex ; align-items: center;width: 200px; justify-content: center;">
+      <svg style="height:24px; width: 24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+      <div style="margin-left: 5px;">${text}</div>
+    </button>
+  `;
+}
+
 let objTableMaillog;
 function tableMaillog() {
   dqs("#heading").innerText = "Maillog";
-  dqs("#work").innerHTML = addNewButton("maillog", "addMaillog()", "Add maillog");
+  dqs("#work").innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(max(200px, 100px), 1fr)); grid-gap: 30px;">
+      ${addNewButtonLog("loadAll", "mailLogLoad('all')", "Load all mails")}
+      ${addNewButtonLog("loadSent", "mailLogLoad('sent')", "Load sent")}
+      ${addNewButtonLog("loadPending", "mailLogLoad('pending')", "Load pending")}
+    </div><div id="maillog"></div>`;
 
   objTableMaillog = new Tabulator("#maillog", {
     height:"70vh",
     layout:"fitColumns",
     ajaxURL:"/api/mails/log",
     progressiveLoad:"scroll",
+    initialSort:[
+      {column:"sent_at", dir:"desc"}
+    ],
     columns:[
       {title:"ID", field:"id", width:80},
-      {title:"Sent At", field:"sent_at", width:140, sorter:"date", headerFilter:true},
+      {title:"Status", field:"status", width:100, headerFilter:true},
+      {title:"Created", field:"created_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 140, headerFilter:true},
+      {title:"Scheduled", field:"scheduled_for", width:140, sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, headerFilter:true},
+      {title:"Sent At", field:"sent_at", width:140, sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, headerFilter:true},
       {title:"Opened", field:"opened", width:90, headerFilter:true},
       {title:"Clicked", field:"clicked", width:90, headerFilter:true},
       {title:"User Email", field:"user_email", minWidth:200, headerFilter:true},
@@ -325,7 +354,27 @@ function tableMaillog() {
       {title:"List Name", field:"list_name", minWidth:160, headerFilter:true},
       {title:"Flow Name", field:"flow_name", minWidth:160, headerFilter:true},
       {title:"Flow Step Name", field:"flow_step_name", width:160, headerFilter:true},
-      {title:"Created At", field:"created_at", hozAlign:"center", sorter:"date", width: 140, headerFilter:true},
     ],
-    });
+  });
+
+}
+
+function mailLogLoad(status) {
+  objTableMaillog.setData("/api/mails/log?status=" + status);
+
+  if (status == "pending") {
+    objTableMaillog.setSort([
+      {column:"scheduled_at", dir:"desc"}, //sort by this first
+    ]);
+  }
+  else if(status == "sent") {
+    objTableMaillog.setSort([
+      {column:"sent_at", dir:"desc"}, //sort by this first
+    ]);
+  }
+  else {
+    objTableMaillog.setSort([
+      {column:"created_at", dir:"desc"}, //sort by this first
+  ]);
+  }
 }
