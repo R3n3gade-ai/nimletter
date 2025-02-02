@@ -127,7 +127,7 @@ proc sendMailMimeNow*(
   # Add first part to message
   multi.parts.add(first)
 
-  when defined(dev) and not defined(forcemail):
+  when defined(dev):
     echo "\n"
     echo "##################"
     echo "Email to: " & recipient
@@ -135,9 +135,11 @@ proc sendMailMimeNow*(
     echo "Message:  " & message
     echo "##################"
     echo "\n"
-    return (true, "dev" & $rand(100000), 1)
+    when not defined(forcemail):
+      return (true, "dev" & $rand(100000), 1)
 
   if smtpData.smtpHost == "smtp_host":
+    echo "SMTP not configured"
     return (false, "SMTP_not_configured_" & $rand(100000), 1)
 
   # Make SMTP connection
@@ -147,8 +149,13 @@ proc sendMailMimeNow*(
     messageID: string
 
   try:
-    smtpAuth(client, smtpData.smtpHost, smtpData.smtpPort, smtpData.smtpUser, smtpData.smtpPass)
+    client.connect(smtpData.smtpHost, Port(smtpData.smtpPort.parseInt()))
+    client.auth(smtpData.smtpUser, smtpData.smtpPass)
     (success, messageID) = sendMail(client, smtpData.smtpFromEmail, recipient, multi)
+
+    when defined(dev):
+      echo "Message sent: " & $success
+      echo "Message ID:   " & messageID
   except:
     echo getCurrentExceptionMsg()
     success = false

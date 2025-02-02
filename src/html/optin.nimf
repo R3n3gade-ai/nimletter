@@ -45,8 +45,8 @@
           # end if
           # if signupForm:
           <form action="/subscribe/${listUUID}" method="post" class="center">
-            <input type="email" name="email" placeholder="Email" required>
             <input type="text" name="name" placeholder="Name">
+            <input type="email" name="email" placeholder="Email" required>
             <input type="text" name="username_second" placeholder="Name" class="hideme">
             <div class="buttonArea">
               <button type="submit" class="buttonIcon">
