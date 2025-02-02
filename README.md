@@ -103,6 +103,169 @@ Easily manage subscriptions with unique links for each list. Embed these links o
 
 ![Subscribe](assets/screenshots/nimletter_subscribe.drawio.svg)
 
+## Events
+
+### Send immediate mail
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+        "event": "email-send",
+        "email": "nim@nimletter.com",
+        "mail": "welcome-mail",
+        "delay": 0
+      }' \
+  http://localhost:5555/api/event
+```
+
+### Send mail after 40 minutes
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+        "event": "email-send",
+        "email": "nim@nimletter.com",
+        "mail": "first-login",
+        "delay": 40
+  }' \
+  http://localhost:5555/api/event
+```
+
+### Send mail with custom content and subject
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+        "event": "email-send",
+        "email": "nim@nimletter.com",
+        "content": "<div>Custom content</div>",
+        "subject": "Custom subject",
+        "delay": 40
+  }' \
+  http://localhost:5555/api/event
+```
+
+### Cancel mail
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+        "event": "email-cancel",
+        "email": "nim@nimletter.com",
+        "mail": "welcome-mail"
+      }' \
+  http://localhost:5555/api/event
+```
+
+### Create contact
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "event": "contact-create",
+    "email": "mail@nimletter.com",
+    "name": "Nim Letter",
+    "double_opt_in": false,
+    "flow_step": 1
+  }' \
+  http://localhost:5555/api/event
+```
+
+### Create contact and add to list
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+      "event": "contact-create",
+      "email": "mail@nimletter.com",
+      "name": "Nim Letter",
+      "double_opt_in": false,
+      "flow_step": 1,
+      "list": "list-identifier"
+    }' \
+  http://localhost:5555/api/event
+```
+
+### Create contact and add to list with optin email
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+      "event": "contact-create",
+      "email": "mail@nimletter.com",
+      "name": "Nim Letter",
+      "double_opt_in": true,
+      "flow_step": 1,
+      "list": "list-identifier"
+    }' \
+  http://localhost:5555/api/event
+```
+
+### Transfer contact from other system
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+      "event": "contact-create",
+      "email": "mail@nimletter.com",
+      "name": "Nim Letter",
+      "double_opt_in": false,
+      "flow_step": 3,
+      "list": "list-identifier,list-identifier2"
+    }' \
+  http://localhost:5555/api/event
+```
+
+### Update (replace) contact (contactID OR email required)
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+      "event": "contact-update",
+      "email": "nim@nimletter.com",
+      "name": "Nim Letter",
+      "status": "enabled",
+      "double_opt_in": false,
+      "opted_in": false,
+      "meta": "{\"country\":\"Denmark\",\"language\":\"DK\"}"
+    }' \
+  http://localhost:5555/api/event
+```
+
+### Update meta-tags
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+      "event": "contact-meta",
+      "email": "nim@nimletter.com",
+      "meta": "{\"country\":\"Denmark\",\"nim\":\"lang\"}"
+    }' \
+  http://localhost:5555/api/event
+```
+
+### Contact exists
+```sh
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+      "event": "contact-exists",
+      "email": "mail@nimletter.com"
+    }' \
+  http://localhost:5555/api/event
+```
+
 
 # 🚀 Startup
 
@@ -274,6 +437,11 @@ https://heroicons.com/
   * ~~Move mail sending to another dedicated sender thread with synchronous channel (queue)~~
   * SQLite support
   * Moving JS to TypeScript
+  * API testing with Bruno
 * User stuff
   * Captcha for subscribe
   * User managed pages for "subscribe" and "unsubscribe" and "optin"
+* Frontend
+  * Better overview of user and their interactions
+  * Which links the user clicked on
+  * Better overview in flows of open and click rates and users
