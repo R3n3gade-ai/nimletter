@@ -177,6 +177,14 @@ proc checkLoggedIn*(c: var UserData) =
     if not checkApikey(auth[1]):
       return
 
+    # Inc api_keys.count with +1
+    pg.withConnection conn:
+      exec(conn, sqlUpdate(
+        table = "api_keys",
+        data  = ["count = count + 1"],
+        where = ["key = ?"]
+      ), auth[1])
+
 
   else:
     var cookieNaming: string # = $CookieSessionName.Default
