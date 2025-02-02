@@ -270,8 +270,8 @@ https://heroicons.com/
 
 * Backend
   * Valkey (Redis) as caching for all DB values
-  * Backup schedule checking (`checkAndSendScheduledEmails(backupCheck = true)`)
-  * Move mail sending to another dedicated sender thread with synchronous channel (queue)
+  * ~~Backup schedule checking (`checkAndSendScheduledEmails(backupCheck = true)`)~~
+  * ~~Move mail sending to another dedicated sender thread with synchronous channel (queue)~~
   * SQLite support
   * Moving JS to TypeScript
 * User stuff

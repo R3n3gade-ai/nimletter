@@ -18,7 +18,7 @@ proc triggerScheduleEmail*(pendingEmail: PendingMail) =
   when defined(dev):
     echo "Triggering email with ID " & pendingEmail.id
 
-  let scheduledFor = now() + (
+  let scheduledFor = now().utc + (
     if pendingEmail.triggerDelay == 0:
       1.minutes
     else:
@@ -46,7 +46,7 @@ proc triggerScheduleEmail*(pendingEmail: PendingMail) =
 proc createPendingEmail*(
   userID, listID, flowID, flowStepID, mailID: string,
   triggerType: string = "delay",
-  scheduledFor: DateTime = now(),
+  scheduledFor: DateTime = now().utc,
   status: string = "pending",
 ) =
 
@@ -133,7 +133,7 @@ proc createPendingEmailFromFlowstep*(userID, listID, flowID: string, stepNumber:
     flowStepID = flowStep[0],
     mailID = flowStep[1],
     triggerType = flowStep[3],
-    scheduledFor = (now() + parseInt(flowStep[4]).minutes),
+    scheduledFor = (now().utc + parseInt(flowStep[4]).minutes),
     status = "pending"
   )
 

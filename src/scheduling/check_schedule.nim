@@ -1,10 +1,7 @@
-## This file is called every 5 minutes to check if there are any new scheduled
-## emails that need to be sent.
-## It will send the email, if there's new email to be sent (from the flow) they
-## will be added to the pending_emails table.
 
 import
   std/[
+    locks,
     os,
     strutils,
     times
@@ -16,124 +13,24 @@ import
 import
   ../database/database_connection,
   ../database/database_queries,
-  ../email/email_connection,
+  ../email/email_channel,
   ../scheduling/schedule_mail
 
 
-type
-  PendingMailObj = object
-    id: string
-    uuid: string
-    userID: string
-    listID: string
-    flowID: string
-    flowStepID: string
-    triggerType: string
-    scheduledFor: string
-    status: string
-    messageID: string
-    createdAt: string
-    updatedAt: string
-
-
-proc scheduleNextFlowStep(pendingEmail: PendingMailObj, stepNumber: string) =
-  createPendingEmailFromFlowstep(
-    pendingEmail.userID, pendingEmail.listID, pendingEmail.flowID,
-    (parseInt(stepNumber) + 1)
-  )
-
-
-proc getUserData(userID: string): seq[string] =
-  pg.withConnection conn:
-    return getRow(conn, sqlSelect(
-      table = "contacts",
-      select = [
-        "id",
-        "email",
-        "name"
-      ],
-      where = [
-        "id = ?"
-      ]
-    ), userID)
+var gPendingEmailLock*: Lock
+initLock(gPendingEmailLock)
 
 
 
-proc getMailData(flowStepID: string): seq[string] =
-  pg.withConnection conn:
-    return getRow(conn, sqlSelect(
-      table = "flow_steps",
-      select = [
-        "flow_steps.subject",
-        "flow_steps.step_number",
-        "mails.contentHTML",
-      ],
-      joinargs = [
-        (table: "mails", tableAs: "", on: @["mails.id = flow_steps.mail_id"])
-      ],
-      where = [
-        "flow_steps.id = ?"
-      ]
-    ), flowStepID)
+proc checkAndSendScheduledEmails*(minutesBack = 5, until = now().utc) =
 
+  acquire(gPendingEmailLock)
 
-
-proc sendPendingEmail(pendingEmail: PendingMailObj) =
-  # Fetch user and email details
-  let
-    userData = getUserData(pendingEmail.userID)
-
-  let
-    mailData = getMailData(pendingEmail.flowStepID)
-
-
-  # Send the email
-  let sendData = sendMailMimeNow(
-    # pendingEmailID = pendingEmail.id,
-    contactID = pendingEmail.userID,
-    subject = mailData[0],
-    message = mailData[2],
-    recipient = userData[1],
-    mailUUID = pendingEmail.uuid
-  )
-
-  if not sendData.success:
-    echo "Failed to send email: mailID = " & pendingEmail.id & " - Err = " & sendData.messageID
-    return
-
-  # Update the status of the pending email
-  pg.withConnection conn:
-    exec(conn, sqlUpdate(
-      table = "pending_emails",
-      data  = [
-        "status",
-        "message_id",
-        "sent_at",
-        "updated_at"
-      ],
-      where = [
-        "id = ?"
-      ]),
-      "sent",
-      sendData.messageID,
-      $(now().utc).format("yyyy-MM-dd HH:mm:ss"),
-      $(now().utc).format("yyyy-MM-dd HH:mm:ss"),
-      pendingEmail.id
-    )
-
-  # Schedule the next flow step if applicable
-  scheduleNextFlowStep(pendingEmail, mailData[1])
-
-  sleep((1000 / sendData.mailsPerSecond).toInt())
-
-
-proc checkAndSendScheduledEmails*(minutesBack = 5) =
   var pendingEmails: seq[seq[string]]
-
   pg.withConnection conn:
-    let timeThreshold = (now() - initDuration(minutes = minutesBack)).format("yyyy-MM-dd HH:mm:ss")
-    when defined(dev):
-      echo "Scheduling duration: " & $timeThreshold & " < > " & $now().format("yyyy-MM-dd HH:mm:ss")
+    let
+      rightNow = until.format("yyyy-MM-dd HH:mm:ss")
+      timeThreshold = (now().utc - initDuration(minutes = minutesBack)).format("yyyy-MM-dd HH:mm:ss")
 
     pendingEmails = getAllRows(conn, sqlSelect(
         table = "pending_emails",
@@ -149,20 +46,37 @@ proc checkAndSendScheduledEmails*(minutesBack = 5) =
           "pending_emails.message_id",
           "pending_emails.created_at",
           "pending_emails.updated_at",
-          "pending_emails.uuid"
+          "pending_emails.uuid",
+          "pending_emails.mail_id",
+          "pending_emails.manual_html",
+          "pending_emails.manual_subject"
         ],
         where = [
-          "pending_emails.scheduled_for <= NOW()",
+          "pending_emails.scheduled_for <= ?",
           "pending_emails.scheduled_for >= ?",
           "pending_emails.status = 'pending'"
         ]
       ),
+      rightNow,
       timeThreshold
     )
 
+    exec(conn, sqlUpdate(
+      table = "pending_emails",
+      data  = [
+        "status"
+      ],
+      where = [
+        "pending_emails.scheduled_for <= ?",
+        "pending_emails.scheduled_for >= ?",
+        "pending_emails.status = 'pending'"
+      ]
+    ), "inprogress", rightNow, timeThreshold)
+
   for pendingEmail in pendingEmails:
     echo "Sending email: " & pendingEmail[0]
-    sendPendingEmail(PendingMailObj(
+
+    mailChannel.send PendingMailObj(
       id: pendingEmail[0],
       userID: pendingEmail[1],
       listID: pendingEmail[2],
@@ -174,5 +88,10 @@ proc checkAndSendScheduledEmails*(minutesBack = 5) =
       messageID: pendingEmail[8],
       createdAt: pendingEmail[9],
       updatedAt: pendingEmail[10],
-      uuid: pendingEmail[11]
-    ))
+      uuid: pendingEmail[11],
+      mailID: pendingEmail[12],
+      manualHTML: pendingEmail[13],
+      manualSubject: pendingEmail[14]
+    )
+
+  release(gPendingEmailLock)

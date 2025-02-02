@@ -21,6 +21,7 @@ import
   ./src/database/database_connection,
   ./src/database/database_setup,
   ./src/database/database_testdata,
+  ./src/email/email_channel,
   ./src/scheduling/check_schedule
 
 import
@@ -94,29 +95,21 @@ for r in webhooksSnsRouter.routes:
 
 
 proc scheduleStart() {.thread.} =
-  when defined(dev):
-    echo "Checking for scheduled emails"
-
+  echo "Starting thread: scheduling"
   {.gcsafe.}:
     schedules:
-      cron(minute="*/1", hour="*", day_of_month="*", month="*", day_of_week="*", id="tick", throttle=10):
-        echo $now() & " - cron job running"
-        {.gcsafe.}:
-          checkAndSendScheduledEmails(minutesBack = 1)
+      every(seconds=60, id="tick", throttle=2):
+        echo "Schedule check: " & $now() & " on thread " & $getThreadId()
+        checkAndSendScheduledEmails(minutesBack = 2, until = now())
 
-      # #
-      # # This should check for the last 2 hours and 1.5 hours up. If we have had break and missed some
-      # # mails they would be catched here.
-      # #
-      # cron(minute="*", hour="*/1", day_of_month="*", month="*", day_of_week="*", id="tick", throttle=10):
-      #   echo $now() & " - cron job running (backup)"
-      #   {.gcsafe.}:
-      #     checkAndSendScheduledEmails(backupCheck = true)
+      every(minutes=30, id="tick", throttle=2):
+        echo "Backup schedule check: " & $now() & " on thread " & $getThreadId()
+        checkAndSendScheduledEmails(minutesBack = 60, until = now() - initDuration(minutes = 10))
 
 
 
 when isMainModule:
-  echo "\nnimletter - starting ...\n"
+  echo "Starting thread: nimletter"
 
   for kind, key, val in getOpt():
     echo "[" & ($now())[0..18] & "] - CLI_RUN: running on"
@@ -193,7 +186,18 @@ when isMainModule:
 
 
   #
-  # Schedules
+  # Mailing thread
+  #
+  mailChannel.open()
+  createThread mailThread, mailPendingEmails
+
+  addExitProc(proc() =
+    joinThreads mailThread
+  )
+
+
+  #
+  # Scheduling thread
   #
   createThread scheduleThread, scheduleStart
 
@@ -211,7 +215,7 @@ when isMainModule:
         maxBodyLen = 1024 * 1024 * 30, # 30 MB
       )
 
-  echo "\nnimletter - server started on port 5555\n"
+  echo "\n=> nimletter up and running on port 5555\n"
 
   server.serve(Port(5555))
 
