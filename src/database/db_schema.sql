@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS mails (
   category            TEXT,           -- Category of the mail (e.g., promotional, informational)
   uuid                UUID NOT NULL DEFAULT uuid_generate_v4()  -- Unique identifier
 );
-INSERT INTO mails (name, identifier, category, contentHTML, contentEditor, subject) VALUES ('Double Opt-In', 'double-opt-in', 'template', '<div style="background-color:#F5F5F5;color:#262626;font-family:&quot;Helvetica Neue&quot;, &quot;Arial Nova&quot;, &quot;Nimbus Sans&quot;, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0.15008px;line-height:1.5;margin:0;padding:32px 0;min-height:100%;width:100%"><table align="center" width="100%" style="margin:0 auto;max-width:600px;background-color:#FFFFFF" role="presentation" cellSpacing="0" cellPadding="0" border="0"><tbody><tr style="width:100%"><td><div style="padding:24px 32px 24px 32px"><h2 style="font-weight:bold;margin:0;font-size:24px;padding:16px 24px 16px 24px">Hi {{ firstname | there }}</h2><div style="font-weight:normal;padding:16px 24px 16px 24px">We’re glad to have you with us at {{ pagename }}!</div><div style="font-weight:normal;padding:16px 24px 16px 24px">To finish subscribing to our emails, just click the button below. You can unsubscribe anytime if you change your mind.</div><div style="text-align:center;padding:16px 24px 16px 24px"><a href="{{ hostname }}/subscribe/optin?contactUUID={{ contactUUID }}" style="color:#FFFFFF;font-size:16px;font-weight:bold;background-color:#4F46E5;border-radius:4px;display:block;padding:12px 20px;text-decoration:none" target="_blank"><span><!--[if mso]><i style="letter-spacing: 20px;mso-font-width:-100%;mso-text-raise:30" hidden>&nbsp;</i><![endif]--></span><span>Subscribe!</span><span><!--[if mso]><i style="letter-spacing: 20px;mso-font-width:-100%" hidden>&nbsp;</i><![endif]--></span></a></div></div></td></tr></tbody></table></div>', '{ "root": { "type": "EmailLayout", "data": { "backdropColor": "#F5F5F5", "canvasColor": "#FFFFFF", "textColor": "#262626", "fontFamily": "MODERN_SANS", "childrenIds": [ "block-1737229372503" ] } }, "block-1737229372503": { "type": "Container", "data": { "style": { "padding": { "top": 24, "bottom": 24, "right": 32, "left": 32 } }, "props": { "childrenIds": [ "block-1737229386674", "block-1737229395871", "block-1737229536738", "block-1737229551815" ] } } }, "block-1737229386674": { "type": "Heading", "data": { "props": { "text": "Hi {{ firstname | there }}" }, "style": { "padding": { "top": 16, "bottom": 16, "right": 24, "left": 24 } } } }, "block-1737229395871": { "type": "Text", "data": { "style": { "fontWeight": "normal", "padding": { "top": 16, "bottom": 16, "right": 24, "left": 24 } }, "props": { "text": "We’re glad to have you with us at {{ pagename }}!" } } }, "block-1737229536738": { "type": "Text", "data": { "style": { "fontWeight": "normal", "padding": { "top": 16, "bottom": 16, "right": 24, "left": 24 } }, "props": { "text": "To finish subscribing to our emails, just click the button below. You can unsubscribe anytime if you change your mind." } } }, "block-1737229551815": { "type": "Button", "data": { "style": { "fontWeight": "bold", "textAlign": "center", "padding": { "top": 16, "bottom": 16, "right": 24, "left": 24 } }, "props": { "buttonBackgroundColor": "#4F46E5", "fullWidth": true, "text": "Subscribe!", "url": "{{ hostname }}/subscribe/optin?contactUUID={{ contactUUID }}" } } } }', 'Confirm your email address') ON CONFLICT DO NOTHING;
+
 
 -- Table for flows (campaigns or automated sequences)
 CREATE TABLE IF NOT EXISTS flows (
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   requires_double_opt_in BOOLEAN DEFAULT TRUE,  -- Flag for double opt-in status
-  double_opt_in_sent  BOOLEAN DEFAULT FALSE,  -- Has initial double opt-in email been sent?
+  double_opt_in_sent  BOOLEAN DEFAULT FALSE,  -- Has initial double opt-in email been sent
   double_opt_in       BOOLEAN DEFAULT FALSE,  -- Flag for double opt-in status
   double_opt_in_data  TEXT, -- IP address, timestamp, etc.
   pending_lists       INT[], -- Pending lists to be signed up to until double_opt_in is complete
@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS settings (
   optin_email         INT NOT NULL REFERENCES mails(id),
   logo_url            TEXT
 );
-INSERT INTO settings (page_name, hostname, optin_email) VALUES ('Nimletter, drip it!', 'https://nimletter.com', 1) ON CONFLICT DO NOTHING;
+
 
 -- Table for smtp
 CREATE TABLE IF NOT EXISTS smtp_settings (
@@ -223,5 +223,8 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 -- Indexes for efficient querying
 CREATE INDEX IF NOT EXISTS idx_pending_emails_scheduled_for ON pending_emails (scheduled_for);
+
 CREATE INDEX IF NOT EXISTS idx_email_opens_user_id ON email_opens (user_id);
+
 CREATE INDEX IF NOT EXISTS idx_email_clicks_user_id ON email_clicks (user_id);
+

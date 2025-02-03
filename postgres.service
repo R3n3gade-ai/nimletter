@@ -1,0 +1,63 @@
+#
+# postgres.service for rootless deployment with podman and systemd
+#
+# Requires:
+# - podman
+# - systemd
+#
+# Can be updated with:
+# - podman auto-update
+# - podman auto-update --dry-run
+#
+# How to use:
+# $ cp postgres.service ~/.config/systemd/user/
+# $ podman pull docker.io/postgres:17.2-alpine
+# $ systemctl --user start postgres
+# $ systemctl --user status postgres
+# $ systemctl --user enable postgres
+#
+
+[Unit]
+Description=Podman postgres.service
+Documentation=man:podman-generate-systemd(1)
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=%t/containers
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart=always
+RestartSec=3
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/%n.ctr-id
+ExecStart=/usr/bin/podman run \
+  --cidfile=%t/%n.ctr-id \
+  --cgroups=no-conmon \
+  --rm \
+  --sdnotify=conmon \
+  -d \
+  --replace \
+  --name postgres \
+  --init \
+  --network host \
+  --label io.containers.autoupdate=registry \
+  --log-driver journald \
+  --log-opt tag=postgres \
+  --env POSTGRES_USER=postgres \
+  --env POSTGRES_PASSWORD=postgres \
+  --env POSTGRES_DB=nimletter_db \
+  -v postgres_data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  docker.io/postgres:17.2-alpine
+ExecStop=/usr/bin/podman stop \
+  --ignore \
+  --cidfile=%t/%n.ctr-id
+ExecStopPost=/usr/bin/podman rm \
+  -f \
+  --ignore \
+  --cidfile=%t/%n.ctr-id
+Type=notify
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target default.target

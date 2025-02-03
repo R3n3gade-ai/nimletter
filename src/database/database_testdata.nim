@@ -30,20 +30,20 @@ proc insertTestData*() =
         """))
 
     exec(conn, sql("""
-      INSERT INTO mails (name, created_at, updated_at, contentHTML, tags, category, editorType, uuid, identifier)
+      INSERT INTO mails (name, contentHTML, tags, category, editorType, identifier)
       VALUES
-      ('Welcome Email', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Hey {{ firstname }}, Welcome to our service!', ARRAY['welcome', 'intro'], 'informational', 'html', uuid_generate_v4(), 'welcome-email'),
-      ('Follow-up Email', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Here is some {{ interest | important }} more information.', ARRAY['followup', 'info'], 'informational', 'html', uuid_generate_v4(), 'followup-email'),
-      ('Anything else?', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Anything else you want?', ARRAY['followup', 'info'], 'informational', 'html', uuid_generate_v4(), 'anything-else'),
-      ('Like it, then click', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Like it, then click', ARRAY['marketing', 'info'], 'drip', 'html', uuid_generate_v4(), 'like-it-then-click'),
-      ('Wee see you (EmailBuilder)', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Wee see you', ARRAY['marketing', 'info'], 'drip', 'emailbuilder', uuid_generate_v4(), 'wee-see-you');
+      ('Welcome Email', 'Hey {{ firstname }}, Welcome to our service!', ARRAY['welcome', 'intro'], 'informational', 'html', 'welcome-email'),
+      ('Follow-up Email', 'Here is some {{ interest | important }} more information.', ARRAY['followup', 'info'], 'informational', 'html', 'followup-email'),
+      ('Anything else', 'Anything else you want', ARRAY['followup', 'info'], 'informational', 'html', 'anything-else'),
+      ('Like it, then click', 'Like it, then click', ARRAY['marketing', 'info'], 'drip', 'html', 'like-it-then-click'),
+      ('Wee see you (EmailBuilder)', 'Wee see you', ARRAY['marketing', 'info'], 'drip', 'emailbuilder', 'wee-see-you');
     """))
 
     exec(conn, sql("""
-      INSERT INTO flows (name, created_at, updated_at)
+      INSERT INTO flows (name)
       VALUES
-      ('Welcome Flow', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-      ('Click Open Flow', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+      ('Welcome Flow'),
+      ('Click Open Flow');
     """))
 
     exec(conn, sql("""
@@ -51,7 +51,7 @@ proc insertTestData*() =
       VALUES
       ((SELECT id FROM flows WHERE name = 'Welcome Flow'), (SELECT id FROM mails WHERE name = 'Welcome Email'), 1, 'delay', 1, 'Step 1', 'Welcome to our service!', CURRENT_TIMESTAMP),
       ((SELECT id FROM flows WHERE name = 'Welcome Flow'), (SELECT id FROM mails WHERE name = 'Follow-up Email'), 2, 'delay', 1, 'Step 2', 'Follow-up Information', CURRENT_TIMESTAMP),
-      ((SELECT id FROM flows WHERE name = 'Welcome Flow'), (SELECT id FROM mails WHERE name = 'Anything else?'), 3, 'delay', 1, 'Step 3', 'Anything else subject?', CURRENT_TIMESTAMP),
+      ((SELECT id FROM flows WHERE name = 'Welcome Flow'), (SELECT id FROM mails WHERE name = 'Anything else'), 3, 'delay', 1, 'Step 3', 'Anything else subject', CURRENT_TIMESTAMP),
       ((SELECT id FROM flows WHERE name = 'Click Open Flow'), (SELECT id FROM mails WHERE name = 'Like it, then click'), 1, 'delay', 0, 'Step 1', 'Like it, then click', CURRENT_TIMESTAMP),
       ((SELECT id FROM flows WHERE name = 'Click Open Flow'), (SELECT id FROM mails WHERE name = 'Wee see you (EmailBuilder)'), 2, 'click', 0, 'Step 2', 'Wee see you', CURRENT_TIMESTAMP);
         """))

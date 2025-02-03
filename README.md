@@ -320,6 +320,8 @@ nim c -d:release nimletter
 
 ### Option D) Systemd service file
 ```sh
+cp postgres.service ~/.config/systemd/user/
+# (the same as below)
 cp nimletter.service ~/.config/systemd/user/
 podman pull ghcr.io/thomastjdev/nimletter:latest
 systemctl --user daemon-reload

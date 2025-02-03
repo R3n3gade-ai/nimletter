@@ -22,8 +22,8 @@ else:
   echo "PostgreSQL: connecting ..."
   let
     pgHost      = getEnv("PG_HOST", "localhost")
-    pgUser*     = getEnv("PG_USER", "nimletter")
-    pgPassword* = getEnv("PG_PASSWORD", "nimletter")
+    pgUser*     = getEnv("PG_USER", "postgres")
+    pgPassword* = getEnv("PG_PASSWORD", "postgres")
     pgDatabase* = getEnv("PG_DATABASE", "nimletter_db")
     pgWorkers   = getEnv("PG_WORKERS", "3").parseInt()
     pg* = newPostgresPool(pgWorkers, pgHost, pgUser, pgPassword, pgDatabase)
