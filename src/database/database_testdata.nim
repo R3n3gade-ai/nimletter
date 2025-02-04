@@ -59,8 +59,8 @@ proc insertTestData*() =
     exec(conn, sql("""
       INSERT INTO lists (name, identifier, flow_ids, description, created_at, updated_at, uuid)
       VALUES
-      ('Test List', 'test-list', ARRAY[(SELECT id FROM flows WHERE name = 'Welcome Flow')], 'A test list for Thomas', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, uuid_generate_v4()),
-      ('Click Open List', 'click-list', ARRAY[(SELECT id FROM flows WHERE name = 'Click Open Flow')], 'A test list for Thomas', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, uuid_generate_v4());
+      ('Test List', 'test-list', ARRAY[(SELECT id FROM flows WHERE name = 'Welcome Flow')], 'A test list', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, uuid_generate_v4()),
+      ('Click Open List', 'click-list', ARRAY[(SELECT id FROM flows WHERE name = 'Click Open Flow')], 'A click list', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, uuid_generate_v4());
     """))
 
     exec(conn, sql("""
