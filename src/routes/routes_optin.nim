@@ -169,9 +169,7 @@ proc(request: Request) =
     resp Http200, nimfOptinSubscribe(true, "Contact already exists", "")
 
   if listsData.requireOptIn:
-    echo "oko"
     emailOptinSend(email, name, userID)
-    echo "ll"
   else:
     for listID in listsData.ids:
       discard addContactToList(userID, listID)
