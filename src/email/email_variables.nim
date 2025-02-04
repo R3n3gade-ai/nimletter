@@ -49,6 +49,23 @@ proc finalizeEmail(
     )
 
 
+template linkReplace() =
+  ## Link replacing
+  ## 1. Get all href="..." links and convert it to base64
+  ## 2. Replace the link with a `customurl/base64` string
+  if mailUUID != "":
+    let reLink = re("""href="([^"]+)"""")
+    let links = findAll(result, reLink)
+    for link in links:
+      let
+        base64 = encode(link.split("\"")[1])
+
+      const
+        baseUrl = "/webhook/tracking/$1/click/$2"
+
+      result = result.replace(link, "href=\"" & hostname & baseUrl.format(mailUUID, base64) & "\"")
+
+
 proc emailVariableReplace*(contactID, message, subjectChecked: string, mailUUID = "", ignoreUnsubscribe = false): string =
   ## Replace variables in a message.
   ##
@@ -65,8 +82,8 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string, mailUUID 
 
   result = message
 
-  let re = re("""{{\s*(\w+)\s*(?:\|\s*(\w+))?\s*}}""")
-  let matches = findAll(message, re)
+  let reRes = re("""{{\s*(\w+)\s*(?:\|\s*(\w+))?\s*}}""")
+  let matches = findAll(message, reRes)
 
 
   const internalFields = @["firstname", "lastname", "name", "email", "pagename", "hostname", "uuid"]
@@ -141,29 +158,10 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string, mailUUID 
 
 
   #
-  # Link replacing
-  #
-  # 1. Get all href="..." links and convert it to base64
-  # 2. Replace the link with a `customurl/base64` string
-  #
-  if mailUUID != "":
-    let reLink = re("""href="([^"]+)"""")
-    let links = findAll(message, reLink)
-    for link in links:
-      let
-        base64 = encode(link.split("\"")[1])
-
-      const
-        baseUrl = "/webhook/tracking/$1/click/$2"
-
-      result = result.replace(link, "href=\"" & hostname & baseUrl.format(mailUUID, base64) & "\"")
-
-
-
-  #
   # If there's no special attributes, we can just return the message.
   #
   if matchesChecked.len == 0:
+    linkReplace()
     return finalizeEmail(
       result,
       subjectChecked,
@@ -197,6 +195,8 @@ proc emailVariableReplace*(contactID, message, subjectChecked: string, mailUUID 
       multi.add((match, dbvalue))
 
   result = result.multiReplace(multi)
+
+  linkReplace()
 
   return finalizeEmail(
       result,
