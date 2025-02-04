@@ -247,6 +247,16 @@ proc(request: Request) =
 
   var hit = false
   pg.withConnection conn:
+    let ident = getValue(conn, sqlSelect(
+        table = "mails",
+        select = ["identifier"],
+        where = ["uuid = ?"]
+      ),
+      mailUUID)
+
+    if ident == "double-opt-in":
+      resp Http400, "Cannot delete double-opt-in mail"
+
     hit = execAffectedRows(conn, sqlDelete(
         table = "mails",
         where = [
