@@ -133,7 +133,7 @@ async function doLogin() {
   console.log(resp);
 
   if (!resp.success) {
-    alert(resp.message);
+    alert("Error");
     return;
   }
 
