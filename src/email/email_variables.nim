@@ -57,6 +57,9 @@ template linkReplace() =
     let reLink = re("""href="([^"]+)"""")
     let links = findAll(result, reLink)
     for link in links:
+      if link.contains("/subscribe/optin"):
+        continue
+
       let
         base64 = encode(link.split("\"")[1])
 

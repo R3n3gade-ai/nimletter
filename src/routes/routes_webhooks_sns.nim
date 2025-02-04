@@ -333,11 +333,8 @@ const pathTracker = "/assets/images/nimletter_icon.png"
 
 webhooksSnsRouter.get("/webhook/tracking/@mailuuid/@action/@do",
 proc(request: Request) =
-  when defined(dev):
-    echo "Received SNS webhook"
 
   let mailuuid = @"mailuuid"
-
 
   if not mailuuid.isValidUUID() and mailuuid != "pure":
     resp Http400
