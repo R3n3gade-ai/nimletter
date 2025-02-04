@@ -89,7 +89,9 @@ proc(request: Request) =
       ]
     ), email, c.userID)
 
-  resp Http200, "Email updated"
+  resp Http200, %* {
+    "success": true
+  }
 )
 
 
