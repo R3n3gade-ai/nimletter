@@ -88,13 +88,11 @@ proc(request: Request) =
     if userID == "":
       resp Http400, "User not found"
 
-    let mailID = getMailIDfromIdent(mail)
-    if mailID == "":
-      resp Http400, "Mail not found"
+    let mailID = if mail == "": "" else: getMailIDfromIdent(mail)
 
     pg.withConnection conn:
       # For a specific mailID
-      if mail != "":
+      if mailID != "":
         if getValue(conn, sqlSelect(
               table = "mails",
               select = [

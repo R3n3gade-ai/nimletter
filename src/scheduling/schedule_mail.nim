@@ -59,44 +59,34 @@ proc createPendingEmail*(
         "NULL"
     )
 
-  let argsData = @[
-        userID,
-        listID,
-        flowID,
-        flowStepID,
-        mailID,
-        triggerType,
-        status,
-        scheduledFor
-      ]
-
-  var args  = @[
-        userID,
-        listID,
-        flowID,
-        flowStepID,
-        mailID,
-        triggerType,
-        status
-      ]
+  var args = @[userID]
+  var data = @["user_id"]
+  if listID != "":
+    data.add("list_id")
+    args.add(listID)
+  if flowID != "":
+    data.add("flow_id")
+    args.add(flowID)
+  if flowStepID != "":
+    data.add("flow_step_id")
+    args.add(flowStepID)
+  if mailID != "":
+    data.add("mail_id")
+    args.add(mailID)
+  if triggerType != "":
+    data.add("trigger_type")
+    args.add(triggerType)
+  if status != "":
+    data.add("status")
+    args.add(status)
   if scheduledFor != "NULL":
+    data.add("scheduled_for")
     args.add(scheduledFor)
 
   pg.withConnection conn:
-
     exec(conn, sqlInsert(
       table = "pending_emails",
-      data  = [
-        "user_id",
-        "list_id",
-        "flow_id",
-        "flow_step_id",
-        "mail_id",
-        "trigger_type",
-        "status",
-        "scheduled_for",
-      ],
-      args = argsData
+      data  = data,
     ), args)
 
 
