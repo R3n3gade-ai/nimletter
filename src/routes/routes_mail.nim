@@ -466,8 +466,6 @@ proc(request: Request) =
     listID = @"listID"
     email  = @"email"
 
-  echo email.isValidEmail()
-
   var
     mailData: seq[string]
     contactData: seq[string]
@@ -525,5 +523,7 @@ proc(request: Request) =
 
   elif listExists:
     createPendingEmailToAllListContacts(listID, mailID)
+
+    resp Http200, "Mail sent to listID: " & listID
 
 )
