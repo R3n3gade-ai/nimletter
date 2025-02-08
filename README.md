@@ -382,6 +382,12 @@ export SMTP_FROMNAME=
 export SMTP_MAILSPERSECOND=1
 ```
 
+**HTTP OPTIONS**
+```sh
+export LISTEN_PORT=5555
+export LISTEN_IP=0.0.0.0
+```
+
 **SNS SECRET**
 ```sh
 export SNS_WEBHOOK_SECRET=secret

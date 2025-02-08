@@ -4,6 +4,7 @@ import
   std/[
     exitprocs,
     parseopt,
+    strutils,
     times
   ]
 
@@ -217,5 +218,4 @@ when isMainModule:
 
   echo "\n=> nimletter up and running on port 5555\n"
 
-  server.serve(Port(5555))
-
+  server.serve(Port(parseInt(getEnv("LISTEN_PORT", "5555"))), address = getEnv("LISTEN_IP", "0.0.0.0"))
