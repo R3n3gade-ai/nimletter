@@ -1,49 +1,116 @@
+# ==============================================================================
+# Environment variables (copy to a .env file in the same directory)
+#
+# POSTGRES_USER=postgres
+# POSTGRES_PASSWORD=postgres
+# POSTGRES_DB=nimletter_db
+#
+# SMTP_HOST=smtp.example.com
+# SMTP_PORT=465
+# SMTP_USER=user@example.com
+# SMTP_PASSWORD=changeme
+# SMTP_FROMEMAIL=noreply@example.com
+# SMTP_FROMNAME="App Notifications"
+# SMTP_MAILSPERSECOND=1
+#
+# ADMIN_EMAIL=admin@example.com
+# ADMIN_PASSWORD=supersecurepassword
+#
+# SNS_WEBHOOK_SECRET=randomlongsecret
+#
+# NIMLETTER_HOST=letter.example.com
+# DBGATE_HOST=db.example.com
+# ==============================================================================
+
+version: '3.9'
+
 services:
 
-  postgres:
-    image: docker.io/postgres:17.2-alpine
-    container_name: postgres
+  postgres-db:
+    image: docker.io/postgres:17-alpine
+    container_name: postgres-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: nimletter_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - app-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      retries: 5
-    network_mode: host
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      start_period: 4s
+      interval: 16s
+      timeout: 8s
+      retries: 4
 
   nimletter:
     image: ghcr.io/thomastjdev/nimletter:latest
     container_name: nimletter
     restart: unless-stopped
     depends_on:
-      postgres:
+      postgres-db:
         condition: service_healthy
     environment:
-      PG_HOST: 127.0.0.1:5432
-      PG_USER: postgres
-      PG_PASSWORD: postgres
-      PG_DATABASE: nimletter_db
+      PG_HOST: postgres-db:5432
+      PG_USER: ${POSTGRES_USER}
+      PG_PASSWORD: ${POSTGRES_PASSWORD}
+      PG_DATABASE: ${POSTGRES_DB}
       PG_WORKERS: 3
-      SMTP_HOST: smtp_host
-      SMTP_PORT: 465
-      SMTP_USER: smtp_username
-      SMTP_PASSWORD: smtp_password
-      SMTP_FROMEMAIL: admin@nimletter.com
-      SMTP_FROMNAME: ADMIN
-      # Maximum number of emails to send per second
-      SMTP_MAILSPERSECOND: 1
-      # Use a random long string - it's part of the route to the webhook
-      SNS_WEBHOOK_SECRET: secret
-    ports:
-      - "5555:5555"
-    network_mode: host
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROMEMAIL: ${SMTP_FROMEMAIL}
+      SMTP_FROMNAME: ${SMTP_FROMNAME}
+      SMTP_MAILSPERSECOND: ${SMTP_MAILSPERSECOND}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      SNS_WEBHOOK_SECRET: ${SNS_WEBHOOK_SECRET}
+    networks:
+      - app-net
+      - proxy
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.nimletter.rule=Host(`${NIMLETTER_HOST}`)'
+      - 'traefik.http.routers.nimletter.entrypoints=https'
+      - 'traefik.http.routers.nimletter.tls=true'
+      - 'traefik.http.routers.nimletter.tls.certresolver=letsencrypt'
+      - 'traefik.http.routers.nimletter.middlewares=authelia@docker,error-pages@docker'
+      - 'traefik.http.routers.nimletter.service=nimletter-service'
+      - 'traefik.http.services.nimletter-service.loadbalancer.server.port=5555'
 
-volumes:
-  postgres_data:
+  dbgate:
+    image: dbgate/dbgate
+    container_name: dbgate
+    restart: always
+    environment:
+      CONNECTIONS: con2
+      LABEL_con2: PostgreSQL
+      SERVER_con2: postgres-db
+      USER_con2: ${POSTGRES_USER}
+      PASSWORD_con2: ${POSTGRES_PASSWORD}
+      PORT_con2: 5432
+      ENGINE_con2: postgres@dbgate-plugin-postgres
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - app-net
+      - proxy
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.dbgate.rule=Host(`${DBGATE_HOST}`)'
+      - 'traefik.http.routers.dbgate.entrypoints=https'
+      - 'traefik.http.routers.dbgate.tls=true'
+      - 'traefik.http.routers.dbgate.tls.certresolver=letsencrypt'
+      - 'traefik.http.routers.dbgate.middlewares=authelia@docker,error-pages@docker'
+      - 'traefik.http.routers.dbgate.service=dbgate-service'
+      - 'traefik.http.services.dbgate-service.loadbalancer.server.port=3000'
+
+networks:
+  app-net:
+    name: app-net
+  proxy:
+    external: true
