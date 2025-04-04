@@ -3,6 +3,7 @@
 import
   std/[
     json,
+    random,
     strutils
   ]
 
@@ -22,6 +23,9 @@ import
   ../scheduling/schedule_mail,
   ../utils/auth,
   ../utils/validate_data
+
+
+randomize()
 
 
 proc formatTags(tags: string): seq[string] =
@@ -77,6 +81,73 @@ proc(request: Request) =
   resp Http200, (
     %* {
       "id": mailID
+    }
+  )
+)
+
+
+mailRouter.post("/api/mails/duplicate",
+proc(request: Request) =
+  createTFD()
+  if not c.loggedIn: resp Http401
+
+  let mailID = @"mailID"
+
+  if not mailID.isValidInt():
+    resp Http400, "Invalid UUID"
+
+  var mailData: seq[string]
+  pg.withConnection conn:
+    mailData = getRow(conn, sqlSelect(
+        table   = "mails",
+        select  = [
+          "id",
+          "name",
+          "contentHTML",
+          "contentEditor",
+          "editorType",
+          "tags",
+          "category",
+          "send_once",
+          "subject",
+        ],
+        where   = [
+          "id = ?"
+        ]),
+      mailID)
+
+  if mailData.len() == 0 or mailData[0] == "":
+    resp Http404, "mail not found for UUID " & mailID
+
+  var newMailID: string
+  pg.withConnection conn:
+    newMailID = $insertID(conn, sqlInsert(
+        table = "mails",
+        data  = [
+          "name",
+          "identifier",
+          "contentHTML",
+          "contentEditor",
+          "editorType",
+          "tags",
+          "category",
+          "send_once",
+          "subject"
+        ]),
+      mailData[1],  # name
+      mailData[1].toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) & "-" & $rand(1000000),  # identifier
+      mailData[2],  # contentHTML
+      mailData[3],  # contentEditor
+      mailData[4],  # editorType
+      mailData[5],  # tags
+      mailData[6],  # category
+      mailData[7],  # send_once
+      mailData[8],  # subject
+    )
+
+  resp Http200, (
+    %* {
+      "id": newMailID
     }
   )
 )

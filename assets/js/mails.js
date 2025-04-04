@@ -200,14 +200,31 @@ function loadMail(id) {
                     '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" style="height: 22px;width: 22px;"><path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"></path></svg><div class="ml5">Save changes</div>'
                   ]
                 }),
-                jsCreateElement('button', {
+                jsCreateElement('div', {
                   attrs: {
-                    class: 'mailSend buttonIcon',
-                    style: 'width: fit-content;',
-                    onclick: 'sendMail(' + id + ')'
+                    style: 'display: flex;align-items: center;gap: 10px;'
                   },
-                  rawHtml: [
-                    '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg><div class="ml5">Send email</div>'
+                  children: [
+                    jsCreateElement('button', {
+                      attrs: {
+                        class: 'mailSend buttonIcon',
+                        style: 'width: fit-content;',
+                        onclick: 'duplicateMail(' + id + ')',
+                      },
+                      rawHtml: [
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2"><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z"></path><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1"></path></svg><div class="ml5">Duplicate</div>'
+                      ]
+                    }),
+                    jsCreateElement('button', {
+                      attrs: {
+                        class: 'mailSend buttonIcon',
+                        style: 'width: fit-content;',
+                        onclick: 'sendMail(' + id + ')'
+                      },
+                      rawHtml: [
+                        '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg><div class="ml5">Send email</div>'
+                      ]
+                    })
                   ]
                 })
               ]
@@ -766,6 +783,18 @@ function saveMail(mailID) {
   });
 }
 
+async function duplicateMail(mailID) {
+  let mailData = await fetch("/api/mails/duplicate?mailID=" + mailID, {
+    method: "POST"
+  })
+  .then(manageErrors)
+  .then(response => response.json())
+  .then(data => {
+    window.location.reload();
+  });
+
+  console.log(mailData);
+}
 
 async function sendMail(mailID) {
   let lists = await fetch("/api/lists/all", {
