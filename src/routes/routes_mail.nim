@@ -168,6 +168,7 @@ proc(request: Request) =
     contentEditor = @"contentEditor"
     editorType = (if @"editorType" in ["html", "emailbuilder"]: @"editorType" else: "html")
     skipContent = (@"skipContent" == "true")
+    subject = @"subject"
 
   if not mailID.isValidInt():
     resp Http400, "Invalid UUID"
@@ -189,7 +190,8 @@ proc(request: Request) =
             "contentHTML",
             "contentEditor",
             "editorType",
-            "send_once"
+            "send_once",
+            "subject"
           ],
           where = [
             "id = ?"
@@ -202,6 +204,7 @@ proc(request: Request) =
         contentEditor,
         editorType,
         sendOnce,
+        subject,
         mailID
       ) > 0
 

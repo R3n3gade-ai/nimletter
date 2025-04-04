@@ -48,6 +48,7 @@ proc createPendingEmail*(
   triggerType: string = "delay",
   scheduledFor: DateTime = now().utc,
   status: string = "pending",
+  manualSubject: string = "",
 ) =
 
   let scheduledFor = (
@@ -82,6 +83,9 @@ proc createPendingEmail*(
   if scheduledFor != "NULL":
     data.add("scheduled_for")
     args.add(scheduledFor)
+  if manualSubject != "":
+    data.add("manual_subject")
+    args.add(manualSubject)
 
   pg.withConnection conn:
     exec(conn, sqlInsert(
@@ -104,7 +108,8 @@ proc createPendingEmailFromFlowstep*(userID, listID, flowID: string, stepNumber:
         "mail_id",
         "step_number",
         "trigger_type",
-        "delay_minutes"
+        "delay_minutes",
+        "subject"
       ],
       where = [
         "flow_id = ?",
@@ -124,7 +129,8 @@ proc createPendingEmailFromFlowstep*(userID, listID, flowID: string, stepNumber:
     mailID = flowStep[1],
     triggerType = flowStep[3],
     scheduledFor = (now().utc + parseInt(flowStep[4]).minutes),
-    status = "pending"
+    status = "pending",
+    manualSubject = flowStep[5]
   )
 
 
