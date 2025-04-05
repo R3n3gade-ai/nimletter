@@ -127,9 +127,10 @@ proc insertTestData*() =
       data = [
         "email",
         "password",
-        "salt"
+        "salt",
+        "rank"
       ]
-    ), adminEmail, passwordCreated, salt)
+    ), adminEmail, passwordCreated, salt, "admin")
 
 
 

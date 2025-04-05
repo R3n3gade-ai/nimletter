@@ -2,7 +2,7 @@
 #
 #
 #
-#proc nimfProfile(): string =
+#proc nimfProfile(c: UserData): string =
 <html>
   <head>
     <title>Nimletter</title>
@@ -18,7 +18,7 @@
   </head>
   <body class="mainbody">
     <main>
-      ${nimfSidebar()}
+      ${nimfSidebar(c)}
       <div class="content">
         <h1 id="heading">Nimletter, drip it!</h1>
         <div id="work">

@@ -139,7 +139,7 @@ proc(request: Request) =
   createTFD()
   if not c.loggedIn: redirect("/login")
 
-  resp Http200, nimfMain("dashboard")
+  resp Http200, nimfMain(c, "dashboard")
 )
 
 mainRouter.get("/contacts",
@@ -147,7 +147,7 @@ proc(request: Request) =
   createTFD()
   if not c.loggedIn: redirect("/login")
 
-  resp Http200, nimfMain()
+  resp Http200, nimfMain(c)
 )
 
 mainRouter.get("/lists",
@@ -155,7 +155,7 @@ proc(request: Request) =
   createTFD()
   if not c.loggedIn: redirect("/login")
 
-  resp Http200, nimfMain()
+  resp Http200, nimfMain(c)
 )
 
 mainRouter.get("/mails",
@@ -163,7 +163,7 @@ proc(request: Request) =
   createTFD()
   if not c.loggedIn: redirect("/login")
 
-  resp Http200, nimfMain()
+  resp Http200, nimfMain(c)
 )
 
 mainRouter.get("/flows",
@@ -171,7 +171,7 @@ proc(request: Request) =
   createTFD()
   if not c.loggedIn: redirect("/login")
 
-  resp Http200, nimfMain()
+  resp Http200, nimfMain(c)
 )
 
 mainRouter.get("/maillog",
@@ -179,7 +179,7 @@ proc(request: Request) =
   createTFD()
   if not c.loggedIn: redirect("/login")
 
-  resp Http200, nimfMain()
+  resp Http200, nimfMain(c)
 )
 
 mainRouter.get("/settings",
@@ -187,7 +187,7 @@ proc(request: Request) =
   createTFD()
   if not c.loggedIn: redirect("/login")
 
-  resp Http200, nimfMain()
+  resp Http200, nimfMain(c)
 )
 
 mainRouter.get("/events",
@@ -195,6 +195,6 @@ proc(request: Request) =
   createTFD()
   if not c.loggedIn: redirect("/login")
 
-  resp Http200, nimfEvent()
+  resp Http200, nimfEvent(c)
 )
 

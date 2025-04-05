@@ -6,7 +6,7 @@ function buildSettingsHtml() {
       jsCreateElement('div', {
         attrs: {
           class: 'tabButtons',
-          style: 'display: grid ; grid-template-columns: 1fr 1fr 1fr 1fr; width: 600px; grid-gap: 30px; margin-bottom: 60px; height: 40px;'
+          style: 'display: grid ; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; width: 600px; grid-gap: 30px; margin-bottom: 60px; height: 40px;'
         },
         children: [
           jsCreateElement('button', {
@@ -36,6 +36,13 @@ function buildSettingsHtml() {
               onclick: 'showTab("webhooks")'
             },
             children: ['Webhooks']
+          }),
+          jsCreateElement('button', {
+            attrs: {
+              class: 'tabButton w100p',
+              onclick: 'showTab("users")'
+            },
+            children: ['Users']
           })
         ]
       }),
@@ -125,6 +132,33 @@ function showTab(tab) {
       });
 
     });
+  }
+
+  if (tab == "users") {
+    buildSettingsUsers().then((html) => {
+      tabContent.appendChild(jsRender(jsCreateElement('div', { attrs: { style: "" }, children: html })));
+      labelFloater();
+
+      var objTableUsers = new Tabulator("#usersTable", {
+        height: '500px',
+        layout:"fitColumns",
+        ajaxURL:"/api/settings/users",
+        progressiveLoad:"load",
+        columns:[
+          { title: "ID", field: "id", visible: false },
+          { title: "Email", field: "email" },
+          { title: "Created At", field: "created_at" },
+          { title: "Delete", field: "delete", width: 40 }
+        ]
+      });
+
+      objTableUsers.on("cellClick", function(e, cell){
+        if (cell.getColumn().getField() == "delete") {
+          deleteUser(cell.getData().id);
+        }
+      });
+    });
+
   }
 }
 
@@ -674,6 +708,141 @@ function addWebhook() {
       webhookURL: dqs("#webhookURL").value,
       webhookEvent: dqs("#webhookEvent").value,
       webhookHeaders: dqs("#webhookHeaders").value
+    })
+  })
+  .then(manageErrors)
+  .then(() => {
+    window.location.reload();
+  });
+}
+
+
+
+/*
+
+Users
+
+*/
+
+async function buildSettingsUsers() {
+
+  let html = [];
+
+  html.push(
+    jsCreateElement('div', {
+      attrs: {
+        class: 'mb40'
+      },
+      children: [
+        jsCreateElement('div', {
+          attrs: {
+            class: 'itemBlock mb20'
+          },
+          children: [
+            jsCreateElement('label', {
+              attrs: {
+                class: 'forinput'
+              },
+              children: ["Email"]
+            }),
+            jsCreateElement('input', {
+              attrs: {
+                id: 'userEmail',
+                value: '',
+                placeholder: 'Enter email',
+                class: ''
+              }
+            }),
+          ]
+        }),
+        jsCreateElement('div', {
+          attrs: {
+            class: 'itemBlock mb20'
+          },
+          children: [
+            jsCreateElement('label', {
+              attrs: {
+                class: 'forinput'
+              },
+              children: ["Password"]
+            }),
+            jsCreateElement('input', {
+              attrs: {
+                id: 'userPassword',
+                value: '',
+                placeholder: 'Enter password',
+                class: ''
+              }
+            }),
+          ]
+        }),
+        jsCreateElement('button', {
+          attrs: {
+            id: 'user_create',
+            class: 'buttonIcon',
+            onclick: 'createUser()'
+          },
+          rawHtml: [
+            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg><div class="ml10">Add new user</div>'
+          ]
+        })
+      ]
+    })
+  );
+
+  html.push(
+    jsCreateElement('div', {
+      attrs: {
+        id: 'usersTable'
+      }
+    })
+  );
+
+  return html;
+}
+
+function deleteUser(id) {
+  const html = jsCreateElement('div', {
+    attrs: {
+    },
+    children: [
+      jsCreateElement('div', {
+        attrs: {
+          class: 'headingH3 mb20'
+        },
+        children: ["Delete user"]
+      }),
+      jsCreateElement('button', {
+        attrs: {
+          class: "buttonIcon",
+          onclick: 'deleteUserDo("' + id + '")'
+        },
+        rawHtml: [
+          '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg><div class="ml10">Delete</div>'
+        ]
+      })
+    ]
+  });
+
+  rawModalLoader(jsRender(html));
+}
+
+function deleteUserDo(id) {
+  fetch('/api/users/delete?userID=' + id, {
+    method: 'DELETE'
+  })
+  .then(manageErrors)
+  .then(() => {
+    window.location.reload();
+  });
+}
+
+function createUser() {
+  fetch('/api/users/create', {
+    method: 'POST',
+    body: new URLSearchParams({
+      email: dqs("#userEmail").value,
+      password: dqs("#userPassword").value
     })
   })
   .then(manageErrors)

@@ -206,6 +206,7 @@ CREATE TABLE IF NOT EXISTS users (
   yubikey_public      TEXT,
   yubikey_clientid    TEXT,
   twofa_app_secret    TEXT,
+  rank                TEXT DEFAULT 'user',
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

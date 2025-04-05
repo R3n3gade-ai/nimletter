@@ -118,6 +118,8 @@ settingsRouter.get("/api/settings/smtp",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401
+  if c.rank != "admin":
+    resp Http403, "You are not authorized to view SMTP settings"
 
   if getEnv("SMTP_HOST") != "":
     resp Http200, (
@@ -166,6 +168,8 @@ settingsRouter.post("/api/settings/smtp",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401
+  if c.rank != "admin":
+    resp Http403, "You are not authorized to update SMTP settings"
 
   let
     smtpHost = @"smtpHost"
@@ -321,6 +325,8 @@ settingsRouter.post("/api/settings/api/update",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401
+  if c.rank != "admin":
+    resp Http403, "You are not authorized to update API settings"
 
   let
     ident = @"ident"
@@ -351,6 +357,8 @@ settingsRouter.delete("/api/settings/api/delete",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401
+  if c.rank != "admin":
+    resp Http403, "You are not authorized to delete API settings"
 
   let
     ident = @"ident"
@@ -469,6 +477,8 @@ settingsRouter.post("/api/settings/webhooks/delete",
 proc (request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401
+  if c.rank != "admin":
+    resp Http403, "You are not authorized to delete webhook settings"
 
   let
     ident = @"ident"

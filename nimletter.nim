@@ -39,6 +39,7 @@ import
   ./src/routes/routes_profile,
   ./src/routes/routes_settings,
   ./src/routes/routes_subscriptions,
+  ./src/routes/routes_users,
   ./src/routes/routes_webhooks_sns
 
 var
@@ -62,6 +63,9 @@ for r in analyticsRouter.routes:
   routerMain.routes.add(r)
 
 for r in assetRouter.routes:
+  routerMain.routes.add(r)
+
+for r in contactsRouter.routes:
   routerMain.routes.add(r)
 
 for r in eventRouter.routes:
@@ -93,6 +97,7 @@ for r in usersRouter.routes:
 
 for r in webhooksSnsRouter.routes:
   routerMain.routes.add(r)
+
 
 
 proc scheduleStart() {.thread.} =

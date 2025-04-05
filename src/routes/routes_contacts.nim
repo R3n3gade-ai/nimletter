@@ -35,9 +35,9 @@ import
 
 
 
-var usersRouter*: Router
+var contactsRouter*: Router
 
-usersRouter.post("/api/contacts/create",
+contactsRouter.post("/api/contacts/create",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn:
@@ -52,7 +52,7 @@ proc(request: Request) =
 )
 
 
-usersRouter.post("/api/contacts/update",
+contactsRouter.post("/api/contacts/update",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn:
@@ -151,7 +151,7 @@ proc(request: Request) =
 )
 
 
-usersRouter.post("/api/contacts/meta/@action",
+contactsRouter.post("/api/contacts/meta/@action",
 proc(request: Request) =
   ## meta is JSONB. If action = add, add new, if action = remove, remove key
   createTFD()
@@ -223,7 +223,7 @@ proc(request: Request) =
 )
 
 
-usersRouter.post("/api/contacts/list/add",
+contactsRouter.post("/api/contacts/list/add",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401
@@ -266,7 +266,7 @@ proc(request: Request) =
 )
 
 
-usersRouter.post("/api/contacts/list/remove",
+contactsRouter.post("/api/contacts/list/remove",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401
@@ -336,7 +336,7 @@ proc(request: Request) =
 )
 
 
-usersRouter.delete("/api/contacts/delete",
+contactsRouter.delete("/api/contacts/delete",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401
@@ -356,7 +356,7 @@ proc(request: Request) =
 )
 
 
-usersRouter.get("/api/contacts/get",
+contactsRouter.get("/api/contacts/get",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn:
@@ -493,7 +493,7 @@ proc(request: Request) =
 )
 
 
-usersRouter.get("/api/contacts/exist",
+contactsRouter.get("/api/contacts/exist",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn:
@@ -508,7 +508,7 @@ proc(request: Request) =
 )
 
 
-usersRouter.get("/api/contacts/get/activity",
+contactsRouter.get("/api/contacts/get/activity",
 proc(request: Request) =
   ## Data from each of the tables:
   ## pending_emails, email_clicks, email_opens, email_bounces, email_complaints
@@ -697,7 +697,7 @@ proc(request: Request) =
 )
 
 
-usersRouter.get("/api/contacts/all",
+contactsRouter.get("/api/contacts/all",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401

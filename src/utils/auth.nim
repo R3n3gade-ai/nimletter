@@ -30,6 +30,7 @@ type
     req*: Request
     sessionkey*: string
     loggedInTime*: int
+    rank*: string
 
   CookieSessionName* = enum
     Default = "sidletter"
@@ -55,30 +56,30 @@ proc checkApikey*(apikey: string): bool =
 
 
 
-proc checkPasswordAndOTP*(email, password, yubikeyOTP: string): tuple[userID: string, passwordOK: bool, otpOK: bool, otpRequired: bool] =
+proc checkPasswordAndOTP*(email, password, yubikeyOTP: string): tuple[userID: string, passwordOK: bool, otpOK: bool, otpRequired: bool, rank: string] =
   var user: seq[string]
   pg.withConnection conn:
     user = getRow(conn, sqlSelect(
       table   = "users",
-      select  = ["id", "password", "salt", "yubikey_public", "yubikey_clientid"],
+      select  = ["id", "password", "salt", "yubikey_public", "yubikey_clientid", "rank"],
       where   = ["email = ?"],
     ), email)
 
   if user.len == 0 or user[0] == "":
-    return ("", false, false, false)
+    return ("", false, false, false, "")
 
   # YK not enabled
   let passOK = (user[1] == makePassword(password, user[2], user[1]))
   if user[3] == "":
-    return (user[0], passOK, false, false)
+    return (user[0], passOK, false, false, user[5])
 
   if yubikeyOTP == "":
-    return (user[0], passOK, false, true)
+    return (user[0], passOK, false, true, user[5])
 
 
   # YK enabled
   if yubikeyOTP.len != 44:
-    return (user[0], passOK, false, true)
+    return (user[0], passOK, false, true, user[5])
 
   let
     userID           = user[0]
@@ -90,7 +91,7 @@ proc checkPasswordAndOTP*(email, password, yubikeyOTP: string): tuple[userID: st
   #
   let currentPublicID = yubikeyExtractPublicID(yubikeyOTP)
   if currentPublicID == "":
-    return (user[0], passOK, false, true)
+    return (user[0], passOK, false, true, user[5])
 
   #
   # Parse DB publicIDs to JSON
@@ -99,7 +100,7 @@ proc checkPasswordAndOTP*(email, password, yubikeyOTP: string): tuple[userID: st
   try:
     ykJson = parseJson(yubikeyPublicIDs)
   except:
-    return (user[0], passOK, false, true)
+    return (user[0], passOK, false, true, user[5])
 
   #
   # Check if current publicID is in the DB
@@ -111,14 +112,14 @@ proc checkPasswordAndOTP*(email, password, yubikeyOTP: string): tuple[userID: st
       break
 
   if not ykPublicIDConfirmed:
-    return (user[0], passOK, false, true)
+    return (user[0], passOK, false, true, user[5])
 
   #
   # Validate OTP in Yubikey API
   #
   let yubikeyApproved = yubikeyValidate(yubikeyClientID, currentPublicID, yubikeyOTP)
   if not yubikeyApproved:
-    return (user[0], passOK, yubikeyApproved, true)
+    return (user[0], passOK, yubikeyApproved, true, user[5])
 
   #
   # Update last used publicID
@@ -139,7 +140,7 @@ proc checkPasswordAndOTP*(email, password, yubikeyOTP: string): tuple[userID: st
         where = ["id"]
       ), $ykJsonNew, userID)
 
-  return (user[0], passOK, yubikeyApproved, true)
+  return (user[0], passOK, yubikeyApproved, true, user[5])
 
 
 
@@ -220,6 +221,12 @@ proc checkLoggedIn*(c: var UserData) =
 
   c.loggedIn = true
   c.loggedInTime = toInt(epochTime())
+  pg.withConnection conn:
+    c.rank = getValue(conn, sqlSelect(
+      table = "users",
+      select = ["rank"],
+      where = ["id = ?"],
+    ), c.userID)
 
 
 func isLoggedIn*(c: UserData): bool =

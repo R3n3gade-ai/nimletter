@@ -37,7 +37,7 @@ profileRouter.get("/profile",
 proc(request: Request) =
   createTFD()
   if not c.loggedIn: redirect("/")
-  resp Http200, nimfProfile()
+  resp Http200, nimfProfile(c)
 )
 
 

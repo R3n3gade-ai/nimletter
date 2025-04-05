@@ -2,7 +2,7 @@
 #
 #
 #
-#proc nimfMain(page = ""): string =
+#proc nimfMain(c: UserData, page = ""): string =
 <html>
   <head>
     <title>Nimletter</title>
@@ -35,7 +35,7 @@
   </head>
   <body class="mainbody ${page}">
     <main>
-      ${nimfSidebar()}
+      ${nimfSidebar(c)}
       <div class="content">
         <h1 id="heading">Nimletter, drip it!</h1>
         <div id="work">
@@ -48,7 +48,7 @@
 #
 #
 #
-#proc nimfEvent(page = ""): string =
+#proc nimfEvent(c: UserData, page = ""): string =
 <html>
   <head>
     <title>Nimletter</title>
@@ -74,7 +74,7 @@
   </head>
   <body class="mainbody ${page}">
     <main>
-      ${nimfSidebar()}
+      ${nimfSidebar(c)}
       <div class="content">
         <h1 id="heading">Events</h1>
         <div id="work">
