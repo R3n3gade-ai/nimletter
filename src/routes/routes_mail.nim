@@ -288,7 +288,8 @@ proc(request: Request) =
             "tags",
             "category",
             "editorType",
-            "send_once"
+            "send_once",
+            "subject"
           ],
           where = [
             "id = ?"
@@ -299,6 +300,7 @@ proc(request: Request) =
         category,
         editorType,
         sendOnce,
+        subject,
         mailID
       ) > 0
 
