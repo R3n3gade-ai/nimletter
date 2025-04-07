@@ -259,10 +259,10 @@ proc(request: Request) =
         JOIN flow_steps fs ON ARRAY[fs.flow_id] <@ l.flow_ids
         WHERE fs.flow_id = ? AND fs.id = ?
         )
-        INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for)
-        SELECT user_id, list_id, ?, ?, scheduled_time
+        INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for, manual_subject, mail_id)
+        SELECT user_id, list_id, ?, ?, scheduled_time, ?, ?
         FROM subscription_info
-      """), flowID, prevStepID, flowID, newStepID)
+      """), flowID, prevStepID, flowID, newStepID, subject, mailID)
 
 
   resp Http200
