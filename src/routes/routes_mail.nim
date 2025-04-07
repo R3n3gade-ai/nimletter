@@ -542,6 +542,9 @@ proc(request: Request) =
     listID = @"listID"
     email  = @"email"
 
+  if mailID == "":
+    resp Http400, "Mail ID is required"
+
   var
     mailData: seq[string]
     contactData: seq[string]
