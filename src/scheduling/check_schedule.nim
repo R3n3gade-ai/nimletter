@@ -22,7 +22,7 @@ initLock(gPendingEmailLock)
 
 
 
-proc checkAndSendScheduledEmails*(minutesBack = 5, until = now().utc) =
+proc checkAndSendScheduledEmails*(minutesBack = 5, until = now().utc, isBackupRun = false) =
 
   acquire(gPendingEmailLock)
 
@@ -54,7 +54,7 @@ proc checkAndSendScheduledEmails*(minutesBack = 5, until = now().utc) =
         where = [
           "pending_emails.scheduled_for <= ?",
           "pending_emails.scheduled_for >= ?",
-          "pending_emails.status = 'pending'"
+          "pending_emails.status = 'pending'" & (if isBackupRun: " OR pending_emails.status = 'inprogress'" else: "")
         ]
       ),
       rightNow,
@@ -72,6 +72,8 @@ proc checkAndSendScheduledEmails*(minutesBack = 5, until = now().utc) =
         "pending_emails.status = 'pending'"
       ]
     ), "inprogress", rightNow, timeThreshold)
+
+  release(gPendingEmailLock)
 
   for pendingEmail in pendingEmails:
     echo "Sending email: " & pendingEmail[0]
@@ -94,4 +96,3 @@ proc checkAndSendScheduledEmails*(minutesBack = 5, until = now().utc) =
       manualSubject: pendingEmail[14]
     )
 
-  release(gPendingEmailLock)

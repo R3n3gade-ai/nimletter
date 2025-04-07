@@ -110,7 +110,7 @@ proc scheduleStart() {.thread.} =
 
       every(minutes=30, id="tick", throttle=2):
         echo "Backup schedule check: " & $now() & " on thread " & $getThreadId()
-        checkAndSendScheduledEmails(minutesBack = 60, until = now() - initDuration(minutes = 10))
+        checkAndSendScheduledEmails(minutesBack = 60, until = now() - initDuration(minutes = 10), isBackupRun = true)
 
 
 
