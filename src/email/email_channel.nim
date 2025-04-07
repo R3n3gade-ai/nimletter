@@ -100,7 +100,7 @@ proc sendPendingEmail(pendingEmail: PendingMailObj) =
   # Send the email
   let sendData = sendMailMimeNow(
     contactID = pendingEmail.userID,
-    subject = (if mailData[0].len() > 0: mailData[0] else: pendingEmail.manualSubject),
+    subject = (if pendingEmail.manualSubject.len > 0: pendingEmail.manualSubject else: mailData[0]),
     message = mailData[1],
     recipient = userData[1],
     mailUUID = pendingEmail.uuid
