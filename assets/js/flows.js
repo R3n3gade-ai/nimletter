@@ -622,7 +622,8 @@ function updateFlowStep(flowStepID) {
   let
     mailID = dqs("#flowStepMail_" + flowStepID).value,
     delayMinutes = dqs("#flowStepDelay_" + flowStepID).value,
-    subject = dqs("#flowStepSubject_" + flowStepID).value;
+    subject = dqs("#flowStepSubject_" + flowStepID).value,
+    triggerType = dqs("#flowStepTrigger_" + flowStepID).value;
 
   fetch("/api/flow_steps/update", {
     method: "POST",
@@ -630,7 +631,8 @@ function updateFlowStep(flowStepID) {
       flowStepID: flowStepID,
       mailID: mailID,
       delayMinutes: delayMinutes,
-      subject: subject
+      subject: subject,
+      trigger: triggerType
     })
   })
   .then(manageErrors);

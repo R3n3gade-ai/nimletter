@@ -312,6 +312,7 @@ proc(request: Request) =
     mailID       = @"mailID"
     delayMinutes = @"delayMinutes"
     subject      = @"subject"
+    triggerType  = @"trigger"
 
   if not flowStepID.isValidInt():
     resp Http400, "Invalid flow step ID"
@@ -328,10 +329,11 @@ proc(request: Request) =
         data  = [
           "mail_id",
           "delay_minutes",
-          "subject"
+          "subject",
+          "trigger_type"
         ],
         where = ["id = ?"]),
-      mailID, delayMinutes, subject, flowStepID
+      mailID, delayMinutes, subject, triggerType, flowStepID
     )
 
   resp Http200
