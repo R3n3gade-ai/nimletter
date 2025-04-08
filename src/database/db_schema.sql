@@ -173,7 +173,9 @@ CREATE TABLE IF NOT EXISTS smtp_settings (
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO smtp_settings (smtp_host, smtp_port, smtp_user, smtp_password, smtp_fromemail, smtp_fromname) VALUES ('email-smtp.eu-west-1.amazonaws.com', 465, 'AKIA', 'EXAMPLE', '', '') ON CONFLICT DO NOTHING;
+INSERT INTO smtp_settings (smtp_host, smtp_port, smtp_user, smtp_password, smtp_fromemail, smtp_fromname)
+SELECT 'email-smtp.eu-west-1.amazonaws.com', 465, 'AKIA', 'EXAMPLE', '', ''
+WHERE NOT EXISTS (SELECT 1 FROM smtp_settings);
 
 -- Table for API keys
 CREATE TABLE IF NOT EXISTS api_keys (
