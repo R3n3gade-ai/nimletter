@@ -73,6 +73,8 @@ proc createPendingEmail*(
   else:
     scheduledFor = "NULL"
 
+  echo "Scheduled for " & scheduledFor & " for user " & userID
+
   var args = @[userID]
   var data = @["user_id"]
   if listID != "":
@@ -109,8 +111,7 @@ proc createPendingEmail*(
 
 proc createPendingEmailFromFlowstep*(userID, listID, flowID: string, stepNumber: int) =
 
-  when defined(dev):
-    echo "Creating pending email from flowID " & flowID & " and step " & $stepNumber
+  echo "Creating pending email from flowID " & flowID & " and step " & $stepNumber & " for user " & userID
 
   var flowStep: seq[string]
   pg.withConnection conn:

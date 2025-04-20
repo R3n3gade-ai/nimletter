@@ -63,7 +63,7 @@ proc getUserData(userID: string): seq[string] =
 
 proc getMailData(flowStepID: string): string =
   pg.withConnection conn:
-    return getValue(conn, sqlSelect(
+    result = getValue(conn, sqlSelect(
       table = "flow_steps",
       select = [
         "flow_steps.step_number",
@@ -96,7 +96,7 @@ proc sendPendingEmail(pendingEmail: PendingMailObj) =
         ]
       ), pendingEmail.mailID)
 
-
+  echo "Email being sent to " & userData[1]
   # Send the email
   let sendData = sendMailMimeNow(
     contactID = pendingEmail.userID,
