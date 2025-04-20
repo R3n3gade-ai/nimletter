@@ -51,11 +51,11 @@ proc createPendingEmail*(
   scheduledTime: string = "",
 ) =
 
-  var scheduledFor: string
+  var scheduledForFormatted: string
   if triggerType == "delay":
-    scheduledFor = $scheduledFor.format("yyyy-MM-dd HH:mm:ss")
+    scheduledForFormatted = $scheduledFor.format("yyyy-MM-dd HH:mm:ss")
   elif triggerType == "immediate":
-    scheduledFor = $(now().utc).format("yyyy-MM-dd HH:mm:ss")
+    scheduledForFormatted = $(now().utc).format("yyyy-MM-dd HH:mm:ss")
   elif triggerType == "time":
     if scheduledTime != "":
       # Combine current date with the scheduled time
@@ -65,15 +65,15 @@ proc createPendingEmail*(
 
       # If the time has already passed today, schedule for tomorrow
       if scheduledDateTime < now().utc:
-        scheduledFor = $(scheduledDateTime + 1.days).format("yyyy-MM-dd HH:mm:ss")
+        scheduledForFormatted = $(scheduledDateTime + 1.days).format("yyyy-MM-dd HH:mm:ss")
       else:
-        scheduledFor = $scheduledDateTime.format("yyyy-MM-dd HH:mm:ss")
+        scheduledForFormatted = $scheduledDateTime.format("yyyy-MM-dd HH:mm:ss")
     else:
-      scheduledFor = $(now().utc).format("yyyy-MM-dd HH:mm:ss")
+      scheduledForFormatted = $(now().utc).format("yyyy-MM-dd HH:mm:ss")
   else:
-    scheduledFor = "NULL"
+    scheduledForFormatted = "NULL"
 
-  echo "Scheduled for " & scheduledFor & " for user " & userID
+  echo "Scheduled for " & scheduledForFormatted & " for user " & userID
 
   var args = @[userID]
   var data = @["user_id"]
@@ -95,9 +95,9 @@ proc createPendingEmail*(
   if status != "":
     data.add("status")
     args.add(status)
-  if scheduledFor != "NULL":
+  if scheduledForFormatted != "NULL":
     data.add("scheduled_for")
-    args.add(scheduledFor)
+    args.add(scheduledForFormatted)
   if manualSubject != "":
     data.add("manual_subject")
     args.add(manualSubject)
