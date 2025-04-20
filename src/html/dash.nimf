@@ -252,9 +252,35 @@ curl -X POST \
     http://localhost:5555/api/event
   </pre>
 </div>
-          </div>
-
-        </div>
+<div>
+  <b>Add contact to list:</b>
+  <pre>
+  curl -X POST \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -d '{
+      "event": "contact-add-to-list",
+      "email": "mail@nimletter.com",
+      "list": "list-identifier",
+      "flowStep": 1
+    }' \
+    http://localhost:5555/api/event
+  </pre>
+</div>
+<div>
+  <b>Remove contact from list:</b>
+  <pre>
+  curl -X POST \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -d '{
+      "event": "contact-remove-from-list",
+      "email": "mail@nimletter.com",
+      "list": "list-identifier"
+    }' \
+    http://localhost:5555/api/event
+  </pre>
+</div>
       </div>
     </main>
   </body>

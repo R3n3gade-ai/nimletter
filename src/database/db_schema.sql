@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS flow_steps (
   step_number         INT NOT NULL,  -- Sequence of steps in the flow
   trigger_type        TEXT DEFAULT 'delay', -- open, linkclick, delay, etc.
   delay_minutes       INT NOT NULL DEFAULT 0, -- Delay from the previous step
+  scheduled_time      TIME DEFAULT NULL, -- Specific time to schedule the email (in GMT0)
   name                TEXT NOT NULL, -- Name of the step
   subject             TEXT NOT NULL, -- Email subject for this step
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

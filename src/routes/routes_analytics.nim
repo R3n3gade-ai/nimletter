@@ -26,6 +26,7 @@ proc(request: Request) =
   if not c.loggedIn: resp Http401
 
   var data: seq[seq[string]]
+  var dataPending: seq[seq[string]]
   var openData: seq[seq[string]]
   var clickData: seq[seq[string]]
   pg.withConnection conn:
@@ -41,6 +42,20 @@ proc(request: Request) =
         customSQL = """
           WHERE created_at >= current_date - interval '20 days'
           AND created_at <= current_date + interval '7 days'
+          GROUP BY day
+          ORDER BY day
+        """
+      ))
+
+    dataPending = getAllRows(conn, sqlSelect(
+        table = "pending_emails",
+        select = [
+          "to_char(date_trunc('day', scheduled_for), 'YYYY-MM-DD') AS day",
+          "COUNT(*) FILTER (WHERE status = 'pending') AS pending"
+        ],
+        customSQL = """
+          WHERE scheduled_for >= current_date - interval '20 days'
+          AND scheduled_for <= current_date + interval '7 days'
           GROUP BY day
           ORDER BY day
         """
@@ -101,10 +116,15 @@ proc(request: Request) =
   for row in data:
     let idx = days.find(row[0])
     if idx >= 0:
-      pending[idx] = row[1].parseInt
+      #pending[idx] = row[1].parseInt
       sent[idx] = row[2].parseInt
       bounced[idx] = row[3].parseInt
       complained[idx] = row[4].parseInt
+
+  for row in dataPending:
+    let idx = days.find(row[0])
+    if idx >= 0:
+      pending[idx] = row[1].parseInt
 
   for row in openData:
     let idx = days.find(row[0])

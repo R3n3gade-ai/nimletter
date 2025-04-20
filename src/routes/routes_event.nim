@@ -16,6 +16,7 @@ import
   ../database/database_connection,
   ../utils/auth,
   ../utils/contacts_utils,
+  ../utils/list_utils,
   ../utils/validate_data
 
 
@@ -215,6 +216,47 @@ proc(request: Request) =
 
     resp Http200, data.data
 
+
+  of "contact-add-to-list":
+    let userID = getUserIDfromEmail(email)
+    if userID == "":
+      resp Http400, "User not found"
+    let listID = listIDfromIdentifier(if data.hasKey("list"): data["list"].getStr() else: "")
+    var flowStep = if data.hasKey("flowStep"): data["flowStep"].getInt() else: 1
+    if listID == "":
+      resp Http400, "List identifier required"
+    if flowStep == 0:
+      flowStep = 1
+
+    let data = addContactToList(userID, listID, flowStep)
+    if not data:
+      resp Http400, %* {
+        "success": false,
+        "message": "Failed to add contact to list"
+      }
+
+    resp Http200, %* {
+      "success": true,
+      "message": "Contact added to list"
+    }
+
+
+  of "contact-remove-from-list":
+    let userID = getUserIDfromEmail(email)
+    if userID == "":
+      resp Http400, "User not found"
+    let listID = listIDfromIdentifier(if data.hasKey("list"): data["list"].getStr() else: "")
+    if listID == "":
+      resp Http400, "List identifier required"
+
+    let data = contactRemoveFromList(userID, listID, "")
+    if not data.success:
+      resp Http400, %* {
+        "success": false,
+        "message": data.msg
+      }
+
+    resp Http200, data.data
 
   else:
     resp Http400, "Invalid event"

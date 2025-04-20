@@ -1,4 +1,3 @@
-
 import
   std/[
     strutils,
@@ -49,16 +48,30 @@ proc createPendingEmail*(
   scheduledFor: DateTime = now().utc,
   status: string = "pending",
   manualSubject: string = "",
+  scheduledTime: string = "",
 ) =
 
-  let scheduledFor = (
-      if triggerType == "delay":
-        $scheduledFor.format("yyyy-MM-dd HH:mm:ss")
-      elif triggerType == "immediate":
-        $(now().utc).format("yyyy-MM-dd HH:mm:ss")
+  var scheduledFor: string
+  if triggerType == "delay":
+    scheduledFor = $scheduledFor.format("yyyy-MM-dd HH:mm:ss")
+  elif triggerType == "immediate":
+    scheduledFor = $(now().utc).format("yyyy-MM-dd HH:mm:ss")
+  elif triggerType == "time":
+    if scheduledTime != "":
+      # Combine current date with the scheduled time
+      let today = now().utc
+      let timeParts = scheduledTime.split(":")
+      let scheduledDateTime = dateTime( today.year, today.month, today.monthday, parseInt(timeParts[0]), parseInt(timeParts[1]), 0, zone = utc() )
+
+      # If the time has already passed today, schedule for tomorrow
+      if scheduledDateTime < now().utc:
+        scheduledFor = $(scheduledDateTime + 1.days).format("yyyy-MM-dd HH:mm:ss")
       else:
-        "NULL"
-    )
+        scheduledFor = $scheduledDateTime.format("yyyy-MM-dd HH:mm:ss")
+    else:
+      scheduledFor = $(now().utc).format("yyyy-MM-dd HH:mm:ss")
+  else:
+    scheduledFor = "NULL"
 
   var args = @[userID]
   var data = @["user_id"]
@@ -109,7 +122,8 @@ proc createPendingEmailFromFlowstep*(userID, listID, flowID: string, stepNumber:
         "step_number",
         "trigger_type",
         "delay_minutes",
-        "subject"
+        "subject",
+        "scheduled_time"
       ],
       where = [
         "flow_id = ?",
@@ -130,7 +144,8 @@ proc createPendingEmailFromFlowstep*(userID, listID, flowID: string, stepNumber:
     triggerType = flowStep[3],
     scheduledFor = (now().utc + parseInt(flowStep[4]).minutes),
     status = "pending",
-    manualSubject = flowStep[5]
+    manualSubject = flowStep[5],
+    scheduledTime = flowStep[6]
   )
 
 

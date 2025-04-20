@@ -221,12 +221,14 @@ proc checkLoggedIn*(c: var UserData) =
 
   c.loggedIn = true
   c.loggedInTime = toInt(epochTime())
-  pg.withConnection conn:
-    c.rank = getValue(conn, sqlSelect(
-      table = "users",
-      select = ["rank"],
-      where = ["id = ?"],
-    ), c.userID)
+
+  if not apiCall:
+    pg.withConnection conn:
+      c.rank = getValue(conn, sqlSelect(
+        table = "users",
+        select = ["rank"],
+        where = ["id = ?"],
+      ), c.userID)
 
 
 func isLoggedIn*(c: UserData): bool =

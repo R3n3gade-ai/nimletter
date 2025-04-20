@@ -165,7 +165,7 @@ proc(request: Request) =
   for row in data:
     let sentCount = row[5].parseInt()
     let openCount = row[7].parseInt()
-    let openingRate = if sentCount > 0: (openCount.float / sentCount.float) * 100 else: 0.0
+    let openingRate = toInt(if sentCount > 0: (openCount.float / sentCount.float) * 100 else: 0.0)
 
     respData.add(
       %* {
@@ -203,6 +203,7 @@ proc(request: Request) =
     delayMinutes = @"delay"
     subject      = @"subject"
     triggerType  = @"trigger"
+    scheduledTime = if triggerType == "time": @"scheduledTime" else: ""
 
   if name.strip() == "":
     resp Http400, "Subject is required"
@@ -210,6 +211,8 @@ proc(request: Request) =
   if not mailID.isValidInt():
     resp Http400, "Invalid mail ID"
 
+  if triggerType == "time" and scheduledTime == "":
+    resp Http400, "Scheduled time is required"
 
   pg.withConnection conn:
 
@@ -222,18 +225,37 @@ proc(request: Request) =
     if stepNumberRaw.len > 0:
       stepNumber = stepNumberRaw.parseInt() + 1
 
+
+    var
+      queryData = @[
+        "flow_id",
+        "name",
+        "mail_id",
+        "step_number",
+        "delay_minutes",
+        "subject",
+        "trigger_type"
+      ]
+    if triggerType == "time":
+      queryData.add("scheduled_time")
+
+    var
+      queryArgs = @[
+        flowID,
+        name,
+        mailID,
+        $stepNumber,
+        delayMinutes,
+        subject,
+        triggerType
+      ]
+    if triggerType == "time":
+      queryArgs.add(scheduledTime)
+
     let newStepID = insertID(conn, sqlInsert(
         table = "flow_steps",
-        data  = [
-          "flow_id",
-          "name",
-          "mail_id",
-          "step_number",
-          "delay_minutes",
-          "subject",
-          "trigger_type"
-        ]),
-        flowID, name, mailID, stepNumber, delayMinutes, subject, triggerType
+        data  = queryData),
+        queryArgs
     )
 
 
@@ -251,18 +273,41 @@ proc(request: Request) =
           where  = ["flow_id = ?", "step_number = ?"]
         ), flowID, prevStepNumber)
 
-      exec(conn, sql("""
-        WITH subscription_info AS (
-        SELECT s.user_id, s.list_id, NOW() + (fs.delay_minutes || ' minutes')::INTERVAL AS scheduled_time
-        FROM subscriptions s
-        JOIN lists l ON s.list_id = l.id
-        JOIN flow_steps fs ON ARRAY[fs.flow_id] <@ l.flow_ids
-        WHERE fs.flow_id = ? AND fs.id = ?
-        )
-        INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for, manual_subject, mail_id)
-        SELECT user_id, list_id, ?, ?, scheduled_time, ?, ?
-        FROM subscription_info
-      """), flowID, prevStepID, flowID, newStepID, subject, mailID)
+
+      if triggerType == "time":
+        # For time-based scheduling, use the scheduled time
+        exec(conn, sql("""
+          WITH subscription_info AS (
+          SELECT s.user_id, s.list_id,
+            CASE
+              WHEN ?::time < CURRENT_TIME THEN
+                (CURRENT_DATE + 1 + ?::time)::timestamp
+              ELSE
+                (CURRENT_DATE + ?::time)::timestamp
+            END as scheduled_time
+          FROM subscriptions s
+          JOIN lists l ON s.list_id = l.id
+          JOIN flow_steps fs ON ARRAY[fs.flow_id] <@ l.flow_ids
+          WHERE fs.flow_id = ? AND fs.id = ?
+          )
+          INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for, manual_subject, mail_id)
+          SELECT user_id, list_id, ?, ?, scheduled_time, ?, ?
+          FROM subscription_info
+        """), scheduledTime, scheduledTime, scheduledTime, flowID, prevStepID, flowID, newStepID, subject, mailID)
+      else:
+        # For delay-based scheduling, use the delay minutes
+        exec(conn, sql("""
+          WITH subscription_info AS (
+          SELECT s.user_id, s.list_id, NOW() + (fs.delay_minutes || ' minutes')::INTERVAL AS scheduled_time
+          FROM subscriptions s
+          JOIN lists l ON s.list_id = l.id
+          JOIN flow_steps fs ON ARRAY[fs.flow_id] <@ l.flow_ids
+          WHERE fs.flow_id = ? AND fs.id = ?
+          )
+          INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for, manual_subject, mail_id)
+          SELECT user_id, list_id, ?, ?, scheduled_time, ?, ?
+          FROM subscription_info
+        """), flowID, prevStepID, flowID, newStepID, subject, mailID)
 
 
   resp Http200
@@ -282,7 +327,7 @@ proc(request: Request) =
   pg.withConnection conn:
     data = getRow(conn, sqlSelect(
         table   = "flow_steps",
-        select  = ["id", "flow_id", "mail_id", "step_number", "trigger_type", "delay_minutes", "subject", "created_at"],
+        select  = ["id", "flow_id", "mail_id", "step_number", "trigger_type", "delay_minutes", "scheduled_time", "subject", "created_at"],
         where   = ["id = ?"]
       ), flowStepID)
 
@@ -294,8 +339,9 @@ proc(request: Request) =
       "step_number": data[3],
       "trigger_type": data[4],
       "delay_minutes": data[5],
-      "subject": data[6],
-      "created_at": data[7]
+      "scheduled_time": data[6],
+      "subject": data[7],
+      "created_at": data[8]
     }
   )
 )
@@ -313,6 +359,7 @@ proc(request: Request) =
     delayMinutes = @"delayMinutes"
     subject      = @"subject"
     triggerType  = @"trigger"
+    scheduledTime = if triggerType == "time": @"scheduledTime" else: ""
 
   if not flowStepID.isValidInt():
     resp Http400, "Invalid flow step ID"
@@ -323,18 +370,34 @@ proc(request: Request) =
   if not delayMinutes.isValidInt():
     resp Http400, "Invalid delay minutes"
 
+  var
+    queryData = @[
+      "mail_id",
+      "delay_minutes",
+      "subject",
+      "trigger_type"
+    ]
+  if triggerType == "time":
+    if scheduledTime == "":
+      queryData.add("scheduled_time = NULL")
+    else:
+      queryData.add("scheduled_time")
+
+  var
+    queryArgs = @[
+      mailID, delayMinutes, subject, triggerType
+    ]
+  if triggerType == "time" and scheduledTime.len() > 0:
+    queryArgs.add(scheduledTime)
+
+  queryArgs.add(flowStepID)
+
   pg.withConnection conn:
     exec(conn, sqlUpdate(
         table = "flow_steps",
-        data  = [
-          "mail_id",
-          "delay_minutes",
-          "subject",
-          "trigger_type"
-        ],
+        data  = queryData,
         where = ["id = ?"]),
-      mailID, delayMinutes, subject, triggerType, flowStepID
-    )
+    queryArgs)
 
   resp Http200
 )
@@ -549,7 +612,8 @@ proc(request: Request) =
           "to_char(flow_steps.updated_at, 'YYYY-MM-DD HH24:MI:SS') as updated_at",
           "mails.name",
           "(SELECT COUNT(*) FROM pending_emails WHERE pending_emails.flow_step_id = flow_steps.id AND pending_emails.status = 'pending') as pending_count",
-          "(SELECT COUNT(*) FROM pending_emails WHERE pending_emails.flow_step_id = flow_steps.id AND pending_emails.status = 'sent') as sent_count"
+          "(SELECT COUNT(*) FROM pending_emails WHERE pending_emails.flow_step_id = flow_steps.id AND pending_emails.status = 'sent') as sent_count",
+          "flow_steps.scheduled_time"
         ],
         joinargs = [
           (table: "mails", tableAs: "", on: @["mails.id = flow_steps.mail_id"])
@@ -577,7 +641,8 @@ proc(request: Request) =
         "updated_at": row[9],
         "mail_name": row[10],
         "pending_count": row[11].parseInt(),
-        "sent_count": row[12].parseInt()
+        "sent_count": row[12].parseInt(),
+        "scheduled_time": row[13]
       }
     )
 

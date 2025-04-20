@@ -143,6 +143,34 @@ proc addContactToList*(userID, listID: string, flowStep = 1): bool =
 
   return result
 
+proc addContactToListBody*(body: string): tuple[success: bool, msg: string, data: JsonNode] =
+  var
+    userID, listID: string
+    flowStep: int
+
+  try:
+    let jsonBody = parseJson(body)
+    userID  = jsonBody.getOrDefault("userID").getStr().strip()
+    listID  = jsonBody.getOrDefault("listID").getStr().strip()
+    flowStep = jsonBody.getOrDefault("flowStep").getInt()
+  except:
+    return (false, "Invalid JSON", nil)
+
+  if flowStep == 0:
+    flowStep = 1
+
+  let data = addContactToList(userID, listID, flowStep)
+  if not data:
+    return (false, "Failed to add contact to list", nil)
+
+  return (true, "", %* {
+    "success": true,
+    "event": "contact_added_to_list",
+    "userID": userID,
+    "listID": listID,
+    "flowStep": flowStep
+  })
+
 
 proc createContact*(email, name: string, requiresDoubleOptIn: bool, listIDs: seq[string], ip: string = ""): (bool, string) =
 
@@ -405,3 +433,104 @@ proc contactUpdateMeta*(body: string): tuple[success: bool, msg: string, data: J
     }
 
   return (true, "", data)
+
+
+
+proc contactRemoveFromList*(userID, listID, listType: string): tuple[success: bool, msg: string, data: JsonNode] =
+  if not userID.isValidInt():
+    return (false, "Invalid user ID", nil)
+
+  if not listID.isValidInt():
+    return (false, "Invalid list ID", nil)
+
+  if listType == "pending":
+    # Remove int from array pendinglists
+    pg.withConnection conn:
+      exec(conn, sqlUpdate(
+          table = "contacts",
+          data  = [
+            "pending_lists = array_remove(pending_lists, ?)",
+            "updated_at",
+          ],
+          where = ["id = ?"]
+        ),
+        listID,
+        $now().utc,
+        userID
+      )
+
+    return (true, "", %* {
+      "success": true,
+      "event": "contact_removed_from_list",
+      "userID": userID,
+      "listID": listID,
+      "listType": listType
+    })
+
+  #
+  # Get potential flow, so we can stop pending emails
+  #
+  pg.withConnection conn:
+    let flowIDs = getValue(conn, sqlSelect(
+        table = "lists",
+        select = ["array_to_string(lists.flow_ids, ',') as flows"],
+        where = ["id = ?"]
+      ), listID)
+
+    if flowIDs != "":
+      for flowID in flowIDs.split(","):
+        exec(conn, sqlUpdate(
+            table = "pending_emails",
+            data  = [
+              "status = 'cancelled'",
+              "scheduled_for = NULL",
+              "updated_at = ?"
+            ],
+            where = [
+              "user_id = ?",
+              "flow_id = ?",
+              "status = 'pending'"
+            ]
+          ),
+          $now().utc, userID, flowID)
+
+    exec(conn, sqlDelete(
+        table = "subscriptions",
+        where = ["user_id = ?", "list_id = ?"]),
+        userID, listID
+      )
+
+  return (true, "", %* {
+    "success": true,
+    "event": "contact_removed_from_list",
+    "userID": userID,
+    "listID": listID,
+    "listType": listType
+  })
+
+
+proc contactRemoveFromListBody*(body: string): tuple[success: bool, msg: string, data: JsonNode] =
+  var
+    userID, listID, listType: string
+
+  try:
+    let jsonBody = parseJson(body)
+
+    userID  = jsonBody.getOrDefault("userID").getStr().strip()
+    listID  = jsonBody.getOrDefault("listID").getStr().strip()
+    listType = jsonBody.getOrDefault("listType").getStr().strip()
+  except:
+    return (false, "Invalid JSON", nil)
+
+  let data = contactRemoveFromList(userID, listID, listType)
+  if not data.success:
+    return (false, data.msg, nil)
+
+  return (true, "", %* {
+    "success": true,
+    "event": "contact_removed_from_list",
+    "userID": userID,
+    "listID": listID,
+    "listType": listType
+  })
+

@@ -1,5 +1,3 @@
-
-
 let
   globalFlowID,
   globalFlowStepsData = [];
@@ -27,7 +25,7 @@ function addFlow() {
             attrs: {
               class: 'forinput'
             },
-            children: ['List name']
+            children: ['Flow name']
           }),
           jsCreateElement('input', {
             attrs: {
@@ -240,6 +238,13 @@ async function buildFlowHTML(data) {
       },
       children: ['Click link in previous mail']
     }));
+    triggerOpts.push(jsCreateElement('option', {
+      attrs: {
+        value: 'time',
+        selected: (step.trigger_type == 'time') ? "selected" : false
+      },
+      children: ['Specific time']
+    }));
 
 
     //
@@ -348,7 +353,16 @@ async function buildFlowHTML(data) {
                         jsCreateElement('input', {
                           attrs: {
                             id: "flowStepDelay_" + step.id,
-                            value: step.delay_minutes
+                            value: step.delay_minutes,
+                            style: step.trigger_type == 'time' ? 'display: none;' : ''
+                          },
+                        }),
+                        jsCreateElement('input', {
+                          attrs: {
+                            id: "flowStepTime_" + step.id,
+                            type: 'time',
+                            value: step.scheduled_time || '',
+                            style: step.trigger_type == 'time' ? '' : 'display: none;'
                           },
                         })
                       ]
@@ -401,6 +415,20 @@ async function buildFlowHTML(data) {
   let inputs = document.querySelectorAll("input, select");
   for (let i = 0; i < inputs.length; i++) {
     inputs[i].addEventListener("change", function() {
+      // Check if this is a trigger type selection
+      if (this.id.startsWith("flowStepTrigger_")) {
+        const stepId = this.id.split("_")[1];
+        // Show/hide time or delay input based on trigger type
+        if (this.value === "time") {
+          document.getElementById("flowStepTime_" + stepId).style.display = "";
+          document.getElementById("flowStepDelay_" + stepId).style.display = "none";
+        } else {
+          document.getElementById("flowStepTime_" + stepId).style.display = "none";
+          document.getElementById("flowStepDelay_" + stepId).style.display = "";
+        }
+      }
+      
+      // Call updateFlowStep for all changes
       updateFlowStep(this.id.split("_")[1]);
     });
   }
@@ -535,6 +563,12 @@ async function addFlowStep() {
                   value: 'click'
                 },
                 children: ['Click link in previous mail']
+              }),
+              jsCreateElement('option', {
+                attrs: {
+                  value: 'time'
+                },
+                children: ['Specific time']
               })
             ]
           })
@@ -559,11 +593,19 @@ async function addFlowStep() {
               min: '10'
             }
           }),
+          jsCreateElement('input', {
+            attrs: {
+              type: 'time',
+              id: 'flowStepTime',
+              value: '',
+              style: 'display: none;'
+            }
+          }),
           jsCreateElement('div', {
             attrs: {
               style: "font-size: 12px;"
             },
-            children: ['Minimum time is 10 minutes. Emails will be scheduled as soon as the step is added.']
+            children: ['Minimum time is 2 minutes. Emails will be scheduled as soon as the step is added.']
           })
         ]
       }),
@@ -586,6 +628,17 @@ async function addFlowStep() {
   labelFloater();
   setTimeout(() => {
     dqs("#flowStepName").focus();
+
+    // Set the trigger type to delay by default
+    dqs("#flowStepTrigger").addEventListener("change", function() {
+      if (this.value === "time") {
+        dqs("#flowStepTime").style.display = "";
+        dqs("#flowStepDelay").style.display = "none";
+      } else {
+        dqs("#flowStepTime").style.display = "none";
+        dqs("#flowStepDelay").style.display = "";
+      }
+    });
   }, 100);
 }
 
@@ -596,7 +649,8 @@ function addFlowStepDo() {
     mailID = dqs("#flowStepMail").value,
     subject = dqs("#flowStepSubject").value,
     trigger = dqs("#flowStepTrigger").value,
-    delay = dqs("#flowStepDelay").value;
+    delay = dqs("#flowStepDelay").value,
+    time = dqs("#flowStepTime").value;
 
   fetch("/api/flow_steps/create", {
     method: "POST",
@@ -606,7 +660,8 @@ function addFlowStepDo() {
       mailID: mailID,
       subject: subject,
       trigger: trigger,
-      delay: delay
+      delay: delay,
+      scheduledTime: time
     })
   })
   .then(manageErrors)
@@ -623,7 +678,8 @@ function updateFlowStep(flowStepID) {
     mailID = dqs("#flowStepMail_" + flowStepID).value,
     delayMinutes = dqs("#flowStepDelay_" + flowStepID).value,
     subject = dqs("#flowStepSubject_" + flowStepID).value,
-    triggerType = dqs("#flowStepTrigger_" + flowStepID).value;
+    triggerType = dqs("#flowStepTrigger_" + flowStepID).value,
+    scheduledTime = dqs("#flowStepTime_" + flowStepID).value;
 
   fetch("/api/flow_steps/update", {
     method: "POST",
@@ -632,7 +688,8 @@ function updateFlowStep(flowStepID) {
       mailID: mailID,
       delayMinutes: delayMinutes,
       subject: subject,
-      trigger: triggerType
+      trigger: triggerType,
+      scheduledTime: scheduledTime
     })
   })
   .then(manageErrors);

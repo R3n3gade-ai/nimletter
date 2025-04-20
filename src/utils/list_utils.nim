@@ -22,6 +22,9 @@ import
 
 
 proc listIDfromIdentifier*(listIdentifer: string): string =
+  if listIdentifer == "":
+    return ""
+
   pg.withConnection conn:
     result = getValue(conn, sqlSelect(
         table = "lists",

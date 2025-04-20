@@ -276,61 +276,9 @@ proc(request: Request) =
     listID = @"listID"
     listType = @"listType"
 
-  if not userID.isValidInt():
-    resp Http400, "Invalid user ID"
-
-  if not listID.isValidInt():
-    resp Http400, "Invalid list ID"
-
-  if listType == "pending":
-    # Remove int from array pendinglists
-    pg.withConnection conn:
-      exec(conn, sqlUpdate(
-          table = "contacts",
-          data  = [
-            "pending_lists = array_remove(pending_lists, ?)",
-            "updated_at",
-          ],
-          where = ["id = ?"]
-        ),
-        listID,
-        $now().utc,
-        userID
-      )
-
-    resp Http200
-  #
-  # Get potential flow, so we can stop pending emails
-  #
-  pg.withConnection conn:
-    let flowIDs = getValue(conn, sqlSelect(
-        table = "lists",
-        select = ["array_to_string(lists.flow_ids, ',') as flows"],
-        where = ["id = ?"]
-      ), listID)
-
-    if flowIDs != "":
-      for flowID in flowIDs.split(","):
-        exec(conn, sqlUpdate(
-            table = "pending_emails",
-            data  = [
-              "status = 'cancelled'",
-              "scheduled_for = NULL",
-              "updated_at = ?"
-            ],
-            where = [
-              "user_id = ?",
-              "flow_id = ?",
-              "status = 'pending'"
-            ]
-          ),
-          $now().utc, userID, flowID)
-
-    exec(conn, sqlDelete(
-        table = "subscriptions",
-        where = ["user_id = ?", "list_id = ?"]),
-        userID, listID
-      )
+  let data = contactRemoveFromList(userID, listID, listType)
+  if not data.success:
+    resp Http400, data.msg
 
   resp Http200
 )

@@ -460,7 +460,7 @@ proc(request: Request) =
         "pending_emails.flow_id",
         "pending_emails.flow_step_id",
         "pending_emails.trigger_type",
-        "pending_emails.scheduled_for",
+        "to_char(pending_emails.scheduled_for, 'YYYY-MM-DD HH24:MI:SS TZ') as scheduled_for",
         "pending_emails.status",
         "pending_emails.message_id",
         "pending_emails.sent_at",
