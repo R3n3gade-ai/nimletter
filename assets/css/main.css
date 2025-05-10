@@ -407,7 +407,11 @@ label.labelBold {
 }
 .modalpop.emailbuilder {
   max-height: 100vh;
-  padding: 20px 0;
+  padding: 0;
+}
+.modalpop.emailbuilder .modal-content {
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 .modalpop.show {
   display: block;
@@ -752,10 +756,15 @@ body.mainbody #mailEditPreview * {
   font-weight: inherit;
 }
 
+body.mainbody #rootArea strong,
+body.mainbody #mailEditPreview strong {
+  font-weight: 500;
+}
+
 #rootArea {
   position: relative;
   width: 90vw;
-  height: 90vh;
+  height: 100vh;
   overflow: hidden;
   border: 1px solid var(--colorN40);
 }
