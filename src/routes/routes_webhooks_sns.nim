@@ -340,12 +340,13 @@ proc(request: Request) =
     resp Http400
 
   var mailID: string
-  pg.withConnection conn:
-    mailID = getValue(conn, sqlSelect(
-      table   = "pending_emails",
-      select  = ["message_id"],
-      where   = ["uuid = ?"]
-    ), mailuuid)
+  if mailuuid.isValidUUID():
+    pg.withConnection conn:
+      mailID = getValue(conn, sqlSelect(
+        table   = "pending_emails",
+        select  = ["message_id"],
+        where   = ["uuid = ?"]
+      ), mailuuid)
 
   if mailID == "" and @"action" == "open":
     acquire(gFilecacheLock)

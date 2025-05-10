@@ -33,7 +33,7 @@ proc(request: Request) =
 
   let
     name    = @"name"
-    identifier = (if @"identifier" == "": name.toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) else: @"identifier".replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}))
+    identifier = (if @"identifier" == "": name.toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) else: @"identifier".replace(" ", "-").subStr(0, 100).strip(chars={'-', '_'}))
     description = @"description"
     flowIDRaw   = @"flowID"
     requireOptIn = @"requireOptIn" == "true"
@@ -159,7 +159,7 @@ proc(request: Request) =
   let
     listID   = @"listID"
     name     = @"name"
-    identifier  = (if @"identifier" == "": name.toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) else: @"identifier".replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}))
+    identifier  = (if @"identifier" == "": name.toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) else: @"identifier".replace(" ", "-").subStr(0, 100).strip(chars={'-', '_'}))
     description = @"description"
     requireOptIn = @"requireOptIn" == "true"
 

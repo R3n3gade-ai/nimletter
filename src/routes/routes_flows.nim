@@ -569,6 +569,9 @@ proc(request: Request) =
     let
       newFlowStepID = newFlowData[0]
 
+    if newFlowStepID == "":
+      resp Http200
+
     exec(conn, sql("""
       WITH subscription_info AS (
       SELECT s.user_id, s.list_id, NOW() + (fs.delay_minutes || ' minutes')::INTERVAL AS scheduled_time

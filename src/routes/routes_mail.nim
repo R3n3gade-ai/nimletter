@@ -231,7 +231,7 @@ proc(request: Request) =
   let
     mailID  = @"mailID"
     name      = @"name".strip()
-    identifier = (if @"identifier" == "": name.toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) else: @"identifier".replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}))
+    identifier = (if @"identifier" == "": name.toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) else: @"identifier".replace(" ", "-").subStr(0, 100).strip(chars={'-', '_'}))
     tags      = @"tags"
     category  = @"category"
     sendOnce  = (if @"sendOnce" == "true": true else: false)
