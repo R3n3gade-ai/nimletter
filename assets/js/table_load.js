@@ -120,7 +120,7 @@ function tableContacts() {
       let lists = cell.getValue().split(", ");
       let html = "";
       lists.forEach(list => {
-        html += `<div style="font-size: 12px; border: 1px solid var(--colorN100); border-radius: 10px; padding: 0px 6px; background-color: var(--colorN20); margin-right: 5px;">${list}</div>`;
+        html += `<div style="font-size: 10px; border: 1px solid var(--colorN100); border-radius: 10px; padding: 0px 6px; background-color: var(--colorN20); margin-right: 5px;white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;" title="${list}">${list}</div>`;
       });
       return '<div style="display: flex">' + html + '</div>';
       }},
@@ -169,15 +169,16 @@ function tableMails() {
     ajaxURL:"/api/mails/all",
     progressiveLoad:"load",
     initialSort:[
+      {column:"category", dir:"asc"},
       {column:"name", dir:"asc"}
     ],
     // rowHeight:50,
     columns:[
       {title:"ID", field:"id", vertAlign: "middle", width:60, headerFilter:true},
+      {title:"Category", field:"category", vertAlign: "middle", width:200, headerFilter:true},
+      {title:"Identifier", field:"identifier", vertAlign: "middle", width:140, headerFilter:true},
       {title:"Name", field:"name", vertAlign: "middle", minWidth:200, headerFilter:true},
       {title:"Subject", field:"subject", vertAlign: "middle", minWidth:250, headerFilter:true},
-      {title:"Identifier", field:"identifier", vertAlign: "middle", width:140, headerFilter:true},
-      {title:"Category", field:"category", vertAlign: "middle", width:200, headerFilter:true},
       {title:"Tags", field:"tags", vertAlign: "middle", width:200, headerFilter:true, formatter:function(cell, formatterParams, onRendered){
         if (cell.getValue() == "") {
           return "";

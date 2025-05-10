@@ -324,37 +324,43 @@ function loadMail(id) {
                   children: [
                     jsCreateElement('option', {
                       attrs: {
-                        value: 'template'
+                        value: 'template',
+                        selected: data.category == 'template' ? 'selected' : false
                       },
                       children: ['Template']
                     }),
                     jsCreateElement('option', {
                       attrs: {
-                        value: 'newsletter'
+                        value: 'newsletter',
+                        selected: data.category == 'newsletter' ? 'selected' : false
                       },
                       children: ['Newsletter']
                     }),
                     jsCreateElement('option', {
                       attrs: {
-                        value: 'drip'
+                        value: 'drip',
+                        selected: data.category == 'drip' ? 'selected' : false
                       },
                       children: ['Drip']
                     }),
                     jsCreateElement('option', {
                       attrs: {
-                        value: 'campaign'
+                        value: 'campaign',
+                        selected: data.category == 'campaign' ? 'selected' : false
                       },
                       children: ['Campaign']
                     }),
                     jsCreateElement('option', {
                       attrs: {
-                        value: 'singleshot'
+                        value: 'singleshot',
+                        selected: data.category == 'singleshot' ? 'selected' : false
                       },
                       children: ['Single shot']
                     }),
                     jsCreateElement('option', {
                       attrs: {
-                        value: 'event'
+                        value: 'event',
+                        selected: data.category == 'event' ? 'selected' : false
                       },
                       children: ['Event']
                     })
