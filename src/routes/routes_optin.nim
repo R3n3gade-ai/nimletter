@@ -30,7 +30,7 @@ import
   ../utils/validate_data,
   ../webhook/webhook_events
 
-from ../utils/contacts_utils import createMetaWithCountry
+from ../utils/contacts_utils import createMetaWithCountry, contactRemoveFromList
 
 
 include
@@ -198,17 +198,23 @@ proc(request: Request) =
 
   var userData: seq[string]
   pg.withConnection conn:
-    if (
-        execAffectedRows(conn, sqlUpdate(
-        table = "contacts",
-        data  = [
-          "double_opt_in",
-          "double_opt_in_data",
-        ],
-        where = ["uuid = ?"]
-        ), "false", "", userUUID) > 0
-    ):
-      userData = getRow(conn, sqlSelect(table = "contacts", select = ["id", "name", "email"], where = ["uuid = ?"]), userUUID)
+    exec(conn, sqlUpdate(
+    table = "contacts",
+    data  = [
+      "double_opt_in",
+      "double_opt_in_data",
+    ],
+    where = ["uuid = ?"]
+    ), "false", "", userUUID)
+
+    userData = getRow(conn, sqlSelect(table = "contacts", select = ["id", "name", "email"], where = ["uuid = ?"]), userUUID)
+
+    #
+    # Remove from lists
+    #
+    let listIds = getAllRows(conn, sqlSelect(table = "subscriptions", select = ["list_id"], where = ["user_id = ?"]), userData[0])
+    for listId in listIds:
+      discard contactRemoveFromList(userData[0], listId[0], "list")
 
   if userData[0] == "":
     resp Http200, nimfOptinUnubscribe("", "", "")

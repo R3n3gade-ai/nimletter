@@ -113,8 +113,8 @@
   </head>
   <body class="mainbody">
     <main>
-      <div class="content notLoggedIn">
-        <h1 id="heading" class="center">Nimletter, drip it!</h1>
+      <div class="content notLoggedIn" style="max-width: 300px;text-align: center;">
+        <h1 id="heading" class="center">Unsubscribed</h1>
         <div class="mb30" style="display: flex;">
           <div>
             <p>Sorry to see you go, <b>${name}</b>!</p>
