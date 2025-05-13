@@ -727,7 +727,7 @@ proc(request: Request) =
       "count": contactsCount,
       "size": limit,
       "page": offset,
-      "last_page": (if contactsCount == 0: 0 else: (contactsCount / limit).toInt()),
+      "last_page": if contactsCount == 0: 0 elif (contactsCount/limit) < 1.0: 1 else: split($(contactsCount/limit + 1), ".")[0].parseInt()
     }
   )
 )

@@ -415,7 +415,7 @@ proc(request: Request) =
       "count": mailsCount,
       "size": limit,
       "page": offset,
-      "last_page": (if mailsCount == 0: 0 else: (mailsCount / limit).toInt())
+      "last_page": if mailsCount == 0: 0 elif (mailsCount/limit) < 1.0: 1 else: split($(mailsCount/limit + 1), ".")[0].parseInt()
     }
   )
 )
@@ -526,7 +526,7 @@ proc(request: Request) =
       "count": mailsCount,
       "size": limit,
       "page": offset,
-      "last_page": (if mailsCount == 0: 0 else: (mailsCount / limit).toInt())
+      "last_page": if mailsCount == 0: 0 elif (mailsCount/limit) < 1.0: 1 else: split($(mailsCount/limit + 1), ".")[0].parseInt()
     }
   )
 )
