@@ -651,8 +651,8 @@ proc(request: Request) =
   if not c.loggedIn: resp Http401
 
   let
-    limit = (if @"limit" == "": 2000 else: @"limit".parseInt())
-    offset = (if @"offset" == "": 0 else: @"offset".parseInt())
+    limit = (if @"size" == "": 2000 else: @"size".parseInt())
+    offset = (if @"page" == "": 0 elif @"page".parseInt() == 1: 0 else: (@"page".parseInt() - 1) * limit)
 
   var
     contacts: seq[seq[string]]
@@ -725,8 +725,8 @@ proc(request: Request) =
     %* {
       "data": bodyJson,
       "count": contactsCount,
-      "limit": limit,
-      "offset": offset,
+      "size": limit,
+      "page": offset,
       "last_page": (if contactsCount == 0: 0 else: (contactsCount / limit).toInt()),
     }
   )

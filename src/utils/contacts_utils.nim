@@ -122,8 +122,20 @@ proc addContactToPendinglist*(userID, listID: string): bool =
   return true
 
 
+proc isContactOnList*(userID, listID: string): bool =
+  pg.withConnection conn:
+    result = getValue(conn, sqlSelect(
+        table = "subscriptions",
+        select = ["id"],
+        where = ["user_id = ?", "list_id = ?"]
+      ), userID, listID).len() > 0
+
+
 proc addContactToList*(userID, listID: string, flowStep = 1): bool =
   pg.withConnection conn:
+    if isContactOnList(userID, listID):
+      return true
+
     if execAffectedRows(conn, sqlInsert(
         table = "subscriptions",
         data  = [

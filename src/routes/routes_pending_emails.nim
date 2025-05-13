@@ -227,8 +227,8 @@ proc(request: Request) =
   if not c.loggedIn: resp Http401
 
   let
-    limit = (if @"limit" == "": "0" else: @"limit")
-    offset = (if @"offset" == "": "0" else: @"offset")
+    limit = (if @"size" == "": 2000 else: @"size".parseInt())
+    offset = (if @"page" == "": 0 elif @"page".parseInt() == 1: 0 else: (@"page".parseInt() - 1) * limit)
 
   var data: seq[seq[string]]
   pg.withConnection conn:
@@ -270,8 +270,8 @@ proc(request: Request) =
   resp Http200, (
     %* {
       "count": data.len(),
-      "limit": limit,
-      "offset": offset,
+      "size": limit,
+      "page": offset,
       "data": respJson
     }
   )

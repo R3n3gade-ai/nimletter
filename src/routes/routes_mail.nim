@@ -71,7 +71,7 @@ proc(request: Request) =
           "contentEditor",
         ]),
         name,
-        (name.toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'})),
+        (name.toLowerAscii().replace(" ", "-").subStr(0, 100).strip(chars={'-', '_'})),
         "{" & formatTags(tags).join(",") & "}",
         category,
         contentHTML,
@@ -135,7 +135,7 @@ proc(request: Request) =
           "subject"
         ]),
       mailData[1],  # name
-      mailData[1].toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) & "-" & $rand(1000000),  # identifier
+      mailData[1].toLowerAscii().replace(" ", "-").subStr(0, 100).strip(chars={'-', '_'}) & "-" & $rand(1000000),  # identifier
       mailData[2],  # contentHTML
       mailData[3],  # contentEditor
       mailData[4],  # editorType
@@ -231,7 +231,7 @@ proc(request: Request) =
   let
     mailID  = @"mailID"
     name      = @"name".strip()
-    identifier = (if @"identifier" == "": name.toLowerAscii().replace(" ", "-").subStr(0, 20).strip(chars={'-', '_'}) else: @"identifier".replace(" ", "-").subStr(0, 100).strip(chars={'-', '_'}))
+    identifier = (if @"identifier" == "": name.toLowerAscii().replace(" ", "-").subStr(0, 100).strip(chars={'-', '_'}) else: @"identifier".replace(" ", "-").subStr(0, 100).strip(chars={'-', '_'}))
     tags      = @"tags"
     category  = @"category"
     sendOnce  = (if @"sendOnce" == "true": true else: false)
@@ -354,8 +354,8 @@ proc(request: Request) =
   if not c.loggedIn: resp Http401
 
   let
-    limit = (if @"limit" == "": 2000 else: @"limit".parseInt())
-    offset = (if @"offset" == "": 0 else: @"offset".parseInt())
+    limit = (if @"size" == "": 2000 else: @"size".parseInt())
+    offset = (if @"page" == "": 0 elif @"page".parseInt() == 1: 0 else: (@"page".parseInt() - 1) * limit)
 
   var
     mails: seq[seq[string]]
@@ -413,8 +413,8 @@ proc(request: Request) =
     %* {
       "data": bodyJson,
       "count": mailsCount,
-      "limit": limit,
-      "offset": offset,
+      "size": limit,
+      "page": offset,
       "last_page": (if mailsCount == 0: 0 else: (mailsCount / limit).toInt())
     }
   )
@@ -428,8 +428,8 @@ proc(request: Request) =
   if not c.loggedIn: resp Http401
 
   let
-    limit = (if @"limit" == "": 2000 else: @"limit".parseInt())
-    offset = (if @"offset" == "": 0 else: @"offset".parseInt())
+    limit = (if @"size" == "": 2000 else: @"size".parseInt())
+    offset = (if @"page" == "": 0 elif @"page".parseInt() == 1: 0 else: (@"page".parseInt() - 1) * limit)
 
 
   var
@@ -524,8 +524,8 @@ proc(request: Request) =
     %* {
       "data": bodyJson,
       "count": mailsCount,
-      "limit": limit,
-      "offset": offset,
+      "size": limit,
+      "page": offset,
       "last_page": (if mailsCount == 0: 0 else: (mailsCount / limit).toInt())
     }
   )
