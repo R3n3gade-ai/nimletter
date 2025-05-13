@@ -331,9 +331,7 @@ proc(request: Request) =
 
 const pathTracker = "/assets/images/nimletter_icon.png"
 
-webhooksSnsRouter.get("/webhook/tracking/@mailuuid/@action/@do",
-proc(request: Request) =
-
+template handleTracking() =
   let mailuuid = @"mailuuid"
 
   if not mailuuid.isValidUUID() and mailuuid != "pure":
@@ -406,4 +404,14 @@ proc(request: Request) =
 
     redirect(link)
 
+
+webhooksSnsRouter.get("/webhook/tracking/@mailuuid/@action/@do",
+proc(request: Request) =
+  handleTracking()
+)
+
+
+webhooksSnsRouter.get("/webhook/tracking/@mailuuid/@action/@do/@notused",
+proc(request: Request) =
+  handleTracking()
 )
