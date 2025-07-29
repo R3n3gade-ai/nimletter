@@ -231,6 +231,22 @@ proc(request: Request) =
     if flowID == "":
       resp Http400, "Flow ID not found, ID: " & flowIDRaw
 
+    #
+    # Check if flow is already in list
+    #
+    var flowInList: bool
+    pg.withConnection conn:
+      flowInList = getValue(conn, sqlSelect(
+          table   = "lists",
+          select  = ["id"],
+          where   = ["id = ?", "flow_ids @> ARRAY[?]::int[]"]), listID, flowID).len() > 0
+
+    if flowInList:
+      resp Http400, "Flow already in list"
+
+    #
+    # Add flow to list
+    #
     var users: seq[seq[string]]
     pg.withConnection conn:
       exec(conn, sqlUpdate(
