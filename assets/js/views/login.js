@@ -82,7 +82,9 @@ const html = jsCreateElement('div', {
         jsCreateElement('input', {
           attrs: {
             type: 'text',
-            id: 'yubikeyOTP'
+            id: 'yubikeyOTP',
+            autocomplete: 'off',
+            maxlength: '44',
           }
         })
       ]
