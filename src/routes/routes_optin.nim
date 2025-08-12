@@ -196,40 +196,83 @@ proc(request: Request) =
   if not userUUID.isValidUUID():
     resp Http200, nimfOptinUnubscribe("", "", "")
 
-  var userData: seq[string]
-  pg.withConnection conn:
-    exec(conn, sqlUpdate(
-    table = "contacts",
-    data  = [
-      "double_opt_in",
-      "double_opt_in_data",
-    ],
-    where = ["uuid = ?"]
-    ), "false", "", userUUID)
+  let unsubscribeFromAll = @"unsubscribeFromAll" == "true"
 
+
+  # For streamlining the code
+  var listID: string
+  var listIdentifier: string
+  var listUUID: string
+
+  # Used in callback event
+  var listUUIDs: seq[string]
+  var listIdentifiers: seq[string]
+
+  var onlyOneList: bool = false
+  var userData: seq[string]
+
+  pg.withConnection conn:
+
+    # First get user info
     userData = getRow(conn, sqlSelect(table = "contacts", select = ["id", "name", "email"], where = ["uuid = ?"]), userUUID)
+
+    if not unsubscribeFromAll:
+      # Now get listID from latest email from pending_emails
+      let lastEmailListID = getValue(conn, sqlSelect(table = "pending_emails", select = ["list_id"], where = ["user_id = ?"], customSQL = "ORDER BY created_at DESC LIMIT 1"), userData[0])
+      if lastEmailListID != "":
+        listID = lastEmailListID
+        let listData = getRow(conn, sqlSelect(table = "lists", select = ["id", "identifier", "uuid"], where = ["id = ?"]), listID)
+        listUUID = listData[2]
+        listIdentifier = listData[1]
+
+    else:
+      exec(conn, sqlUpdate(
+        table = "contacts",
+        data  = [
+          "double_opt_in",
+          "double_opt_in_data",
+        ],
+        where = ["uuid = ?"]
+        ), "false", "", userUUID)
+
 
     #
     # Remove from lists
     #
-    let listIds = getAllRows(conn, sqlSelect(table = "subscriptions", select = ["list_id"], where = ["user_id = ?"]), userData[0])
-    for listId in listIds:
-      discard contactRemoveFromList(userData[0], listId[0], "list")
+    if not unsubscribeFromAll:
+      listUUIDs.add(listUUID)
+      listIdentifiers.add(listIdentifier)
+      discard contactRemoveFromList(userData[0], listID, "list")
+    else:
+      let listIds = getAllRows(conn, sqlSelect(table = "subscriptions", select = ["list_id"], where = ["user_id = ?"]), userData[0])
+      var tmpListIDs: seq[string]
+      for listId in listIds:
+        tmpListIDs.add(listId[0])
+        discard contactRemoveFromList(userData[0], listId[0], "list")
+
+      # Get data to event hook
+      if tmpListIDs.len() > 0:
+        let listData = getAllRows(conn, sqlSelect(table = "lists", select = ["uuid", "identifier"], where = ["id = ANY(?::int[])"]), "{" & tmpListIDs.join(",") & "}")
+        for listId in listData:
+          listUUIDs.add(listId[0])
+          listIdentifiers.add(listId[1])
 
   if userData[0] == "":
-    resp Http200, nimfOptinUnubscribe("", "", "")
+    resp Http200, nimfOptinUnubscribe("", "", "", unsubscribeFromAll)
 
   let data = %* {
       "success": true,
       "id": userData[0],
       "name": userData[1],
       "email": userData[2],
+      "listUUIDs": listUUIDs,
+      "listIdentifiers": listIdentifiers,
       "event": "contact_optedin"
     }
 
   parseWebhookEvent(contact_optedin, data)
 
-  resp Http200, nimfOptinUnubscribe(userUUID, userData[1], userData[2])
+  resp Http200, nimfOptinUnubscribe(userUUID, userData[1], userData[2], unsubscribeFromAll)
 )
 
 

@@ -135,7 +135,7 @@ async function doLogin() {
   console.log(resp);
 
   if (!resp.success) {
-    alert("Error");
+    alert("Error [" + resp.error + "]");
     return;
   }
 

@@ -99,7 +99,7 @@
 #
 #
 #
-#proc nimfOptinUnubscribe(userUUID, name, email: string): string =
+#proc nimfOptinUnubscribe(userUUID, name, email: string, unsubscribeFromAll: bool = false): string =
 <html>
   <head>
     <title>Nimletter</title>
@@ -118,7 +118,11 @@
         <div class="mb30" style="display: flex;">
           <div>
             <p>Sorry to see you go, <b>${name}</b>!</p>
-            <p>We have unsubscribed you from our list.</p>
+            # if unsubscribeFromAll:
+            <p>We have unsubscribed you from all our lists.</p>
+            # else:
+            <p>We have unsubscribed you from this list.</p>
+            # end if
           </div>
         </div>
         # if userUUID != "":
@@ -134,6 +138,11 @@
             </div>
           </div>
         </div>
+          # if not unsubscribeFromAll:
+          <div>
+            <p>Unsubscribe from all lists and all emails by clicking <a href="/unsubscribe?contactUUID=${userUUID}&unsubscribeFromAll=true">here</a>.</p>
+          </div>
+          # end if
         # end if
       </div>
     </main>

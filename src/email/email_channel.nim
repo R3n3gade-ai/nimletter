@@ -96,7 +96,7 @@ proc sendPendingEmail(pendingEmail: PendingMailObj) =
         ]
       ), pendingEmail.mailID)
 
-  echo "Email being sent to " & userData[1]
+  #echo "Email being sent to " & userData[1]
   # Send the email
   let sendData = sendMailMimeNow(
     contactID = pendingEmail.userID,
