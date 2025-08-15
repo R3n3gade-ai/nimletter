@@ -170,8 +170,8 @@ function tableMails() {
     ajaxURL:"/api/mails/all",
     progressiveLoad:"load",
     initialSort:[
+      {column:"name", dir:"asc"},
       {column:"category", dir:"asc"},
-      {column:"name", dir:"asc"}
     ],
     // rowHeight:50,
     columns:[

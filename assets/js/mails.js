@@ -859,6 +859,14 @@ async function sendMail(mailID) {
             },
             children: listOpt
           }),
+          jsCreateElement('input', {
+            attrs: {
+              type: 'text',
+              id: 'mailToListValidate',
+              class: 'mb20',
+              placeholder: 'Write confirm to send'
+            }
+          }),
           jsCreateElement('div', {
             children: [
               jsCreateElement('button', {
@@ -917,6 +925,12 @@ async function sendMail(mailID) {
 
 function sendMailListDo(mailID) {
   let listID = dqs("#mailSendToList").value;
+  let validate = dqs("#mailToListValidate").value;
+
+  if (validate !== "confirm") {
+    rawModalError("Invalid confirmation");
+    return;
+  }
 
   fetch("/api/mails/send", {
     method: "POST",

@@ -54,6 +54,15 @@ proc(request: Request) =
   if name.strip() == "":
     resp Http400, "Name is required"
 
+  var identifier: string
+  for c in name:
+    if c in {' ', '-', '_', 'A'..'Z', 'a'..'z', '0'..'9'}:
+      if c == ' ':
+        identifier.add("-")
+      else:
+        identifier.add(c)
+
+  identifier = identifier.multiReplace([(" ", "-"), ("---", "-"), ("--", "-")]).subStr(0, 100).strip(chars={'-', '_'}) & "-" & $rand(1000000)
 
   #
   # Insert into database
@@ -110,6 +119,7 @@ proc(request: Request) =
           "category",
           "send_once",
           "subject",
+          "identifier"
         ],
         where   = [
           "id = ?"
@@ -135,7 +145,7 @@ proc(request: Request) =
           "subject"
         ]),
       mailData[1],  # name
-      mailData[1].toLowerAscii().replace(" ", "-").subStr(0, 100).strip(chars={'-', '_'}) & "-" & $rand(1000000),  # identifier
+      mailData[9].toLowerAscii().replace(" ", "-").subStr(0, 100).strip(chars={'-', '_'}) & "-" & $rand(1000000),  # identifier
       mailData[2],  # contentHTML
       mailData[3],  # contentEditor
       mailData[4],  # editorType
