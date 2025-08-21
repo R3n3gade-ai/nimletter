@@ -366,6 +366,11 @@ template handleTracking() =
   if action notin ["open", "click"]:
     resp Http400
 
+
+  # User-Agent:
+  #   Many rows show only "Mozilla/5.0", which is basically useless.
+  #   Proxies and scanners often strip UA details.
+  #   Outlook desktop and OneOutlook show up well, but Gmail (via ggpht.com) will always hide the real UA.
   if action == "open":
     var mailOpen = MailOpen(
       messageID: mailID,
