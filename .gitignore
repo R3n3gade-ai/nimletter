@@ -3,3 +3,7 @@ nimletter
 db
 tests/sns_click
 api
+utils/*
+!utils/*.csv
+!utils/*.nim
+!utils/*.md
