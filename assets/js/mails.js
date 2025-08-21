@@ -863,6 +863,7 @@ async function sendMail(mailID) {
             attrs: {
               type: 'text',
               id: 'mailToListValidate',
+              autocomplete: 'off',
               class: 'mb20',
               placeholder: 'Write confirm to send'
             }
