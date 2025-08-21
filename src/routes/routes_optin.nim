@@ -166,7 +166,9 @@ proc(request: Request) =
     (createSuccess, userID) = createContact(email, name, listsData.requireOptIn, listsData.ids, request.ip)
 
   if not createSuccess:
-    resp Http200, nimfOptinSubscribe(true, "Contact already exists", "")
+    # Do not show if success or not since that would allow a user to check
+    # if the contact already exists.
+    resp Http200, nimfOptinSubscribe(false, "", "Success")
 
   if listsData.requireOptIn:
     emailOptinSend(email, name, userID)
