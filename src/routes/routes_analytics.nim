@@ -33,15 +33,15 @@ proc(request: Request) =
     data = getAllRows(conn, sqlSelect(
         table = "pending_emails",
         select = [
-          "to_char(date_trunc('day', created_at), 'YYYY-MM-DD') AS day",
+          "to_char(date_trunc('day', scheduled_for), 'YYYY-MM-DD') AS day",
           "COUNT(*) FILTER (WHERE status = 'pending') AS pending",
           "COUNT(*) FILTER (WHERE status = 'sent') AS sent",
           "COUNT(*) FILTER (WHERE status = 'bounced') AS bounced",
           "COUNT(*) FILTER (WHERE status = 'complained') AS complained"
         ],
         customSQL = """
-          WHERE created_at >= current_date - interval '20 days'
-          AND created_at <= current_date + interval '7 days'
+          WHERE scheduled_for >= current_date - interval '20 days'
+          AND scheduled_for <= current_date + interval '7 days'
           GROUP BY day
           ORDER BY day
         """
@@ -155,6 +155,8 @@ proc(request: Request) =
   createTFD()
   if not c.loggedIn: resp Http401
   var data: seq[seq[string]]
+  var openData: seq[seq[string]]
+  var clickData: seq[seq[string]]
   pg.withConnection conn:
     data = getAllRows(conn, sqlSelect(
         table = "pending_emails",
@@ -168,8 +170,6 @@ proc(request: Request) =
         """
       ))
 
-  var openData: seq[seq[string]]
-  pg.withConnection conn:
     openData = getAllRows(conn, sqlSelect(
         table = "email_opens",
         select = [
@@ -180,8 +180,6 @@ proc(request: Request) =
         """
       ))
 
-  var clickData: seq[seq[string]]
-  pg.withConnection conn:
     clickData = getAllRows(conn, sqlSelect(
         table = "email_clicks",
         select = [

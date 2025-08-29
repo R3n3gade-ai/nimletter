@@ -38,6 +38,7 @@
       ${nimfSidebar(c)}
       <div class="content">
         <h1 id="heading">Nimletter, drip it!</h1>
+        <p id="infotext" style="max-width: 600px;"></p>
         <div id="work">
         </div>
       </div>

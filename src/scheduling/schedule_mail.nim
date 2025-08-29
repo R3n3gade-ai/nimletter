@@ -103,6 +103,14 @@ proc createPendingEmail*(
     args.add(manualSubject)
 
   pg.withConnection conn:
+    if getValue(conn, sqlSelect(
+      table = "pending_emails",
+      select = ["id"],
+      where = ["user_id = ?", "flow_id = ?", "flow_step_id = ?"]
+    ), userID, flowID, flowStepID) != "":
+      echo "User already has a pending email for this flow and step"
+      return
+
     exec(conn, sqlInsert(
       table = "pending_emails",
       data  = data,

@@ -651,7 +651,7 @@ proc(request: Request) =
   if not c.loggedIn: resp Http401
 
   let
-    limit = (if @"size" == "": 2000 else: @"size".parseInt())
+    limit = (if @"size" == "": 5000 else: @"size".parseInt())
     offset = (if @"page" == "": 0 elif @"page".parseInt() == 1: 0 else: (@"page".parseInt() - 1) * limit)
 
   var

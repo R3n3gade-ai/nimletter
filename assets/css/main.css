@@ -333,6 +333,13 @@ label.labelBold {
   box-shadow: none;
 }
 
+.tabulator .tabulator-cell.semibold {
+  font-weight: 400;
+}
+.tabulator .tabulator-cell.slimpadding {
+  padding: 4px 4px;
+}
+
 
 /* Sidebar */
 .sidebar {

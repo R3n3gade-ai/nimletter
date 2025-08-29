@@ -212,13 +212,22 @@ function rawModalLoader(content) {
   const modal = jsRender(
     jsCreateElement("div", {
       attrs: {
-        class: "modalpop"
+        class: "modalpop confirmclose"
       },
       children: [
         jsCreateElement("div", {
           attrs: {
             class: "modal-content"
-          }
+          },
+          children: [
+            jsCreateElement("div", {
+              attrs: {
+                style: "position: absolute;right: 20px;top: 7px;cursor: pointer;font-size: 22px;",
+                onclick: "dqs('.modalpop').classList.remove('show')"
+              },
+              children: ["×"]
+            }),
+          ]
         })
       ]
     })
@@ -230,10 +239,26 @@ function rawModalLoader(content) {
     modal.classList.add("show");
   }, 10);
 
+  // Handle click outside modal to close
   window.onclick = function(event) {
     if (event.target == modal && !modal.classList.contains("confirmclose")) {
       modal.classList.remove('show');
     }
+  }
+
+  // Handle ESC key to close modal - only add listener if not already present
+  if (!window.escKeyListenerAdded) {
+    const handleEscKey = function(event) {
+      if (event.key === 'Escape') {
+        const openModal = dqs('.modalpop.show');
+        if (openModal) {
+          openModal.classList.remove('show');
+        }
+      }
+    };
+    
+    document.addEventListener('keydown', handleEscKey);
+    window.escKeyListenerAdded = true;
   }
 }
 

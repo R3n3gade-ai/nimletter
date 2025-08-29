@@ -1,5 +1,6 @@
 let
   globalFlowID,
+  globalFlowName,
   globalFlowStepsData = [];
 
 
@@ -166,8 +167,9 @@ function removeFlowDo(flowID) {
 
 
 // -- Open flow
-function openFlow(flowID) {
+function openFlow(flowID, flowName) {
   globalFlowID = flowID;
+  globalFlowName = flowName || dqs("#flowName").innerText;
 
   fetch("/api/flow_steps/all?flowID=" + flowID, {
     method: "GET"
@@ -390,6 +392,11 @@ async function buildFlowHTML(data) {
   const html = jsCreateElement('div', {
     children: [
       jsCreateElement('div', {
+        attrs: {
+          id: 'flowName',
+          class: 'headingH3 mb20'
+        },
+        children: [globalFlowName]
       }),
       jsCreateElement('div', {
         children: flowSteps
@@ -724,11 +731,11 @@ function openStepStats(stepID) {
     ajaxURL:"/api/flow_steps/stats/contacts?flowStepID=" + stepID,
     progressiveLoad:"scroll",
     columns:[
-      {title:"Status", field:"status", width:200},
-      {title:"Contact", field:"user_email", width:200},
-      {title:"Sent At", field:"sent_at", width:200},
-      {title:"Opened times", field:"open_count", width:200},
-      {title:"Scheduled for", field:"scheduled_for", width:200},
+      {title:"Status", field:"status", headerFilter:true, width:200},
+      {title:"Contact", field:"user_email", headerFilter:true, width:200},
+      {title:"Sent At", field:"sent_at", headerFilter:true, width:200},
+      {title:"Opened times", field:"open_count", headerFilter:true, width:200},
+      {title:"Scheduled for", field:"scheduled_for", headerFilter:true, width:200},
     ],
   });
 

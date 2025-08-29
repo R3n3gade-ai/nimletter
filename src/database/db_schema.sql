@@ -157,7 +157,8 @@ CREATE TABLE IF NOT EXISTS settings (
   page_name           TEXT NOT NULL,
   hostname            TEXT NOT NULL,
   optin_email         INT NOT NULL REFERENCES mails(id),
-  logo_url            TEXT
+  logo_url            TEXT,
+  link_success        TEXT,
 );
 
 
@@ -226,9 +227,10 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 
 -- Indexes for efficient querying
-CREATE INDEX IF NOT EXISTS idx_pending_emails_scheduled_for ON pending_emails (scheduled_for);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_pending_emails_scheduled_for ON pending_emails (scheduled_for);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_pending_emails_flowstep_include ON pending_emails (flow_step_id) INCLUDE (user_id, status, sent_at, id);
 
-CREATE INDEX IF NOT EXISTS idx_email_opens_user_id ON email_opens (user_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_email_opens_user_id ON email_opens (user_id);
 
-CREATE INDEX IF NOT EXISTS idx_email_clicks_user_id ON email_clicks (user_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_email_clicks_user_id ON email_clicks (user_id);
 

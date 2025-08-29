@@ -363,6 +363,13 @@ function loadMail(id) {
                         selected: data.category == 'event' ? 'selected' : false
                       },
                       children: ['Event']
+                    }),
+                    jsCreateElement('option', {
+                      attrs: {
+                        value: 'flow',
+                        selected: data.category == 'archived' ? 'selected' : false
+                      },
+                      children: ['Archived']
                     })
                   ]
                 })
@@ -796,7 +803,7 @@ async function duplicateMail(mailID) {
   .then(manageErrors)
   .then(response => response.json())
   .then(data => {
-    window.location.reload();
+    window.location.href = "/mails?viewMail=" + data.id;
   });
 
   console.log(mailData);

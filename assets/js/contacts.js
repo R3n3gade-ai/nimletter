@@ -75,7 +75,6 @@ function addContact() {
               jsCreateElement('input', {
                 attrs: {
                   type: 'checkbox',
-                  checked: 'checked',
                   id: 'requiresDoubleOptInNew'
                 }
               }),

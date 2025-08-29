@@ -108,9 +108,11 @@ proc scheduleStart() {.thread.} =
         echo "Schedule check: " & $now() & " on thread " & $getThreadId()
         checkAndSendScheduledEmails(minutesBack = 2, until = now())
 
-      every(minutes=30, id="tick", throttle=2):
+      # 24 hours
+      #every(minutes=30, id="tick", throttle=2):
+      cron(minute="10", hour="0", day_of_month="*", month="*", day_of_week="*", id="backup"):
         echo "Backup schedule check: " & $now() & " on thread " & $getThreadId()
-        checkAndSendScheduledEmails(minutesBack = 60, until = now() - initDuration(minutes = 10), isBackupRun = true)
+        checkAndSendScheduledEmails(minutesBack = (25 * 60), until = now() - initDuration(minutes = 59), isBackupRun = true)
 
 
 

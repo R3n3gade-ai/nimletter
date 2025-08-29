@@ -272,7 +272,8 @@ function saveSettingsMain() {
       pageName: dqs("#pageName").value,
       hostname: dqs("#hostname").value,
       logoUrl: dqs("#logoUrl").value,
-      optinEmailID: dqs("#optinEmailID").value
+      optinEmailID: dqs("#optinEmailID").value,
+      linkSuccess: dqs("#linkSuccess").value
     })
   })
   .then(manageErrors)

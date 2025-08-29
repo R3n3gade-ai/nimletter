@@ -289,11 +289,19 @@ proc(request: Request) =
           JOIN lists l ON s.list_id = l.id
           JOIN flow_steps fs ON ARRAY[fs.flow_id] <@ l.flow_ids
           WHERE fs.flow_id = ? AND fs.id = ?
+          AND EXISTS (
+            -- Ensure user has received and completed the previous step
+            SELECT 1 FROM pending_emails pe
+            WHERE pe.user_id = s.user_id 
+            AND pe.flow_id = ? 
+            AND pe.flow_step_id = ?
+            AND pe.status = 'sent'
+          )
           )
           INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for, manual_subject, mail_id)
           SELECT user_id, list_id, ?, ?, scheduled_time, ?, ?
           FROM subscription_info
-        """), scheduledTime, scheduledTime, scheduledTime, flowID, prevStepID, flowID, newStepID, subject, mailID)
+        """), scheduledTime, scheduledTime, scheduledTime, flowID, prevStepID, flowID, prevStepID, flowID, newStepID, subject, mailID)
       else:
         # For delay-based scheduling, use the delay minutes
         exec(conn, sql("""
@@ -303,11 +311,19 @@ proc(request: Request) =
           JOIN lists l ON s.list_id = l.id
           JOIN flow_steps fs ON ARRAY[fs.flow_id] <@ l.flow_ids
           WHERE fs.flow_id = ? AND fs.id = ?
+          AND EXISTS (
+            -- Ensure user has received and completed the previous step
+            SELECT 1 FROM pending_emails pe
+            WHERE pe.user_id = s.user_id 
+            AND pe.flow_id = ? 
+            AND pe.flow_step_id = ?
+            AND pe.status = 'sent'
+          )
           )
           INSERT INTO pending_emails (user_id, list_id, flow_id, flow_step_id, scheduled_for, manual_subject, mail_id)
           SELECT user_id, list_id, ?, ?, scheduled_time, ?, ?
           FROM subscription_info
-        """), flowID, prevStepID, flowID, newStepID, subject, mailID)
+        """), flowID, prevStepID, flowID, prevStepID, flowID, newStepID, subject, mailID)
 
 
   resp Http200
@@ -474,29 +490,29 @@ proc(request: Request) =
     )
 
 
-    var stepsToMove: seq[int]
-    if newStepNumber < oldStepNumber:
-      for i in countUp(newStepNumber, oldStepNumber):
-        stepsToMove.add(i)
-    elif newStepNumber > oldStepNumber:
-      for i in countUp(oldStepNumber, newStepNumber):
-        stepsToMove.add(i)
+    # var stepsToMove: seq[int]
+    # if newStepNumber < oldStepNumber:
+    #   for i in countUp(newStepNumber, oldStepNumber):
+    #     stepsToMove.add(i)
+    # elif newStepNumber > oldStepNumber:
+    #   for i in countUp(oldStepNumber, newStepNumber):
+    #     stepsToMove.add(i)
 
 
-    # exec(conn, sqlUpdate(
-    #     table = "pending_emails",
-    #     data  = ["flow_step_id = (SELECT id FROM flow_steps WHERE flow_id = ? AND step_number = ?)"],
-    #     where = [
-    #       "flow_step_id IN (SELECT id FROM flow_steps WHERE flow_id = ? AND step_number = ANY(?::int[]))",
-    #       "status = 'pending'"
-    #     ]),
-    #   flowID, moveUsersToStep, flowID, "{" & stepsToMove.join(",") & "}"
-    # )
-    exec(conn, sql("""
-    UPDATE pending_emails
-    SET flow_step_id = (SELECT id FROM flow_steps WHERE flow_id = ? AND step_number = ?)
-    WHERE flow_step_id IN (SELECT id FROM flow_steps WHERE flow_id = ? AND step_number = ANY(?::int[]))
-    """), flowID, moveUsersToStep, flowID, "{" & stepsToMove.join(",") & "}")
+    # # exec(conn, sqlUpdate(
+    # #     table = "pending_emails",
+    # #     data  = ["flow_step_id = (SELECT id FROM flow_steps WHERE flow_id = ? AND step_number = ?)"],
+    # #     where = [
+    # #       "flow_step_id IN (SELECT id FROM flow_steps WHERE flow_id = ? AND step_number = ANY(?::int[]))",
+    # #       "status = 'pending'"
+    # #     ]),
+    # #   flowID, moveUsersToStep, flowID, "{" & stepsToMove.join(",") & "}"
+    # # )
+    # exec(conn, sql("""
+    # UPDATE pending_emails
+    # SET flow_step_id = (SELECT id FROM flow_steps WHERE flow_id = ? AND step_number = ?)
+    # WHERE flow_step_id IN (SELECT id FROM flow_steps WHERE flow_id = ? AND step_number = ANY(?::int[]))
+    # """), flowID, moveUsersToStep, flowID, "{" & stepsToMove.join(",") & "}")
 
 
   resp Http200
@@ -679,7 +695,7 @@ proc(request: Request) =
             (table: "contacts", tableAs: "", on: @["contacts.id = pending_emails.user_id"])
           ],
           where   = ["pending_emails.flow_step_id = ?"],
-          customSQL = "GROUP BY pending_emails.user_id, pending_emails.status, pending_emails.scheduled_for, pending_emails.sent_at, contacts.email, pending_emails.id ORDER BY pending_emails.status ASC, pending_emails.scheduled_for ASC, pending_emails.sent_at ASC"
+          customSQL = "GROUP BY pending_emails.user_id, pending_emails.status, pending_emails.scheduled_for, pending_emails.sent_at, contacts.email, pending_emails.id ORDER BY pending_emails.scheduled_for DESC"
           ), flowStepID)
 
   var respData = parseJson("[]")

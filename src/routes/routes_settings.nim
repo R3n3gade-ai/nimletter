@@ -45,6 +45,7 @@ proc(request: Request) =
         "settings.hostname",
         "settings.logo_url",
         "settings.optin_email",
+        "settings.link_success",
         "mails.name"
       ],
       joinargs = [
@@ -62,7 +63,8 @@ proc(request: Request) =
       { "key": "hostname", "name": "Domain with HTTPS", "value": mainSettings[1] },
       { "key": "logoUrl", "name": "Logo URL", "value": mainSettings[2] },
       { "key": "optinEmailID", "name": "Optin Email ID", "value": mainSettings[3] },
-      { "key": "optinEmailName", "name": "Optin Email Name", "value": mainSettings[4] }
+      { "key": "linkSuccess", "name": "Link Success", "value": mainSettings[4] },
+      { "key": "optinEmailName", "name": "Optin Email Name", "value": mainSettings[5] }
     ]
   )
 )
@@ -77,6 +79,7 @@ proc(request: Request) =
     hostname = @"hostname"
     logoUrl = @"logoUrl"
     optinEmailID = @"optinEmailID"
+    linkSuccess = @"linkSuccess"
 
   if pageName.strip() == "":
     resp Http400, "Page Name is required"
@@ -97,7 +100,8 @@ proc(request: Request) =
           "page_name",
           "hostname",
           "logo_url",
-          "optin_email"
+          "optin_email",
+          "link_success"
         ],
         where = [
           "id = 1"
@@ -105,7 +109,8 @@ proc(request: Request) =
         pageName,
         hostname,
         logoUrl,
-        optinEmailID
+        optinEmailID,
+        linkSuccess
       )
 
   resp Http200, "Main settings saved"
