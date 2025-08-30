@@ -375,25 +375,25 @@ proc(request: Request) =
     mails = getAllRows(conn, sqlSelect(
       table   = "mails",
       select  = [
-        "DISTINCT ON (mails.id) mails.id",
+        "mails.id",
         "mails.name",
         "mails.subject",
         "array_to_string(mails.tags, ',')",
         "mails.category",
         "to_char(mails.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at",
         "to_char(mails.updated_at, 'YYYY-MM-DD HH24:MI:SS') as updated_at",
-        "(SELECT COUNT(*) FROM pending_emails WHERE flow_step_id = flow_steps.id AND status = 'sent') as sent_count",
-        "(SELECT COUNT(*) FROM pending_emails WHERE flow_step_id = flow_steps.id AND status = 'pending') as pending_count",
+        "COUNT(pending_emails.id) FILTER (WHERE pending_emails.status = 'sent') as sent_count",
+        "COUNT(pending_emails.id) FILTER (WHERE pending_emails.status = 'pending') as pending_count",
         "mails.identifier"
       ],
       joinargs = [
-        (table: "flow_steps", tableAs: "", on: @["flow_steps.mail_id = mails.id"])
+        (table: "pending_emails", tableAs: "", on: @["pending_emails.mail_id = mails.id"])
       ],
-      customSQL = "ORDER BY mails.id, mails.name ASC LIMIT $1 OFFSET $2".format(
+      customSQL = "GROUP BY mails.category, mails.name, mails.subject, mails.id, mails.subject, mails.tags, mails.created_at, mails.updated_at, mails.identifier ORDER BY mails.id, mails.name ASC LIMIT $1 OFFSET $2".format(
         $limit,
         $offset
       )
-      ))
+    ))
 
     mailsCount = getRow(conn, sqlSelect(
       table   = "mails",

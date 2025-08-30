@@ -366,7 +366,7 @@ function loadMail(id) {
                     }),
                     jsCreateElement('option', {
                       attrs: {
-                        value: 'flow',
+                        value: 'archived',
                         selected: data.category == 'archived' ? 'selected' : false
                       },
                       children: ['Archived']

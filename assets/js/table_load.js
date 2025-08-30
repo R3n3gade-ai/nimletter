@@ -204,6 +204,7 @@ function tableMails() {
     layout:"fitColumns",
     ajaxURL:"/api/mails/all",
     progressiveLoad:"load",
+    paginationSize: 1000,
     initialSort:[
       {column:"name", dir:"asc"},
       {column:"category", dir:"asc"},
@@ -250,7 +251,12 @@ function tableMails() {
   });
 
   objTableMails.on("rowClick", function(e, row){
-    loadMail(row.getData().id);
+    // loadMail(row.getData().id);
+    if (e.ctrlKey) {
+      window.open("/mails?viewMail=" + row.getData().id, "_blank");
+    } else {
+      window.location.href = "/mails?viewMail=" + row.getData().id;
+    }
   });
 
   // Query parameter is viewMail=<id> then open the mail
@@ -277,6 +283,7 @@ function tableLists() {
     layout:"fitColumns",
     ajaxURL:"/api/lists/all",
     progressiveLoad:"load",
+    paginationSize: 1000,
     // rowHeight:50,
     columns:[
       {title:"ID", field:"id", width:60, headerFilter:true},
@@ -319,6 +326,7 @@ function tableFlows() {
     layout:"fitColumns",
     ajaxURL:"/api/flows/all",
     progressiveLoad:"load",
+    paginationSize: 1000,
     columns:[
       {title:"ID", field:"id", width:60, headerFilter:true},
       // {title:"UUID", field:"uuid", width:200},
@@ -356,6 +364,7 @@ function tableFlowsteps(flowID) {
     layout:"fitColumns",
     ajaxURL:"/api/flowsteps/all?flowID=" + flowID,
     progressiveLoad:"load",
+    paginationSize: 1000,
     columns:[
       {title:"ID", field:"id", width:100},
       {title:"Flow ID", field:"flow_id", width:200},
