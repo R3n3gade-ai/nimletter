@@ -206,7 +206,7 @@ proc(request: Request) =
     scheduledTime = if triggerType == "time": @"scheduledTime" else: ""
 
   if name.strip() == "":
-    resp Http400, "Subject is required"
+    resp Http400, "Flow name is required"
 
   if not mailID.isValidInt():
     resp Http400, "Invalid mail ID"

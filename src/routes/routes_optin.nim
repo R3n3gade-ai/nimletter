@@ -27,6 +27,7 @@ import
   ../email/email_optin,
   ../utils/contacts_utils,
   ../utils/list_utils,
+  ../utils/google_recaptcha,
   ../utils/validate_data,
   ../webhook/webhook_events
 
@@ -144,6 +145,10 @@ proc(request: Request) =
 
   if not email.isValidEmail():
     resp Http400, nimfOptinSubscribe(true, "Invalid email", "")
+
+  #when not defined(dev):
+  if not checkReCaptcha(@"g-recaptcha-response", request.ip):
+    resp Http400, nimfOptinSubscribe(true, "Invalid captcha", "")
 
 
   var

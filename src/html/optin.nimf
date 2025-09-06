@@ -48,6 +48,13 @@
             <input type="text" name="name" placeholder="Name">
             <input type="email" name="email" placeholder="Email" required>
             <input type="text" name="username_second" placeholder="Name" class="hideme">
+            # let recaptchaSiteKey = getEnv("GOOGLE_RECAPTCHA_SITE_KEY")
+            # if recaptchaSiteKey.len() > 0 and recaptchaSiteKey != "NONE":
+            <div style="display: flex ; justify-content: center;">
+              <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}" data-theme="light" style="transform:scale(0.93);-webkit-transform:scale(0.93);transform-origin:0 0;-webkit-transform-origin:0 0;"></div>
+              <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+            </div>
+            # end if
             <div class="buttonArea">
               <button type="submit" class="buttonIcon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -82,13 +89,13 @@
   <body class="mainbody">
     <main>
       <div class="content notLoggedIn">
-        <h1 id="heading" class="center">Nimletter, drip it!</h1>
+        <h1 id="heading" class="center" style="font-weight: 500;">Subscription confirmed!</h1>
         <div id="work subscribe">
-          <div class="mb30" style="display: flex;">
-            <img src="/assets/images/nimletter.png" style="width: 300px;margin: auto;">
-          </div>
           <p class="center">
             Perfect! Glad to have you onboard! 🚀
+          </p>
+          <p class="center">
+            You can <a href="#!" onclick="window.close()">close this window</a> now.
           </p>
         </div>
       </div>

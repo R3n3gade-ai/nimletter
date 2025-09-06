@@ -362,6 +362,13 @@ If the `SMTP_HOST` is specified as an environment variable, then it won't use th
 # 🌐 Environment variables
 The values are customizable within the system and will be saved to the database.
 
+**CAPTCHA**
+If set, the captcha will be enabled on the subscribe page.
+```sh
+export GOOGLE_RECAPTCHA_SECRET=NONE
+export GOOGLE_RECAPTCHA_SITE_KEY=NONE
+```
+
 **Database**
 ```sh
 export PG_HOST=localhost
