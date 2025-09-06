@@ -25,10 +25,10 @@
 
     <link rel="stylesheet" href="/assets/css/main.css">
   </head>
-  <body class="mainbody">
+  <body class="mainbody white">
     <main>
       <div class="content notLoggedIn">
-        <h1 id="heading" class="center">${pageName}</h1>
+        <h1 id="heading" class="center" style="font-weight: 500;">${pageName}</h1>
         <div id="work" class="subscribe">
           # if errMsg != "":
           <div class="error center">
@@ -40,14 +40,16 @@
           </div>
           # else:
           <div>
-            <p>Click the subscribe button below to get started!</p>
+            <p>Click the subscribe button<br>below to get started!</p>
           </div>
           # end if
           # if signupForm:
           <form action="/subscribe/${listUUID}" method="post" class="center">
-            <input type="text" name="name" placeholder="Name">
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="text" name="username_second" placeholder="Name" class="hideme">
+            <div class="mb20">
+              <input type="text" name="name" placeholder="Name">
+              <input type="email" name="email" placeholder="Email" required>
+              <input type="text" name="username_second" placeholder="Name" class="hideme">
+            </div>
             # let recaptchaSiteKey = getEnv("GOOGLE_RECAPTCHA_SITE_KEY")
             # if recaptchaSiteKey.len() > 0 and recaptchaSiteKey != "NONE":
             <div style="display: flex ; justify-content: center;">
@@ -121,7 +123,7 @@
   <body class="mainbody">
     <main>
       <div class="content notLoggedIn" style="max-width: 300px;text-align: center;">
-        <h1 id="heading" class="center">Unsubscribed</h1>
+        <h1 id="heading" class="center" style="font-weight: 500;">Unsubscribed</h1>
         <div class="mb30" style="display: flex;">
           <div>
             <p>Sorry to see you go, <b>${name}</b>!</p>

@@ -196,6 +196,9 @@ body.mainbody {
   line-height: 1.5;
   background-color: var(--colorN10);
 }
+body.mainbody.white {
+  background-color: white;
+}
 body.mainbody * {
   font-family: "Roboto", serif;
   font-weight: 300;
@@ -315,7 +318,7 @@ label.labelBold {
 #work.subscribe input,
 #work.subscribe button {
   margin-bottom: 20px;
-  max-width: 300px;
+  max-width: 250px;
 }
 #work.subscribe .buttonArea {
   display: flex;
