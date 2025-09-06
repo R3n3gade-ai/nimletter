@@ -397,6 +397,11 @@ label.labelBold {
   margin-left: 0;
   margin: auto;
 }
+@media screen and (max-width: 768px) {
+  .content {
+    padding: 10px;
+  }
+}
 
 /*
   Modal pop
