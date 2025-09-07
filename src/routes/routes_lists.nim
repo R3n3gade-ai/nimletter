@@ -294,9 +294,24 @@ proc(request: Request) =
   # Delete
   #
   pg.withConnection conn:
-    exec(conn, sqlDelete(
+    # exec(conn, sqlDelete(
+    #     table = "lists",
+    #     where = ["id = ?", "identifier != 'default'"]),
+    #   listID)
+    exec(conn, sqlUpdate(
         table = "lists",
-        where = ["id = ?", "identifier != 'default'"]),
+        data  = [
+          "is_deleted = now()"
+        ],
+        where = ["id = ?"]),
+      listID)
+
+    exec(conn, sqlUpdate(
+        table = "pending_emails",
+        data  = [
+          "status = 'cancelled'"
+        ],
+        where = ["list_id = ?"]),
       listID)
 
   resp Http200
@@ -326,12 +341,15 @@ proc(request: Request) =
           "(SELECT COUNT(*) FROM subscriptions WHERE subscriptions.list_id = lists.id) as user_count",
           "lists.require_optin"
         ],
-        customSQL = "ORDER BY lists.name ASC"
+        where   = ["lists.is_deleted IS NULL"],
+        customSQL = "ORDER BY lists.name ASC",
       ))
 
     listsCount = getValue(conn, sqlSelect(
         table = "lists",
-        select = ["COUNT(*)"])).parseInt()
+        select = ["COUNT(*)"],
+        where   = ["lists.is_deleted IS NULL"]
+      )).parseInt()
 
 
   var bodyJson = parseJson("[]")

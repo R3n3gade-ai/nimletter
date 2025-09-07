@@ -298,14 +298,17 @@ function tableLists() {
       {title:"Flow Count", field:"flows", vertAlign: "middle", width:200, headerFilter:true},
       {title:"Created At", field:"created_at", vertAlign: "middle", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 200, headerFilter:true},
       {title:"Updated At", field:"updated_at", vertAlign: "middle", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 200, headerFilter:true},
-      {title:"Delete", cssClass:"slimpadding", formatter:function(cell, formatterParams, onRendered){
+      {title:"Delete", field:"delete", cssClass:"slimpadding", formatter:function(cell, formatterParams, onRendered){
       return '<button onclick="removeList(' + cell.getRow().getData().id + ')">Delete</button>';
       }},
     ],
   });
 
-  objTableLists.on("rowClick", function(e, row){
-    openList(row.getData().id);
+  objTableLists.on("cellClick", function(e, cell){
+    if (cell.getField() == "delete") {
+      return;
+    }
+    openList(cell.getRow().getData().id);
   });
 }
 
@@ -337,14 +340,17 @@ function tableFlows() {
       {title:"Sent Count", field:"sent_count", width:150, headerFilter:true},
       {title:"Created At", field:"created_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 200, headerFilter:true},
       {title:"Updated At", field:"updated_at", hozAlign:"center", sorter:"datetime", sorterParams:{ format:"yyyy-MM-dd HH:mm:ss"}, width: 200, headerFilter:true},
-      {title:"Delete", cssClass:"slimpadding", formatter:function(cell, formatterParams, onRendered){
+      {title:"Delete", field:"delete", cssClass:"slimpadding", formatter:function(cell, formatterParams, onRendered){
       return '<button onclick="removeFlow(' + cell.getRow().getData().id + ')">Delete</button>';
       }},
     ],
   });
 
-  objTableFlows.on("rowClick", function(e, row){
-    openFlow(row.getData().id, row.getData().name);
+  objTableFlows.on("cellClick", function(e, cell){
+    if (cell.getField() == "delete") {
+      return;
+    }
+    openFlow(cell.getRow().getData().id, cell.getRow().getData().name);
   });
 }
 

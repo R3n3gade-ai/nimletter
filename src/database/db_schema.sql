@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS mails (
   subject             TEXT,           -- Subject of the mail
   tags                TEXT[],         -- Array of tags associated with the mail
   category            TEXT,           -- Category of the mail (e.g., promotional, informational)
-  uuid                UUID NOT NULL DEFAULT uuid_generate_v4()  -- Unique identifier
+  uuid                UUID NOT NULL DEFAULT uuid_generate_v4()
 );
 
 
@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS flows (
   name                TEXT NOT NULL,  -- Name of the flow
   description         TEXT,           -- Description of the flow
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  is_deleted          TIMESTAMP DEFAULT NULL
 );
 
 -- Table for flow steps (sequence and details for each step in the flow)
@@ -53,7 +54,8 @@ CREATE TABLE IF NOT EXISTS lists (
   require_optin       BOOLEAN DEFAULT TRUE,  -- Flag for double opt-in status
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  uuid                UUID NOT NULL DEFAULT uuid_generate_v4()  -- Unique identifier
+  uuid                UUID NOT NULL DEFAULT uuid_generate_v4(),
+  is_deleted          TIMESTAMP DEFAULT NULL
 );
 -- Default list
 INSERT INTO lists (name, identifier, description) VALUES ('Default List', 'default', 'Default list for new users') ON CONFLICT DO NOTHING;
@@ -234,3 +236,8 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_email_opens_user_id ON email_opens (
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_email_clicks_user_id ON email_clicks (user_id);
 
+
+
+-- Changelog
+ALTER TABLE flows ADD COLUMN IF NOT EXISTS is_deleted TIMESTAMP DEFAULT NULL;
+ALTER TABLE lists ADD COLUMN IF NOT EXISTS is_deleted TIMESTAMP DEFAULT NULL;

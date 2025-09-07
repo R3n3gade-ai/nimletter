@@ -129,12 +129,23 @@ function removeFlow(flowID) {
           'Are you sure you want to remove this flow?'
         ]
       }),
+      jsCreateElement('input', {
+        attrs: {
+          type: 'text',
+          id: 'flowRemoveID',
+          placeholder: 'Write DELETE to confirm',
+          oninput: 'if(this.value == "DELETE"){dqs("#flowRemoveButton").disabled = false;}',
+          class: 'mb20'
+        }
+      }),
       jsCreateElement('div', {
         children: [
           jsCreateElement('button', {
             attrs: {
+              id: 'flowRemoveButton',
               class: 'svg30 w100p',
-              onclick: 'removeFlowDo(' + flowID + ')'
+              onclick: 'removeFlowDo(' + flowID + ')',
+              disabled: true
             },
             rawHtml: [
               '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg><div style="margin-left: 5px;">Remove flow</div>'

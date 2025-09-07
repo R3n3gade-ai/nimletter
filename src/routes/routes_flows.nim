@@ -129,11 +129,25 @@ proc(request: Request) =
     flowID = @"flowID"
 
   pg.withConnection conn:
-    exec(conn, sqlDelete(
+    # exec(conn, sqlDelete(
+    #     table = "flows",
+    #     where = ["id = ?"]),
+    #   flowID)
+    exec(conn, sqlUpdate(
         table = "flows",
+        data  = [
+          "is_deleted = now()"
+        ],
         where = ["id = ?"]),
-      flowID
-    )
+      flowID)
+
+    exec(conn, sqlUpdate(
+        table = "pending_emails",
+        data  = [
+          "status = 'cancelled'"
+        ],
+        where = ["flow_id = ?"]),
+      flowID)
 
   resp Http200
 )
@@ -158,7 +172,8 @@ proc(request: Request) =
           "(SELECT COUNT(*) FROM pending_emails WHERE pending_emails.flow_id = flows.id AND pending_emails.status = 'pending') as pending_count",
           "(SELECT COUNT(DISTINCT email_opens.pending_email_id) FROM email_opens JOIN pending_emails ON email_opens.pending_email_id = pending_emails.id WHERE pending_emails.flow_id = flows.id) as open_count"
         ],
-        customSQL = "ORDER BY flows.name ASC"
+        where   = ["flows.is_deleted IS NULL"],
+        customSQL = "ORDER BY flows.name ASC",
       ))
 
   var respData = parseJson("[]")
