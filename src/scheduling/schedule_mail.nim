@@ -103,13 +103,15 @@ proc createPendingEmail*(
     args.add(manualSubject)
 
   pg.withConnection conn:
-    if getValue(conn, sqlSelect(
-      table = "pending_emails",
-      select = ["id"],
-      where = ["user_id = ?", "flow_id = ?", "flow_step_id = ?"]
-    ), userID, flowID, flowStepID) != "":
-      echo "User already has a pending email for this flow and step"
-      return
+    # Check if the user already has a pending email for this flow and step
+    if flowID.len() > 0 and flowStepID.len() > 0:
+      if getValue(conn, sqlSelect(
+        table = "pending_emails",
+        select = ["id"],
+        where = ["user_id = ?", "flow_id = ?", "flow_step_id = ?"]
+      ), userID, flowID, flowStepID) != "":
+        echo "User already has a pending email for this flow and step"
+        return
 
     exec(conn, sqlInsert(
       table = "pending_emails",
@@ -169,6 +171,25 @@ proc createPendingEmailToAllListContacts*(listID, mailID: string) =
     ), listID)
 
   for contact in contacts:
+    # Check the send_once flag
+    pg.withConnection conn:
+      if getValue(conn, sqlSelect(
+        table = "pending_emails",
+        select = ["pending_emails.id"],
+        joinargs = [
+          (table: "mails", tableAs: "", on: @["pending_emails.mail_id = mails.id"])
+        ],
+        where = [
+          "pending_emails.user_id = ?",
+          "pending_emails.mail_id = ?",
+          "mails.send_once = true"
+        ],
+        customSQL = "LIMIT 1"
+      ), contact[0], mailID) != "":
+        echo "User " & contact[0] & " has already received this email"
+        continue
+
+    # Create the pending email
     createPendingEmail(
       userID = contact[0],
       listID = listID,
