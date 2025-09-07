@@ -27,7 +27,7 @@ jobs:
       packages: write
 
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 15
 
 
     # Steps represent a sequence of tasks that will be executed as part of the job
