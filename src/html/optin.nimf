@@ -27,7 +27,9 @@
     <script>
       document.addEventListener("DOMContentLoaded", function() {
         const buttonSubscribe = document.querySelector("#subscribeName");
-        buttonSubscribe.focus();
+        if (buttonSubscribe) {
+          buttonSubscribe.focus();
+        }
       });
     </script>
   </head>
