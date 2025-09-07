@@ -24,6 +24,12 @@
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/roboto-v47-latin-500.woff2" crossorigin/>
 
     <link rel="stylesheet" href="/assets/css/main.css">
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const buttonSubscribe = document.querySelector("#subscribeName");
+        buttonSubscribe.focus();
+      });
+    </script>
   </head>
   <body class="mainbody white">
     <main>
@@ -46,23 +52,23 @@
           # if signupForm:
           <form action="/subscribe/${listUUID}" method="post" class="center">
             <div class="mb20">
-              <input type="text" name="name" placeholder="Name">
-              <input type="email" name="email" placeholder="Email" required>
-              <input type="text" name="username_second" placeholder="Name" class="hideme">
+              <input type="text" name="name" placeholder="Name" required id="subscribeName">
+              <input type="email" name="email" placeholder="Email" required id="subscribeEmail">
+              <input type="text" name="username_second" placeholder="Name" class="hideme" id="subscribeUsernameSecond">
             </div>
             # let recaptchaSiteKey = getEnv("GOOGLE_RECAPTCHA_SITE_KEY")
             # if recaptchaSiteKey.len() > 0 and recaptchaSiteKey != "NONE":
-            <div style="display: flex ; justify-content: center;">
-              <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}" data-theme="light" style="transform:scale(0.93);-webkit-transform:scale(0.93);transform-origin:0 0;-webkit-transform-origin:0 0;"></div>
+            <div style="display: flex ; justify-content: center; width: 282px; margin: auto;">
+              <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}" data-theme="light" style="transform:scale(0.85);-webkit-transform:scale(0.85);transform-origin: center center; -webkit-transform-origin: center center;"></div>
               <script src="https://www.google.com/recaptcha/api.js" async defer></script>
             </div>
             # end if
             <div class="buttonArea">
-              <button type="submit" class="buttonIcon">
+              <button type="submit" class="buttonSubscribe buttonIcon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                 </svg>
-                <div class="ml5">Subscribe</div>
+                <div class="ml5 buttonText">Subscribe</div>
               </button>
             </div>
           </form>

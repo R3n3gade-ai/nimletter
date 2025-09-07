@@ -318,11 +318,23 @@ label.labelBold {
 #work.subscribe input,
 #work.subscribe button {
   margin-bottom: 20px;
-  max-width: 250px;
+  max-width: 258px;
+  border: 1px solid var(--colorN60);
 }
 #work.subscribe .buttonArea {
   display: flex;
   justify-content: center;
+}
+#work.subscribe .buttonSubscribe {
+  background-color: #2e73e9;
+  color: white;
+  font-weight: 400;
+  height: 45px;
+}
+#work.subscribe .buttonSubscribe .buttonText {
+  color: white;
+  font-weight: 500;
+  font-size: 16px;
 }
 
 
