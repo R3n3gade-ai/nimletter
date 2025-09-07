@@ -222,7 +222,7 @@ proc(request: Request) =
     if userID == "":
       resp Http400, "User not found"
     let listID = listIDfromIdentifier(if data.hasKey("list"): data["list"].getStr() else: "")
-    var flowStep = if data.hasKey("flowStep"): data["flowStep"].getInt() else: 1
+    var flowStep = if data.hasKey("flow_step"): data["flow_step"].getInt() else: 1
     if listID == "":
       resp Http400, "List identifier required"
     if flowStep == 0:
