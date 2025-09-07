@@ -389,7 +389,7 @@ proc(request: Request) =
       joinargs = [
         (table: "pending_emails", tableAs: "", on: @["pending_emails.mail_id = mails.id"])
       ],
-      customSQL = "GROUP BY mails.category, mails.name, mails.subject, mails.id, mails.subject, mails.tags, mails.created_at, mails.updated_at, mails.identifier ORDER BY mails.id, mails.name ASC LIMIT $1 OFFSET $2".format(
+      customSQL = "GROUP BY mails.category, mails.name, mails.subject, mails.id, mails.subject, mails.tags, mails.created_at, mails.updated_at, mails.identifier ORDER BY mails.category, mails.name ASC LIMIT $1 OFFSET $2".format(
         $limit,
         $offset
       )

@@ -222,7 +222,7 @@ async function buildFlowHTML(data) {
           value: mails[i].id,
           selected: (step.mail_id == mails[i].id) ? "selected" : false
         },
-        children: [mails[i].name]
+        children: [ mails[i].category + ' - ' + mails[i].name + ' (' + mails[i].identifier + ')' ]
       }));
     }
 
@@ -445,7 +445,7 @@ async function buildFlowHTML(data) {
           document.getElementById("flowStepDelay_" + stepId).style.display = "";
         }
       }
-      
+
       // Call updateFlowStep for all changes
       updateFlowStep(this.id.split("_")[1]);
     });
@@ -456,7 +456,7 @@ async function buildFlowHTML(data) {
 
 // -- Add flow
 async function addFlowStep() {
-  
+
   let mails = await fetch("/api/mails/all")
   .then(response => response.json())
   .then(data => data.data);
@@ -475,7 +475,7 @@ async function addFlowStep() {
       attrs: {
         value: mails[i].id
       },
-      children: [mails[i].name]
+      children: [ mails[i].category + ' - ' + mails[i].name + ' (' + mails[i].identifier + ')' ]
     }));
   }
 

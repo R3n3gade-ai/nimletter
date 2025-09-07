@@ -217,7 +217,7 @@ async function buildSettingsMain() {
         value: mail.id,
         selected: (mail.id == optinEmailID) ? "selected" : false
       },
-      children: [mail.name]
+      children: [ mail.category + ' - ' + mail.name + ' (' + mail.identifier + ')' ]
     }));
   });
 

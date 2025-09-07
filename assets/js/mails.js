@@ -872,7 +872,7 @@ async function sendMail(mailID) {
               id: 'mailToListValidate',
               autocomplete: 'off',
               class: 'mb20',
-              placeholder: 'Write confirm to send'
+              placeholder: 'Write CONFIRM to send'
             }
           }),
           jsCreateElement('div', {
@@ -935,7 +935,7 @@ function sendMailListDo(mailID) {
   let listID = dqs("#mailSendToList").value;
   let validate = dqs("#mailToListValidate").value;
 
-  if (validate !== "confirm") {
+  if (validate !== "CONFIRM") {
     rawModalError("Invalid confirmation");
     return;
   }
