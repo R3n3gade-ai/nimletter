@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: nimletter-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nimletter_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      start_period: 4s
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  nimletter:
+    image: ghcr.io/thomastjdev/nimletter:latest
+    container_name: nimletter
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PG_HOST: postgres:5432
+      PG_USER: postgres
+      PG_PASSWORD: postgres
+      PG_DATABASE: nimletter_db
+      PG_WORKERS: 3
+      LISTEN_PORT: 5555
+      LISTEN_IP: 0.0.0.0
+      ADMIN_EMAIL: admin@nimletter.com
+      ADMIN_PASSWORD: dripit
+    command: ["/home/nimmer/nimletter"]
+    ports:
+      - "5555:5555"
+
