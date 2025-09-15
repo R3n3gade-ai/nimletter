@@ -22,6 +22,19 @@ Nimletter is built to replace the simple functionalities found in Mailchimp, Mai
 - 🎨 **Customizable templates**
 - ⚙️ **Customizable settings**
 
+## Quick Local Run (Docker)
+
+- One-liner scripts:
+  - Start: `./scripts/local-up.sh` (use `./scripts/local-up.sh 5556` to map to port 5556)
+  - Stop/Cleanup: `./scripts/local-down.sh`
+  - Open: `http://localhost:5555` (default) and login with `admin@nimletter.com` / `dripit`.
+
+- Or using Compose:
+  - `docker compose -f docker-compose.local.yml up -d`
+  - Open `http://localhost:5555`
+
+If the image’s default command fails to seed the DB on your setup, the above options force the binary to run directly (`/home/nimmer/nimletter`), which initializes the schema and starts cleanly.
+
 ## Flow Concepts
 
 ### Adding Users to a Flow
